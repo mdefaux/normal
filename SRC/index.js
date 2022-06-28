@@ -3,5 +3,7 @@ function func ()
     console.log("messaggio");
 }
 
-func();
-exports.msg=func;
+
+module.exports= {
+    func:func
+};

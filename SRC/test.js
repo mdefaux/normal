@@ -1,2 +1,2 @@
-const func=require(index.js);
+const {func} = require('./index');
 func();
