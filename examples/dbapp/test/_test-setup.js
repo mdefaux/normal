@@ -12,14 +12,14 @@
  * Se compare l'errore: Error: connect ECONNREFUSED 127.0.0.1:5432
  * vuol dire che non è stato avviato il container pg-normalize-dbapp
  */
- process.env.NODE_ENV = "test"; // sets the test mode in env variabile
+//  process.env.NODE_ENV = "test"; // sets the test mode in env variabile
  process.env.LOGGER = undefined;
  
  var chai = require('chai');           // il motore di test
  var should = chai.should();           // serve per fare asserzioni 
  var {expect} = chai;                  // asserzioni di tipo 'expect'
- var server = require('../../app');    // richiama l'app come se fosse un server
- var knex = require('../../db/knex');  // crea la connessione al db (lite)
+ var server = require('../app');    // richiama l'app come se fosse un server
+ var knex = require('../db/knex');  // crea la connessione al db (lite)
  var chaiHttp = require('chai-http');  // per interrogare le api
  chai.use(chaiHttp);                   // consente di effettuare le chiamate alle api
  

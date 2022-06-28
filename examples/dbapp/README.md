@@ -21,3 +21,9 @@ Il comando per creare il container pg-normalize-dbapp con immagine "postgre".
 
 
 ## Knex
+
+        knex init
+
+Create knexfile.js:
+
+        

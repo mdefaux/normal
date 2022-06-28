@@ -1,0 +1,25 @@
+{
+  "name": "dbapp",
+  "version": "1.0.0",
+  "description": "DB application test for normalize",
+  "main": "app.js",
+  "directories": {
+    "test": "mocha test/_test-setup.js --exit test/ --recursive --timeout 15000"
+  },
+  "scripts": {
+    "test": "test",
+    "start": "node app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "knex": "^2.1.0",
+    "pg": "^8.7.3"
+  }
+}
