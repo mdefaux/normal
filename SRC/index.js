@@ -1,3 +1,5 @@
+const {URLquery} = require( './url_query' );
+
 function func ()
 {
     console.log("messaggio");
@@ -5,5 +7,6 @@ function func ()
 
 
 module.exports= {
-    func:func
+    func:func,
+    URLquery: URLquery
 };
