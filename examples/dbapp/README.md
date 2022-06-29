@@ -14,8 +14,7 @@ Create a db application that uses a PG docker container and builds a model
 On Mac you should run `sudo npm link` command, then normal `npm link normalize`.
 
 ## DB on docker
-Use the command:
-Il comando per creare il container pg-normalize-dbapp con immagine "postgre".
+Use the command to create container pg-normalize-dbapp with "postgre" image.
 
         docker run --name pg-normalize-dbapp \
             -p 5433:5432 \
@@ -66,4 +65,12 @@ This will create a knexfile.js:
         };
 
 ## test
+### Testing DB app
+
+        cd ./examples/dbapp
+        npm i -D mocha chai chai-http
+
+        npm ci
+
+        npm test
 
