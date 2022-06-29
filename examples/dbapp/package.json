@@ -4,11 +4,11 @@
   "description": "DB application test for normalize",
   "main": "app.js",
   "directories": {
-    "test": "mocha test/_test-setup.js --exit test/ --recursive --timeout 15000"
   },
   "scripts": {
-    "test": "test",
-    "start": "node app.js"
+    "test": "mocha test/_test-setup.js --exit test/ --recursive --timeout 15000",
+    "start": "node app.js",
+    "createdb": "docker run --name pg-normalize-dbapp -p 5433:5432 -e POSTGRES_USER=test-user -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test-db -e 'TZ=UTC-2' -d postgres"
   },
   "author": "",
   "license": "ISC",

@@ -10,10 +10,12 @@ app.get('/', (req, res) => {
 
 
 app.get('/model', (req, res) => {
-    func();
-  res.send('Hello World!');
+  func();
+  res.send('Library function called!');
 })
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+module.exports = app;
