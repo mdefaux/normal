@@ -1,9 +1,9 @@
 // var defs = require("./defIndex");
-var knex = require('../db/knex');
-var utils = require("../routes/common/index");
+// var knex = require('../db/knex');
+// var utils = require("../routes/common/index");
 const { EntityBE } = require("./orm/EntityBE");
 const { FieldConditionDef } = require("./orm/FieldConditionDef");
-const { KdbStoreHost } = require("./orm/kdbhost/KdbHost");
+// const { KdbStoreHost } = require("./orm/kdbhost/KdbHost");
 const { PrimaryKeyField, ObjectLink, RelatedObjects, PartsOf, Model, Field } = require("./orm/Model");
 
 class FieldWrapper {
@@ -208,7 +208,15 @@ class EntityProxy extends EntityBE
 const defs = {
     entities: {},
 
-    mainHost: new KdbStoreHost( knex ),
+    mainHost: undefined, // new KdbStoreHost( knex ),
+
+    /**Setups main Store with a specific host
+     * 
+     * @param {*} storeHost 
+     */
+    host( storeHost ) {
+        this.mainHost = storeHost;
+    },
 
     setupEntity (name) {
         this.entities[name].setup();
