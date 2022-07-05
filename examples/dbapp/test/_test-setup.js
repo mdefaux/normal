@@ -31,10 +31,10 @@
      global.server = server;
      global.should = should;
  
-     console.log( "API RUN MIGRATE!" );
+     /* console.log( "API RUN MIGRATE!" );
      await knex.migrate.rollback();
      await knex.migrate.latest();
-     await knex.seed.run();
+     await knex.seed.run(); */
  });
  
  // Prima di ogni test fa il drop di tutte le tabelle,
@@ -47,10 +47,10 @@
  // });
    
  // finiti tutti i test ricostruisce il db lite con i dati iniziali
- after(async function() {
+/*  after(async function() {
      await knex.migrate.rollback();
      await knex.migrate.latest();
      await knex.seed.run();
- });
+ }); */
  
  

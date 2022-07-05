@@ -19,9 +19,9 @@ describe('URL parse test', function() {
             .get('/orm/asset/all?gbCustomer[]')
             .end(function(err, res) {
                 res.should.have.status(200);
-                res.should.be.json; // si assicura che il risultato sia json
+                res.should.be.json;
                 res.body.should.be.a('array');
-                res.body.length.should.equal(1); // number of entity
+                res.body.length.should.equal(1);
                 res.body[0].should.have.property('column');
                 res.body[0].column.should.equal('id_customer');
                 done();
@@ -33,11 +33,25 @@ describe('URL parse test', function() {
             .get('/orm/asset/all?slpart_number[]')
             .end(function(err, res) {
                 res.should.have.status(200);
-                res.should.be.json; // si assicura che il risultato sia json
+                res.should.be.json;
                 res.body.should.be.a('array');
-                res.body.length.should.equal(1); // number of entity
+                res.body.length.should.equal(1);
                 res.body[0].should.have.property('column');
                 res.body[0].column.should.equal('part_number');
+                done();
+            });
+    });
+
+    it('datagrid test', function(done) {
+        chai.request(server)
+            .get('/datagrid')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.be.a('array');
+                res.body.length.should.equal(3);
+                res.body[0].should.have.property('nome');
+                res.body[0].should.have.property('cognome');
                 done();
             });
     });
