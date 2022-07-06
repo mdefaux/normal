@@ -133,6 +133,12 @@ class EntityBE {
 
         return r;
     }
+
+    
+    getModel() {
+
+        return this.model.serialize();
+    }
 }
 
 exports.EntityBE = EntityBE;

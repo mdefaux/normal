@@ -1,6 +1,45 @@
 const { Query } = require("./Query");
 // const { Field } = require("./Model");
 
+
+class FieldQueryItem {
+
+    constructor ( field ) {
+        this.field = field;
+        this.name = field.name;
+        // c.toEntityName = this.toEntityName;
+        // c.factory = this.factory;
+        // c.tableModel = this.tableModel;
+        this.sourceField = field.sourceField;
+    }
+
+    get sqlSource() {
+        if (this.sourceAlias) {
+            return `${this.sourceAlias}.${this.sourceField || this.name}`;
+        }
+        return this.sourceField || this.name;
+    }
+
+    in(arrayOrFunction) {
+        if (Array.isArray(arrayOrFunction)) {
+            if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
+                arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
+            }
+        }
+
+        return new FieldConditionDef("in", this, arrayOrFunction);
+    }
+
+    equals(objectOrFunction) {
+        return new FieldConditionDef("=", this, objectOrFunction);
+    }
+
+    max() {
+        return new FieldAggregationMax(this);
+    }
+}
+
+
 class FieldConditionDef {
 
     constructor(type, field, value, tableAlias, query) {
@@ -35,4 +74,6 @@ class FieldConditionDef {
         return `${this.tableAlias}.${this.field.sqlSource} in `;
     }
 }
+
 exports.FieldConditionDef = FieldConditionDef;
+exports.FieldQueryItem = FieldQueryItem;

@@ -6,4 +6,4 @@ store.setup( new StoreHost() );
 // const knex = require( '../db/knex.js' );
 // store.setup( new KdbStoreHost( knex ) );
 
-exports.default = store;
+module.exports = store;

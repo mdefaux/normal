@@ -4,7 +4,8 @@
 const { EntityBE } = require("./orm/EntityBE");
 const { FieldConditionDef } = require("./orm/FieldConditionDef");
 // const { KdbStoreHost } = require("./orm/kdbhost/KdbHost");
-const { PrimaryKeyField, ObjectLink, RelatedObjects, PartsOf, Model, Field } = require("./orm/Model");
+const { /*PrimaryKeyField, ObjectLink, RelatedObjects, PartsOf,*/ Model /*, StringField */ } = require("./orm/Model");
+const fields = require( "./orm/Field" );
 
 class FieldWrapper {
     constructor( field, tableAlias, query )
@@ -104,7 +105,7 @@ class ModelDef {
         }
         else 
         {
-            this.model.fields[ fieldName ] = new PrimaryKeyField( fieldName );
+            this.model.fields[ fieldName ] = new fields.PrimaryKeyField( fieldName );
         }
         this.model.idField = fieldName;
         return this.model.fields[ fieldName ];
@@ -117,7 +118,35 @@ class ModelDef {
 
     string( fieldName )
     {
-        this.model.fields[ fieldName ] = new Field( fieldName );
+        this.model.fields[ fieldName ] = new fields.StringField( fieldName );
+
+        return new FieldDef( this.model.fields[ fieldName ] );
+    }
+
+    date( fieldName )
+    {
+        this.model.fields[ fieldName ] = new fields.DateField( fieldName );
+
+        return new FieldDef( this.model.fields[ fieldName ] );
+    }
+
+    number( fieldName )
+    {
+        this.model.fields[ fieldName ] = new fields.NumberField( fieldName );
+
+        return new FieldDef( this.model.fields[ fieldName ] );
+    }
+
+    integer( fieldName )
+    {
+        this.model.fields[ fieldName ] = new fields.IntegerField( fieldName );
+
+        return new FieldDef( this.model.fields[ fieldName ] );
+    }
+
+    boolean( fieldName )
+    {
+        this.model.fields[ fieldName ] = new fields.BooleanField( fieldName );
 
         return new FieldDef( this.model.fields[ fieldName ] );
     }
@@ -157,7 +186,7 @@ class ModelDef {
         // matches the name of target entity
         fieldName = fieldName || entityName;
 
-        this.model.fields[ fieldName ] = new ObjectLink( entityName, this.factory, this.model.fields );
+        this.model.fields[ fieldName ] = new fields.ObjectLink( entityName, this.factory, this.model );
 
         // returns the field definitor
         return new FieldDef( this.model.fields[ fieldName ] );
@@ -165,13 +194,13 @@ class ModelDef {
 
     many( entityName )
     {
-        return this.model.fields[ entityName ] = new RelatedObjects( entityName, this.factory, this.model.fields );
+        return this.model.fields[ entityName ] = new fields.RelatedObjects( entityName, this.factory, this.model.fields );
         // TODO: return new RelationDef( this.model.fields[ entityName ] )
     }
 
     parts( entityName )
     {
-        return this.model.fields[ entityName ] = new PartsOf( entityName, this.factory, this.model.fields );
+        return this.model.fields[ entityName ] = new fields.PartsOf( entityName, this.factory, this.model.fields );
         // TODO: return new RelationDef( this.model.fields[ entityName ] )
     }
 
@@ -218,6 +247,11 @@ const defs = {
         this.mainHost = storeHost;
     },
 
+    setup( storeHost ) {
+        this.host( storeHost );
+        return this;
+    },
+
     setupEntity (name) {
         this.entities[name].setup();
     
@@ -255,9 +289,9 @@ const defs = {
         return this.entities[ name ];
     },
 
-    entity( name, callback, clazz ){
-        if( this.entities[ name ] )
-        {
+    entity( name, callback, clazz ) {
+        console.log( `Setting up class ${name}.` );
+        if( this.entities[ name ] ) {
             return;
             throw new Error( `Entity '${name}' already defined.` );
         }

@@ -4,12 +4,15 @@ const port = 3000
 const knex = require( './db/knex' );
 const {func} = require( 'normalize' );
 const cors=require ('cors')
+const ormRoute = require( './routes/orm' );
 
 app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 })
+
+app.use('/orm', ormRoute);
 
 
 app.get('/model', (req, res) => {

@@ -1,7 +1,6 @@
 
 
-class StoreHost
-{
+class StoreHost {
 
     createQuery() {
         return undefined;
@@ -17,4 +16,4 @@ class StoreHost
 
 }
 
-exports.StoreHost = StoreHost;
+module.exports = StoreHost;

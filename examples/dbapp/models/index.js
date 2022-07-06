@@ -1,6 +1,6 @@
 const Customer = require( './Customer' );
 
 
-exports.default = {
+module.exports = {
     Customer: Customer
 }
