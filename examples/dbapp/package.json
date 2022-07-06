@@ -6,7 +6,7 @@
   "directories": {},
   "scripts": {
     "test": "mocha test/_test-setup.js --exit test/ --recursive --timeout 15000",
-    "start": "node app.js",
+    "start": "node www.js",
     "createdb": "docker run --name pg-normalize-dbapp -p 5433:5432 -e POSTGRES_USER=test-user -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test-db -e 'TZ=UTC-2' -d postgres"
   },
   "author": "",

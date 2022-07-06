@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const port = 3000
 const knex = require( './db/knex' );
 const {func} = require( 'normalize' );
 const cors=require ('cors')
@@ -104,14 +103,12 @@ app.get('/datagrid', (req, res) => {
   }
 ]
 
-  return data;
+  return res.send(data);
 })
 
 
 
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+
 
 module.exports = app;
