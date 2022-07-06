@@ -1,38 +1,50 @@
-import logo from './logo.svg';
 import './App.css';
+import React from 'react'; 
 
-function App() {
-  fetch('http://localhost:3000/datagrid')
-  .then(response=>response)
-  .then(resp=>resp.json())
-  .then(res => {
+class App extends React.Component {
+  state = {
+    message: []   
+  };
+
+  componentDidMount() {
+    console.log("didmount")
+    fetch('http://localhost:3000/datagrid')
+    .then(response=>response)
+    .then(resp=>resp.json())
+    .then(res => {
 
     console.log(res)
-  })
+    this.setState({message:res},()=>{console.log(this.state.message)})
+})
 
   .catch(e => {
 
     console.error(e);
 
   });
+  }
+
+  render() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <table className='tabella'>
+        <tr>
+          <th>Id</th>
+          <th>Nome</th>
+          <th>Cognome</th>
+        </tr>
+        {
+          this.state.message.map((riga)=>(
+            <tr>
+              <td>{riga.id}</td>
+              <td>{riga.nome}</td>
+              <td>{riga.cognome}</td>
+            </tr>
+          ))
+        }
+        
+      </table>
   );
+  }
 }
 
 export default App;
