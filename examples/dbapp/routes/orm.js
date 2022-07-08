@@ -53,13 +53,8 @@ ormGenericRoute.route("/count/:entity/").get((req, res) => {
     //     res.status(400).json(err);
     //   });
   });
-/*
-// /groupby/:columnName/:recordToExtract/:startingFromIndex
-ormGenericRoute.route("/model/:entity")
-.get((req, res) => {
-    // console.log( `Entity: ${req.params.entity}` );
-    let responseModel = defs[req.params.entity].getModel();
 
+  function translateFormat( responseModel ) {
 
     let ndef = '';
     let otherDefs = [];
@@ -126,10 +121,18 @@ ormGenericRoute.route("/model/:entity")
 
     // otherDefs.forEach( (od) => console.log( od ) );
     // console.log( ndef );
+  }
+
+// /groupby/:columnName/:recordToExtract/:startingFromIndex
+ormGenericRoute.route("/model/:entity")
+    .get((req, res) => {
+    // console.log( `Entity: ${req.params.entity}` );
+    let responseModel = defs[req.params.entity].getModel();
 
     return res.send(responseModel);
 });
 
+/*
 // /groupby/:columnName/:recordToExtract/:startingFromIndex
 ormGenericRoute.route("/groupby/:entity/:columnName/:recordToExtract/:startingFromIndex")
 .get((req, res) => {
