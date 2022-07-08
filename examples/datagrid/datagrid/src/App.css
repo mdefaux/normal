@@ -39,5 +39,12 @@
 
 .tabella{
   background-color: #31abe9;
-  width: 8%;
+  min-width: 60%;
+  border: 1px solid;
+}
+
+.header{
+  font-size: larger;
+  color: rgb(0, 0, 0);
+  text-align: left;
 }
