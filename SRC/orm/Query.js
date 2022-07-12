@@ -27,10 +27,18 @@ class Query {
     this.relateds = false;
     this.joins = false;
     this.groupeds = false;
+    this.range = { start: 0, size: 50 };
 
     this.setup();
   }
 
+  setup() {
+
+  }
+
+  fetch() {
+    return this;
+  }
 
   relation( relationName ) {
     if ( !relationName ) {
@@ -47,6 +55,15 @@ class Query {
     return this;
   }
 
+
+  joinAllRelated() {
+    
+    return this;
+  }
+
+  where( filters ) {
+    return this;
+  }
   
   groupBy(columns) {
     // 
@@ -59,9 +76,19 @@ class Query {
   then(callback) {
     // 
     if( !this.dataStorage )
-      return Promise.resolve( callback() );
+      return Promise.resolve( callback( [] ) );
+
+    // TODO: make a plan listing all needed sources
+    // TODO: fetch some records from all sources 
+    // until end of data or rs has target size
+
+    // TODO: applies filters
+
+    // TODO: applies groupby
     
-    let data = this.dataStorage.getData();
+    let data = this.dataStorage.getData().slice( 
+      this.range.start, this.range.start + this.range.size
+    );
 
     return Promise.resolve( callback( data ) );
   }
@@ -72,4 +99,4 @@ class Query {
   }
 }
 
-exports.Query = Query;
+module.exports = Query;

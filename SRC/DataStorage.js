@@ -9,8 +9,8 @@ class DataStorage {
     }
 
     setData( jsonData ) {
-        assert( this.jsonData );
-        assert( typeof this.jsonData.reduce !== 'function' );
+        assert( jsonData );
+        assert( typeof jsonData.reduce === 'function' );
 
         this.data = jsonData;
     }
@@ -34,7 +34,7 @@ class DataStorage {
     createQuery( entity ) {
         let query = new Query( entity );
         query.dataStorage = this;
-
+        return query;
     }
 
 }
