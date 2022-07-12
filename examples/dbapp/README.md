@@ -13,8 +13,10 @@ Create a db application that uses a PG docker container and builds a model
 
 On Mac you should run `sudo npm link` command, then normal `npm link normalize`.
 
+Note: `npm link normalize` command must be run every time you launch npm ci on example app.
+
 ## DB on docker
-Use the command to create container pg-normalize-dbapp with "postgre" image.
+Use the command to create container pg-normalize-dbapp exposing port 5433 with "postgre" image.
 
         docker run --name pg-normalize-dbapp \
             -p 5433:5432 \

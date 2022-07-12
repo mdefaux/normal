@@ -1,4 +1,4 @@
-const data = require('./data');
+const data = require('./data.json');
 const store = require('../models/store')
 
 // class DataStorage {
@@ -11,4 +11,4 @@ const store = require('../models/store')
 
 
 
-module.exports = store.data( "Customer", () => (data) ); 
+module.exports = store.data( "Customer", data ); 

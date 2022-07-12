@@ -1,3 +1,4 @@
+const assert = require('assert');
 const Query = require( './orm/Query' );
 
 class DataStorage {
@@ -8,10 +9,16 @@ class DataStorage {
     }
 
     setData( jsonData ) {
+        assert( this.jsonData );
+        assert( typeof this.jsonData.reduce !== 'function' );
+
         this.data = jsonData;
     }
 
     addIndex( columnName ) {
+        assert( this.data );
+        assert( typeof this.data.reduce === 'function' );
+
         this.uniqueIndex[ columnName ] = this.data.reduce( 
             (prev,rec,index)=> ({...prev, [rec[columnName]]: index}), {} )
     }
