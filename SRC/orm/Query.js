@@ -49,6 +49,7 @@ class Query {
 
   
   groupBy(columns) {
+    // 
     if ( !columns ) {
       return this;
     }
@@ -57,6 +58,12 @@ class Query {
   
   then(callback) {
     // 
+    if( !this.dataStorage )
+      return Promise.resolve( callback() );
+    
+    let data = this.dataStorage.getData();
+
+    return Promise.resolve( callback( data ) );
   }
 
   debug() {

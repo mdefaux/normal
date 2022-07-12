@@ -77,10 +77,10 @@ class FieldDef {
 
 class ModelDef {
 
-    constructor( model, factory )
-    {
+    constructor ( entity, factory ) {
         this.factory = factory;
-        this.model = model;
+        this.entity = entity;
+        this.model = entity.model;
         this.id( "id" );    // sets default id column
         // this.fields = {};
     }
@@ -204,24 +204,11 @@ class ModelDef {
         // TODO: return new RelationDef( this.model.fields[ entityName ] )
     }
 
+    storageData( storage ) {
+        this.entity.storage = storage;
+    }
+
 }
-
-// class EntityBE
-// {
-
-//     constructor( name )
-//     {
-//         this.name = name;
-//         this.model = new ModelDef( name );
-//         this.host = false;
-//     }
-
-//     query()
-//     {
-
-//     }
-
-// }
 
 class EntityProxy extends EntityBE
 {
@@ -233,6 +220,8 @@ class EntityProxy extends EntityBE
     }
 
 }
+
+const DataStorage = require( './DataStorage' );
 
 const defs = {
     entities: {},
@@ -250,6 +239,18 @@ const defs = {
     setup( storeHost ) {
         this.host( storeHost );
         return this;
+    },
+
+    data( name, jsonData ) {
+        this.data[ name ] = new DataStorage();
+        this.data[ name ].setData( jsonData );
+
+        let idField = 'id';
+        if ( idField ) {
+            this.data[ name ].addIndex( idField );
+        }
+
+        return this.data[ name ];
     },
 
     setupEntity (name) {
@@ -282,7 +283,7 @@ const defs = {
         }
 
         this.entities[ name ].definition( 
-            new ModelDef( this.entities[ name ].model, this.entities ) );
+            new ModelDef( this.entities[ name ], this.entities ) );
 
         this.setupEntity(name);
 
@@ -305,7 +306,7 @@ const defs = {
             throw new Error( `Specified class does not subclass Entity.` );
         }
 
-        callback( new ModelDef( this.entities[ name ].model, this.entities ) );
+        callback( new ModelDef( this.entities[ name ], this.entities ) );
 
         this.setupEntity(name);
 

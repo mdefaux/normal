@@ -1,6 +1,6 @@
 
 var store = require( './store' );
-
+const dataStorage = require( '../db/data_storage' );
 
 
 module.exports = store.entity( 'Customer', (model) => {
@@ -13,4 +13,6 @@ module.exports = store.entity( 'Customer', (model) => {
     model.string( 'address' );
     model.string( 'reference' );
     model.number( 'telephone' );
+
+    model.storageData( dataStorage );
 } );
