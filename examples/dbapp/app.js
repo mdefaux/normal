@@ -4,6 +4,7 @@ const knex = require( './db/knex' );
 const {func} = require( 'normalize' );
 const cors=require ('cors')
 const ormRoute = require( './routes/orm' );
+const models = require('./models/index')
 
 app.use(cors());
 
@@ -13,6 +14,12 @@ app.get('/', (req, res) => {
 
 app.use('/orm', ormRoute);
 
+/* app.get('/model/customer', (req, res) => { 
+  
+  let response = models.Customer.getModel().columns
+
+  return  res.send(response);
+}) */
 
 app.get('/model', (req, res) => {
   func();
@@ -96,21 +103,29 @@ app.get('/orm/asset/all', (req, res) => {
 app.get('/datagrid', (req, res) => {
   
   let data = [{
-    id:1, nome:"a", cognome:"b"
+    id:1, name:"Luis Muriel", address:"Bergamo", reference:"luismuriel@gmail.com", telephone:3395930427
   },
   {
-    id:2, nome:"c", cognome:"d"
+    id:2, name:"Rodrigo de Paul", address:"Udine", reference:"rodrigodepaul@gmail.com", telephone:339519283
   },
   {
-    id:3, nome:"e", cognome:"f"
+    id:3, name:"Lorenzo Insigne", address:"Napoli", reference:"lorenzoinsigne@gmail.com", telephone:339298416
   }
 ]
+
 
   return res.send(data);
 })
 
 
+app.get('/model/:entity', (req, res) => {
+  if(!models[req.params.entity])  {
+    return res.status(500).send("l'entity non esiste")
+  }
+  let response = models[req.params.entity].getModel().columns
 
+  return  res.send(response);
+})
 
 
 

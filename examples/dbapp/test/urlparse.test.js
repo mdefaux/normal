@@ -1,6 +1,6 @@
 describe('URL parse test', function() {
 
-    it('should return a id_customer = 4 filter on entity asset', function(done) {
+    /* it('should return a id_customer = 4 filter on entity asset', function(done) {
         chai.request(server)
             .get('/orm/asset/all?iCustomer[]=4')
             .end(function(err, res) {
@@ -52,6 +52,26 @@ describe('URL parse test', function() {
                 res.body.length.should.equal(3);
                 res.body[0].should.have.property('nome');
                 res.body[0].should.have.property('cognome');
+                done();
+            });
+    }); */
+
+    it('should fail', function(done) {
+        chai.request(server)
+            .get('/model/unexistent')
+            .end(function(err, res) {
+                res.should.have.status(500);
+                done();
+            });
+    });
+
+    it('customer test', function(done) {
+        chai.request(server)
+            .get('/model/Customer')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.have.property('id');
                 done();
             });
     });
