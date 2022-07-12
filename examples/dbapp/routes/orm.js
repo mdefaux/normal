@@ -4,9 +4,10 @@
  * 
  */
 
- var defs = require("../models/index");
+const {URLquery} = require('normalize');
+var defs = require("../models/index");
 //  var express = require("express");
- var ormGenericRoute = require("express").Router();
+var ormGenericRoute = require("express").Router();
  
 //  modelRoute.route("/").get((req, res) => {
 //    let responseModel = defs;
@@ -163,10 +164,11 @@ ormGenericRoute.route("/:entity/:relation?/:recordToExtract?/:startingFromIndex?
         res.status(500).json({ error: true, data: { message: message } });
         console.error( message );
     }
-
-    let filters = false; // {filters, selectedFields, groupedFields} = URLquery.parse( responseModel, req, req.params.relation !== 'all' && req.params.relation );
-    let selectedFields = false; //
-    let groupedFields = false; //
+    
+    let {filters, selectedFields, groupedFields} = URLquery.parse( req.query, responseModel, req.params.relation !== 'all' && req.params.relation );
+    // let filters = false; // 
+    // let selectedFields = false; //
+    // let groupedFields = false; //
 
     // return responseModel.getRelationData()
     return responseModel

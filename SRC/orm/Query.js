@@ -62,6 +62,10 @@ class Query {
   }
 
   where( filters ) {
+    if ( !filters || filters.length === 0 ) {
+      return this;
+    }
+    this.filters = [...(this.filters || []), ...filters ];
     return this;
   }
   
@@ -80,17 +84,31 @@ class Query {
 
     // TODO: make a plan listing all needed sources
     // TODO: fetch some records from all sources 
+    let range = {...this.range};
+    let rsData = [];
+
+
+    let data = this.dataStorage.getData( range );
+
     // until end of data or rs has target size
 
     // TODO: applies filters
+    if ( this.filters?.length > 0 ) {
+      rsData = [...rsData, ...data.filter( (r) => (
 
+        this.filters.every( (filter) => (
+          filter.match( r )
+        ) )
+
+      )) ];
+    }
+    else {
+      rsData = [...rsData, ...data ];
+    }
     // TODO: applies groupby
     
-    let data = this.dataStorage.getData().slice( 
-      this.range.start, this.range.start + this.range.size
-    );
 
-    return Promise.resolve( callback( data ) );
+    return Promise.resolve( callback( rsData ) );
   }
 
   debug() {

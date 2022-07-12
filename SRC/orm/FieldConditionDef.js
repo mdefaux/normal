@@ -1,5 +1,6 @@
 const { Query } = require("./Query");
 // const { Field } = require("./Model");
+const assert = require('assert');
 
 
 class FieldQueryItem {
@@ -72,6 +73,15 @@ class FieldConditionDef {
 
     toQuery(query) {
         return `${this.tableAlias}.${this.field.sqlSource} in `;
+    }
+    
+
+    parseQueryString( reqField, reqValue ) {
+        this.columnName= reqField.substring(1);
+
+        assert( Array.isArray( reqValue ) );
+        this.value= reqValue;
+        return this;
     }
 }
 

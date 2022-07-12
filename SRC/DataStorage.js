@@ -23,8 +23,19 @@ class DataStorage {
             (prev,rec,index)=> ({...prev, [rec[columnName]]: index}), {} )
     }
 
-    getData(  ) {
-        return this.data;
+    getData( range ) {
+        if( !range ) {
+            return this.data;
+        }
+
+        if( range.start >= this.data.length ) {
+            return false;
+        }
+        
+        let data = this.data.slice( 
+            range.start, range.start + range.size
+        );
+        return data;
     }
 
     getRecord( id ) {
