@@ -45,8 +45,9 @@ class EntityBE {
 
     query() {
         // TODO: host should create/factory for query 
-        if ( this.storage )
+        if ( this.storage ) {
             return this.storage.createQuery( this );
+        }
         // return new KdbQuery(this);
         return this.host.createQuery( this );
     }
