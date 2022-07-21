@@ -1,9 +1,9 @@
 
-const { ObjectLink } = require('../Model');
+// const { ObjectLink } = require('../Model');
 const { Query } = require('../Query');
-const { Field } = require( '../Model' );
-const { FieldConditionDef } = require( '../FieldConditionDef' );
-const { FieldAggregation } = require( '../FieldAggregation' );
+const { Field, ObjectLink } = require('../Field');
+const { FieldConditionDef } = require('../FieldConditionDef');
+const { FieldAggregation } = require('../FieldAggregation');
 
 class KdbQuery extends Query {
 
@@ -127,12 +127,22 @@ class KdbQuery extends Query {
     }
 
     where(conditions) {
-        if (!conditions)
+        if (!conditions){
             return this;
-
+        }
         let builtCondition = this.buildCondition(conditions);
 
+        this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
+
+        return this;
+    }
+
+    applyWhereCondition(builtCondition) {
+
         if (builtCondition instanceof FieldConditionDef) {
+
+            builtCondition.apply( this );
+
             this.qb.where(
                 builtCondition.sqlField(this),
                 builtCondition.type,
@@ -171,8 +181,14 @@ class KdbQuery extends Query {
     }
 
     buildCondition(conditions) {
+
         if (!conditions)
             return false;
+
+        if (Array.isArray(conditions)) {
+            
+            return conditions.map(c => (this.buildCondition(c)));
+        }
 
         if (typeof conditions === 'function') {
             return this.buildCondition(conditions(this));
@@ -363,6 +379,10 @@ class KdbQuery extends Query {
             this.qb.select(`${tableName}.*`);
             this.selectAllRelated();
         }
+
+        this.builtCondition?.forEach( (bc) => {
+            this.applyWhereCondition(bc);
+        });
 
         let limit = 50;
         let page= 1;

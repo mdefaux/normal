@@ -51,6 +51,14 @@ class FieldConditionDef {
         this.query = query;
     }
 
+    apply ( query ) {
+
+        if ( !this.field ) {
+
+            this.field = query[ this.columnName ];
+        }
+    }
+
     sqlField(query) {
         // if( query?.tableAlias || this.tableAlias )
         //     return `${query?.tableAlias || this.tableAlias}.${this.field.sqlSource}`;

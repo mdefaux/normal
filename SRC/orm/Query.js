@@ -117,4 +117,5 @@ class Query {
   }
 }
 
-module.exports = Query;
+// module.exports = Query;
+exports.Query = Query;

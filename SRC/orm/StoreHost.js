@@ -16,4 +16,4 @@ class StoreHost {
 
 }
 
-module.exports = StoreHost;
+exports.StoreHost = StoreHost;

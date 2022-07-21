@@ -1,5 +1,5 @@
 const assert = require('assert');
-const Query = require( './orm/Query' );
+const {Query} = require( './orm/Query' );
 
 class DataStorage {
 

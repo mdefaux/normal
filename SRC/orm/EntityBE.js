@@ -45,6 +45,7 @@ class EntityBE {
 
     query() {
         // TODO: host should create/factory for query 
+        // TODO: use storage query if entity is marked 'local storage'
         if ( this.storage ) {
             return this.storage.createQuery( this );
         }
