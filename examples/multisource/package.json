@@ -1,0 +1,31 @@
+{
+  "name": "multisource",
+  "version": "1.0.0",
+  "description": "normalize data example application which collect records among different source types",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "normalize",
+    "data",
+    "example",
+    "sources"
+  ],
+  "author": "Maurice Defaux",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.1",
+    "knex": "^2.2.0",
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.0.0"
+  }
+}
