@@ -3,7 +3,7 @@
 const { Query } = require('../Query');
 const { Field, ObjectLink } = require('../Field');
 const { FieldConditionDef } = require('../FieldConditionDef');
-const { FieldAggregation } = require('../FieldAggregation');
+const { FieldAggregation, FieldAggregationCount } = require('../FieldAggregation');
 
 class KdbQuery extends Query {
 
@@ -218,10 +218,18 @@ class KdbQuery extends Query {
         }
 
         if (Array.isArray(column)) {
-            column.forEach(c => (this.select(c)));
+            // column.forEach(c => (this.select(c)));
+
+            this.columns = [...this.columns || [], ...column];
             return this;
         }
 
+        this.columns = [...this.columns || [], column];
+
+        return this;
+    }
+
+    buildSelect() {
         let field;
 
         if( !this.qb )
@@ -248,10 +256,6 @@ class KdbQuery extends Query {
         if (field instanceof ObjectLink) {
             this.selectRelatedDetails(field);
         }
-
-
-
-        this.columns = [...this.columns || [], field];
 
         return this;
     }
@@ -374,15 +378,39 @@ class KdbQuery extends Query {
 
     then(callback) {
 
+        let countAllMode = false;
+
+
+        this.builtCondition?.forEach( (bc) => {
+            this.applyWhereCondition(bc);
+        });
+
         if (!this.columns) {
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
             this.qb.select(`${tableName}.*`);
             this.selectAllRelated();
         }
+        else {
+            // checks for count( * )
+            if ( this.columns.find( (c) => ( c instanceof FieldAggregationCount ) ) ) {
 
-        this.builtCondition?.forEach( (bc) => {
-            this.applyWhereCondition(bc);
-        });
+                countAllMode = true;
+
+                //return 
+                this.qb.count();
+                
+                /*.then(result => {
+                    // ottenuto il risultato primario, esegue le query dipendenti
+                    // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
+                    return result.map((rec) => (this.readRecord(rec)));
+                })
+                .then(callback);
+                */
+            }
+            else {
+
+            }
+        }
 
         let limit = 50;
         let page= 1;

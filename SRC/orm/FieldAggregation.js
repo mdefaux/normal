@@ -3,6 +3,7 @@ class FieldAggregation {
         this.field = field;
     }
 }
+
 // exports.FieldAggregation = FieldAggregation;
 class FieldAggregationMax extends FieldAggregation {
     constructor(field) {
@@ -14,5 +15,14 @@ class FieldAggregationMax extends FieldAggregation {
     }
 }
 
+class FieldAggregationCount extends FieldAggregation {
+    constructor() {
+        super(undefined);
+    }
+
+
+}
+
 exports.FieldAggregation = FieldAggregation;
 exports.FieldAggregationMax = FieldAggregationMax;
+exports.FieldAggregationCount = FieldAggregationCount;

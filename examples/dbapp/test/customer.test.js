@@ -65,4 +65,21 @@ describe('Customer test', function() {
                 done();
             });
     });
+    it('should count the whole recordset', function(done) {
+        chai.request(server)
+            .get('/orm/Customer/all?xcount=*')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.should.be.json;
+                res.body.should.be.a('array');
+                res.body.length.should.equal(1); // should have 1 record
+                res.body[0].should.have.property('count');
+                res.body[0].count.should.equals('1000');
+                // res.body[0].should.have.property('name');
+                // res.body[0].name.should.equals('Wordpedia');
+                // res.body[0].should.have.property('address');
+                // res.body[0].should.have.property('telephone');
+                done();
+            });
+    });
 });
