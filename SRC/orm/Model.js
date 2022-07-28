@@ -6,6 +6,7 @@ class Model {
         this.name = name;
         this.fields = {};
         this.relations = {};
+        this.paged = true;
     }
 
     serialize() {
