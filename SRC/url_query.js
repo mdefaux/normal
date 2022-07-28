@@ -42,8 +42,11 @@ const URLquery = {
     },
 
     parse( req, responseModel, relation ) {
-        let filters = this.parseFilter( req, responseModel, relation );
-        let selectedFields = URLquery.parseSelect( req, responseModel, relation );
+
+        let params = req; // .params;
+
+        let filters = this.parseFilter( params, responseModel, relation );
+        let selectedFields = URLquery.parseSelect( params, responseModel, relation );
         let groupedFields = false;
 
         return {filters, selectedFields, groupedFields};
