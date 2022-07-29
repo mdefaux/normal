@@ -397,7 +397,7 @@ class KdbQuery extends Query {
                 countAllMode = true;
 
                 //return 
-                this.qb.count();
+                this.qb.count('*', {as: 'COUNT'});
                 
                 /*.then(result => {
                     // ottenuto il risultato primario, esegue le query dipendenti
