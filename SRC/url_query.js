@@ -1,3 +1,4 @@
+const { FieldAggregationCount } = require("./orm/FieldAggregation");
 const FieldCondition = require("./orm/FieldCondition");
 
 const URLquery = {
@@ -21,9 +22,31 @@ const URLquery = {
         }, [] );
     },
 
+    parseSelect( req, responseModel, relation ) {
+
+        return Object.entries( req ).reduce( (selectedColumns, [reqField, reqValue]) => {
+            let newColumnSelected;
+            if ( reqField.startsWith( "xcount" ) ) {
+                newColumnSelected = new FieldAggregationCount();
+            }
+            // else if ( reqField.startsWith( "xsel" ) ) {
+            //     newColumnSelected = new FieldCondition.textMatch();
+            // }
+            else {
+                return selectedColumns;
+            }
+
+            return [...selectedColumns, newColumnSelected ];
+
+        }, [] );
+    },
+
     parse( req, responseModel, relation ) {
-        let filters = this.parseFilter( req, responseModel, relation );
-        let selectedFields = false;
+
+        let params = req; // .params;
+
+        let filters = this.parseFilter( params, responseModel, relation );
+        let selectedFields = URLquery.parseSelect( params, responseModel, relation );
         let groupedFields = false;
 
         return {filters, selectedFields, groupedFields};
