@@ -26,7 +26,7 @@ class Query {
     this.columns = false;
     this.relateds = false;
     this.joins = false;
-    this.groupeds = false;
+    this.groups = false;
     this.range = { start: 0, size: 50 };
 
     this.setup();
