@@ -229,7 +229,11 @@ class KdbQuery extends Query {
         return this;
     }
 
-    buildSelect() {
+    buildSelect(fieldsList) {
+
+        // if fields is passed, it's the only elaboration made.
+        // otherwise, check groupBy condition, then select conditions.
+        let fields = fieldsList || this.columns;
         let field;
 
         if( !this.qb )
@@ -237,27 +241,75 @@ class KdbQuery extends Query {
             this.fetch();
         }
 
-        if (typeof column === 'string') {
-            field = this.model.fields[column];
+      
+        // handle groupBy
+        if(this.groups && (!fieldsList || fieldsList.length === 0)) {
+            this.groups.forEach(e => {
+                if (e instanceof ObjectLink) {
+                    this.selectRelatedDetails(e);
+                }
+
+            field = this.model.fields[e.name];
             if (!field)
-                throw new Error(`Unknown field '${column}' in entity '${this.model.name}'.`);
+                throw new Error(`Unknown field '${e}' in entity '${this.model.name}'.`);
 
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
-            this.qb.select(`${tableName}.${field.sqlSource}`);
+            this.qb.select(`${tableName}.${field.sqlSource}`);  
 
-        }
 
-        if (typeof column === 'object' && column instanceof FieldAggregation) {
-            column.toQuery(this);
-            field = column.field;
+            });
+
             return this;
         }
 
-        if (field instanceof ObjectLink) {
-            this.selectRelatedDetails(field);
+    //    if(!fields || fields.length === 0) return this;
+
+        // handle FieldAggregationCounts
+        if ( fields.find( (c) => ( c instanceof FieldAggregationCount ) ) ) {
+
+        //    countAllMode = true;
+
+            //return 
+            this.qb.count('*', {as: 'COUNT'});
+            
+            /*.then(result => {
+                // ottenuto il risultato primario, esegue le query dipendenti
+                // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
+                return result.map((rec) => (this.readRecord(rec)));
+            })
+            .then(callback);
+            */
         }
 
-        return this;
+
+        // ciclo fields e faccio qualcosa
+
+        fields.forEach(f => {
+            if (typeof f === 'string') {
+                field = this.model.fields[f];
+                if (!field)
+                    throw new Error(`Unknown field '${f}' in entity '${this.model.name}'.`);
+    
+                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+                this.qb.select(`${tableName}.${field.sqlSource}`);
+    
+            }
+    
+            if (typeof f === 'object' && f instanceof FieldAggregation && !(f instanceof FieldAggregationCount)) {
+                f.toQuery(this);
+                field = f.field;
+                return this;
+            }
+    
+            if (f instanceof ObjectLink) {
+                this.selectRelatedDetails(f);
+            }
+    
+            return this;
+        });
+
+
+
     }
 
     selectAllRelated() {
@@ -376,8 +428,14 @@ class KdbQuery extends Query {
         return this;
     }
 
-    then(callback) {
+    page(limit, offset) {
+        this.limit = limit || 50;
+        this.offset = parseInt(offset-1) || 0;
 
+        return this;
+    }
+
+    then(callback) {
         let countAllMode = false;
 
 
@@ -385,10 +443,22 @@ class KdbQuery extends Query {
             this.applyWhereCondition(bc);
         });
 
-        if (!this.columns) {
-            let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
-            this.qb.select(`${tableName}.*`);
-            this.selectAllRelated();
+
+        this.buildSelect();
+
+/*         if (!this.columns || this.columns.length === 0) {
+            if(this.groups) {
+                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+                // this.qb.select(`${tableName}.${this.groups[0].name}`);
+                this.buildSelect(this.groups);
+
+            }
+            else {
+                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+                this.qb.select(`${tableName}.*`);
+                this.selectAllRelated();
+            }
+
         }
         else {
             // checks for count( * )
@@ -399,22 +469,23 @@ class KdbQuery extends Query {
                 //return 
                 this.qb.count('*', {as: 'COUNT'});
                 
-                /*.then(result => {
+                //.then(result => {
                     // ottenuto il risultato primario, esegue le query dipendenti
                     // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
-                    return result.map((rec) => (this.readRecord(rec)));
-                })
-                .then(callback);
-                */
+              //      return result.map((rec) => (this.readRecord(rec)));
+               // })
+               // .then(callback);
+                
             }
             else {
 
             }
-        }
+        } */
 
-        let limit = 50;
-        let page= 1;
-        this.qb.limit(50).offset(0);
+        let limit = parseInt(this.limit) || 50;
+      //  let offset = parseInt(this.pageNumber) > 1 ? (parseInt(limit) * (parseInt(this.pageNumber)-1)) +1 : 0;
+        let offset = parseInt(this.offset) || 0;
+        this.qb.limit(limit).offset(offset);
         // this.qb.fetchPage({
         //     pageSize: limit, // Defaults to 10 if not specified
         //     page: page, // Defaults to 1 if not specified
