@@ -55,8 +55,17 @@ class FieldConditionDef {
 
         if ( !this.field ) {
 
+            if ( !this.columnName ) {
+                throw new Error( `Column not specified for condition '${this.type}'.`)
+            }
+
             this.field = query[ this.columnName ];
+            if ( !this.field ) {
+                throw new Error( `Column '${this.columnName}' not present in query/entity '${query.name || query.entity.name}'.`)
+            }
         }
+
+
     }
 
     sqlField(query) {

@@ -43,7 +43,7 @@ class EntityBE {
         );
     }
 
-    query() {
+    createQuery() {
         // TODO: host should create/factory for query 
         // TODO: use storage query if entity is marked 'local storage'
         if ( this.storage ) {
@@ -53,12 +53,21 @@ class EntityBE {
         return this.host.createQuery( this );
     }
 
+    createRelationQuery( relatedEntity ) {
+
+        let relationQuery;
+        
+        if ( !relationQuery ) {
+            throw new Error( `'${relatedEntity}' is not related with entity '${this.name}'.`)
+        }
+    }
+
     fetch() {
-        return this.query().fetch();
+        return this.createQuery().fetch();
     }
 
     fetchWithRelated() {
-        return this.query().fetchWithRelated();
+        return this.createQuery().fetchWithRelated();
     }
 
     select(field) {
