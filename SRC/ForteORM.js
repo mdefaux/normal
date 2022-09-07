@@ -49,6 +49,11 @@ class FieldDef {
         return this;
     }
 
+    sourceAlias(sourceName) {
+        this.targetField.sourceAlias = sourceName;
+        return this;
+    }
+
     rename(name) {
         this.targetField.name = name;
         return this;
