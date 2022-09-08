@@ -1,3 +1,7 @@
+/**Entity defines the structure, the fields (column table) and relations
+ * with other entities.
+ * 
+ */
 
 class EntityBE {
     /**
@@ -151,6 +155,26 @@ class EntityBE {
     getModel() {
 
         return this.model.serialize();
+    }
+
+    actions( actionName ) {
+        if ( !this.actionDictionary?.[ actionName ] ) {
+            throw new Error( `Action '${actionName}' not defined in entity '${this.name}' ` )
+        }
+
+        return this.actionDictionary[ actionName ];
+
+        // if ( [actionName] === 'renew' ) {
+        //     return {
+        //         execute: ( body ) => {
+
+        //             return new Promise( ( resolve, reject ) => {
+
+        //                 resolve( { projectId: 1 } );
+        //             } );
+        //         }
+        //     };
+        // }
     }
 }
 

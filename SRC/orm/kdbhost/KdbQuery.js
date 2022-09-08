@@ -132,7 +132,8 @@ class KdbQuery extends Query {
         }
         let builtCondition = this.buildCondition(conditions);
 
-        this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
+        // this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
+        this.builtCondition = [... (this.builtCondition||[]),builtCondition];
 
         return this;
     }
@@ -234,6 +235,11 @@ class KdbQuery extends Query {
         // if fields is passed, it's the only elaboration made.
         // otherwise, check groupBy condition, then select conditions.
         let fields = fieldsList || this.columns;
+
+        if ( !fields ) {
+            fields = Object.entries(this.entity.model.fields).map( (f) => (f) );
+        }
+
         let field;
 
         if( !this.qb )
@@ -436,6 +442,11 @@ class KdbQuery extends Query {
     }
 
     then(callback) {
+
+        if ( !this.qb ) {
+            let tableName = this.model.dbTableName || this.model.name;
+            this.qb = this.knex(tableName);
+        }
         let countAllMode = false;
 
 

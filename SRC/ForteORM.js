@@ -6,6 +6,7 @@ const { FieldConditionDef } = require("./orm/FieldConditionDef");
 // const { KdbStoreHost } = require("./orm/kdbhost/KdbHost");
 const { /*PrimaryKeyField, ObjectLink, RelatedObjects, PartsOf,*/ Model /*, StringField */ } = require("./orm/Model");
 const fields = require( "./orm/Field" );
+const {Action} = require( "./orm/Action" );
 
 class FieldWrapper {
     constructor( field, tableAlias, query )
@@ -211,6 +212,29 @@ class ModelDef {
 
     storageData( storage ) {
         this.entity.storage = storage;
+    }
+
+    action( actionName, callback ) {
+
+        if ( !actionName ) {
+            throw new Error( `Specifiy an action name.` );
+        }
+        if ( !callback ) {
+            throw new Error( `Specifiy a callback.` );
+        }
+        if ( !(typeof callback === 'function') ) {
+            throw new Error( `Specifiy a callback for action '${actionName}' in entity '${this.entity.name}' ` );
+        }
+        if ( this.entity.actionDictionary && this.entity.actionDictionary[ actionName ] ) {
+            throw new Error( `Action '${actionName}' already defined in entity '${this.entity.name}' ` );
+        }
+
+        this.entity.actionDictionary = {
+            ... this.entity.actionDictionary || {},
+
+            [actionName]: new Action( actionName, this.entity, callback )
+        }
+
     }
 
 }
