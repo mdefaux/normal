@@ -2,7 +2,7 @@ describe('Model test', function() {
 
     it('should return an array with 3 models', function(done) {
         chai.request(server)
-            .get('/models')
+            .get('/model')
             .end(function(err, res) {
                 res.should.have.status(200);
                 res.should.be.json; // si assicura che il risultato sia json
@@ -19,10 +19,10 @@ describe('Model test', function() {
             .end(function(err, res) {
                 res.should.have.status(200);
                 res.should.be.json; // si assicura che il risultato sia json
-                res.body.should.be.json;
-                res.body.should.have.property('columns');
-                res.body.columns.should.have.property('part_number');
-                res.body.columns.should.have.property('Vendor');
+                // res.body.should.be.json;
+                res.should.have.property('columns');
+                res.columns.should.have.property('part_number');
+                res.columns.should.have.property('Vendor');
                 done();
             });
     });

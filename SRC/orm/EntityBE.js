@@ -66,16 +66,16 @@ class EntityBE {
         }
     }
 
-    fetch() {
-        return this.createQuery().fetch();
-    }
+    // fetch() {
+    //     return this.createQuery().fetch();
+    // }
 
-    fetchWithRelated() {
-        return this.createQuery().fetchWithRelated();
-    }
+    // fetchWithRelated() {
+    //     return this.createQuery().fetchWithRelated();
+    // }
 
     select(field) {
-        return this.fetch().select(field);
+        return this.createQuery().fetch().select(field);
     }
     
     /**Gets a record
