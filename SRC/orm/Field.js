@@ -1,5 +1,5 @@
 const { FieldAggregationMax } = require("./FieldAggregation");
-const { FieldConditionDef, FieldQueryItem } = require("./FieldConditionDef");
+const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef, FieldQueryItem } = require("./FieldConditionDef");
 
 
 
@@ -48,6 +48,15 @@ class Field {
 
     equals(objectOrFunction) {
         return new FieldConditionDef("=", this, objectOrFunction);
+    }
+
+    isNull() {
+        return new IsNullFieldConditionDef("is null", this, undefined);
+    }
+    
+
+    isNotNull() {
+        return new IsNotNullFieldConditionDef("is not null", this, undefined);
     }
 
     max() {

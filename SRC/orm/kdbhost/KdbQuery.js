@@ -2,7 +2,7 @@
 // const { ObjectLink } = require('../Model');
 const { Query } = require('../Query');
 const { Field, ObjectLink } = require('../Field');
-const { FieldConditionDef } = require('../FieldConditionDef');
+const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef } = require('../FieldConditionDef');
 const { FieldAggregation, FieldAggregationCount } = require('../FieldAggregation');
 
 class KdbQuery extends Query {
@@ -130,6 +130,10 @@ class KdbQuery extends Query {
         if (!conditions){
             return this;
         }
+        if ( Array.isArray(conditions) ) {
+            conditions.forEach( (c) => (this.where(c) ) );
+            return this;
+        }
         let builtCondition = this.buildCondition(conditions);
 
         // this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
@@ -144,13 +148,24 @@ class KdbQuery extends Query {
 
             builtCondition.apply( this );
 
-            this.qb.where(
-                builtCondition.sqlField(this),
-                builtCondition.type,
-                typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
-                    this.knex.raw(builtCondition.sqlValue(this)) :
-                    builtCondition.sqlValue(this)
-            );
+            
+            if (builtCondition instanceof IsNullFieldConditionDef) {
+
+                this.qb.whereNull( builtCondition.sqlField(this) );
+            }
+            else if (builtCondition instanceof IsNotNullFieldConditionDef) {
+
+                this.qb.whereNotNull( builtCondition.sqlField(this) );
+            }
+            else {
+                this.qb.where(
+                    builtCondition.sqlField(this),
+                    builtCondition.type,
+                    typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                        this.knex.raw(builtCondition.sqlValue(this)) :
+                        builtCondition.sqlValue(this)
+                );
+            }
         }
 
         else {
@@ -439,6 +454,12 @@ class KdbQuery extends Query {
         this.offset = parseInt(offset-1) || 0;
 
         return this;
+    }
+
+    async first() {
+        
+        let result = await this.then();
+        return result[0];
     }
 
     then(callback) {

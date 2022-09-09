@@ -35,6 +35,10 @@ class FieldQueryItem {
         return new FieldConditionDef("=", this, objectOrFunction);
     }
 
+    isNull() {
+        return new IsNullFieldConditionDef("is null", this, objectOrFunction);
+    }
+
     max() {
         return new FieldAggregationMax(this);
     }
@@ -102,5 +106,34 @@ class FieldConditionDef {
     }
 }
 
+
+class IsNullFieldConditionDef extends FieldConditionDef {
+
+    constructor(type, field, value, tableAlias, query) {
+        super( type, field, value, tableAlias, query );
+    }
+
+
+    toQuery(query) {
+        return `${this.tableAlias}.${this.field.sqlSource} is null `;
+    }
+
+}
+
+class IsNotNullFieldConditionDef extends FieldConditionDef {
+
+    constructor(type, field, value, tableAlias, query) {
+        super( type, field, value, tableAlias, query );
+    }
+
+
+    toQuery(query) {
+        return `${this.tableAlias}.${this.field.sqlSource} is not null `;
+    }
+
+}
+
 exports.FieldConditionDef = FieldConditionDef;
 exports.FieldQueryItem = FieldQueryItem;
+exports.IsNullFieldConditionDef = IsNullFieldConditionDef;
+exports.IsNotNullFieldConditionDef = IsNotNullFieldConditionDef;
