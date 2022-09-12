@@ -50,8 +50,8 @@ class FieldDef {
         return this;
     }
 
-    sourceAlias(sourceName) {
-        this.targetField.sourceAlias = sourceName;
+    externSource(sourceName) {
+        this.targetField.externSource = sourceName;
         return this;
     }
 
