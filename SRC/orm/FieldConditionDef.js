@@ -97,10 +97,8 @@ class FieldConditionDef {
     }
     
 
-    parseQueryString( reqField, reqValue ) {
-        this.columnName= reqField.substring(1);
-
-        assert( Array.isArray( reqValue ) );
+    setup( reqField, reqValue ) {
+        this.columnName= reqField;
         this.value= reqValue;
         return this;
     }

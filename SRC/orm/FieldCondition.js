@@ -20,6 +20,13 @@ class include extends FieldConditionDef {
         // return ( this.value.find( (f) => ( this.props.column.equals( value, f ) ) ) )
         // ( filterValues.indexOf( value ) > -1 )
     }
+    parseQueryString( reqField, reqValue ) {
+        this.columnName= reqField.substring(1);
+
+        assert( Array.isArray( reqValue ) );
+        this.value= reqValue;
+        return this;
+    }
 };
 
 class textMatch extends FieldConditionDef {
@@ -52,6 +59,19 @@ class textMatch extends FieldConditionDef {
         // return !! regExp.exec( this.column.toString( value ) );   // converts to string then test regex and converts to boolean with !!
         return !! regExp.exec( value );   // converts to string then test regex and converts to boolean with !!
     }
+    
+    sqlValue(query) {
+        if (typeof this.value === 'object') {
+            if (this.value instanceof Query) {
+                return this.value.qb;
+            }
+            // else if (this.value instanceof Field) {
+            else if (this.value && this.value.sqlSource) {
+                return this.value.sqlSource;
+            }
+        }
+        return `%${this.value}%`;
+    }
 }
 
 
@@ -59,22 +79,50 @@ const FieldCondition = {
 
     in: include,
 
-    notIn: 
-    {
-        name: "notIn",
-        label: "non in questi valori",
-        description: "value is contained IN a set of specified values",
-        toQueryString: function( column, filterValues )
-            {
-                return filterValues.map( (value) => { 
-                    let entry = column.writeEntry( value );
-                    let urlFilterValue =entry[1] && entry[1].replace ? entry[1].replace('&','%26') : entry[1];
-                    return `n${entry[0]}[]=${ urlFilterValue }`;
-                } ).join( '&' );
-            },
-        match: ( value, filterValues ) =>
-            ( filterValues.indexOf( value ) === -1 )
+    notIn: class include extends FieldConditionDef {
+
+        constructor () {
+            super( 'not in', undefined, undefined, undefined, undefined ) ;
+        }
+    
+        toQueryString ( column, filterValues ) {
+            return filterValues.map( (value) => { 
+                let entry = column.writeEntry( value );
+                let urlFilterValue = entry[1] && entry[1].replace ? entry[1].replace('&','%26') : entry[1];
+                return `n${entry[0]}[]=${ urlFilterValue }`;
+            } ).join( '&' );
+        }
+        match( record ) {
+            let value = record[ this.columnName ];
+            return ( this.value.find( (f) => ( value === f ) ) );
+            // return ( this.value.find( (f) => ( this.props.column.equals( value, f ) ) ) )
+            // ( filterValues.indexOf( value ) > -1 )
+        }
+        parseQueryString( reqField, reqValue ) {
+            this.columnName= reqField.substring(1);
+    
+            assert( Array.isArray( reqValue ) );
+            this.value= reqValue;
+            return this;
+        }
     },
+
+
+    // {
+    //     name: "notIn",
+    //     label: "non in questi valori",
+    //     description: "value is contained IN a set of specified values",
+    //     toQueryString: function( column, filterValues )
+    //         {
+    //             return filterValues.map( (value) => { 
+    //                 let entry = column.writeEntry( value );
+    //                 let urlFilterValue =entry[1] && entry[1].replace ? entry[1].replace('&','%26') : entry[1];
+    //                 return `n${entry[0]}[]=${ urlFilterValue }`;
+    //             } ).join( '&' );
+    //         },
+    //     match: ( value, filterValues ) =>
+    //         ( filterValues.indexOf( value ) === -1 )
+    // },
 
     endsWith:
     {

@@ -7,17 +7,31 @@ const URLquery = {
 
         return Object.entries( req ).reduce( (filters, [reqField, reqValue]) => {
             let newCondition;
+            let columnName = reqField.substring(1);
             if ( reqField.startsWith( "i" ) ) {
                 newCondition = new FieldCondition.in();
+                return [...filters, newCondition.setup( columnName, reqValue ) ];
             }
-            else if ( reqField.startsWith( "c" ) ) {
+            else if ( reqField.startsWith( "n" ) ) {
+                newCondition = new FieldCondition.notIn();
+                return [...filters, newCondition.setup( columnName, reqValue ) ];
+            }
+
+            if ( reqValue.length > 1 ) {
+                // newCondition = new FieldCondition.or();
+// return 
+            }
+            
+            if ( reqField.startsWith( "c" ) ) {
                 newCondition = new FieldCondition.textMatch();
             }
-            else {
+            
+            if ( !newCondition ) {
                 return filters;
             }
 
-            return [...filters, newCondition.parseQueryString( reqField, reqValue ) ];
+            return [...filters, newCondition.setup( columnName, reqValue[0] ) ];
+
 
         }, [] );
     },

@@ -3,6 +3,7 @@
 const { Query } = require('../Query');
 const { Field, ObjectLink } = require('../Field');
 const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef } = require('../FieldConditionDef');
+const FieldCondition = require( '../FieldCondition' );
 const { FieldAggregation, FieldAggregationCount } = require('../FieldAggregation');
 
 class KdbQuery extends Query {
@@ -147,6 +148,9 @@ class KdbQuery extends Query {
         if (builtCondition instanceof FieldConditionDef) {
 
             builtCondition.apply( this );
+            let value = typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                this.knex.raw(builtCondition.sqlValue(this)) :
+                builtCondition.sqlValue(this);
 
             
             if (builtCondition instanceof IsNullFieldConditionDef) {
@@ -156,6 +160,15 @@ class KdbQuery extends Query {
             else if (builtCondition instanceof IsNotNullFieldConditionDef) {
 
                 this.qb.whereNotNull( builtCondition.sqlField(this) );
+            }
+            else if (builtCondition instanceof FieldCondition.textMatch) {
+
+                this.qb.where(
+                    this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
+                    builtCondition.type,
+                    typeof value === 'string' ? value.toUpperCase() :
+                        this.knex.raw( `UPPER( ${value} )` )
+                );
             }
             else {
                 this.qb.where(
