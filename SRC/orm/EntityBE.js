@@ -14,7 +14,15 @@ class EntityBE {
         this.name = name;
         this.model = model;
         this.factory = factory;
-        this.host = host
+        this.host = host;
+        this.metaData = {
+            name: name,
+            model: model,
+            columns: [],
+            factory: factory,
+            host: host,
+            relations: {}
+        };
     }
 
     setup() {
@@ -57,13 +65,23 @@ class EntityBE {
         return this.host.createQuery( this );
     }
 
-    createRelationQuery( relatedEntity ) {
+    createRelationQuery( relatedEntityName ) {
 
-        let relationQuery;
+        
+        if ( !this.metaData.relations[ relatedEntityName ] ) {
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+        }
+        
+        const queryFactory = this.metaData.relations[ relatedEntityName ].queryFactory;
+        let relationQuery = queryFactory( this.createQuery() );
+
+        
         
         if ( !relationQuery ) {
-            throw new Error( `'${relatedEntity}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
         }
+
+        return relationQuery;
     }
 
     // fetch() {

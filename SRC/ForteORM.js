@@ -237,6 +237,16 @@ class ModelDef {
 
     }
 
+    relation( relationName, queryFactoryCallback ) {
+
+        this.entity.metaData.relations = {
+            ...this.entity.metaData.relations,
+            [ relationName ]: {
+                queryFactory: queryFactoryCallback
+            }
+        }
+    }
+
 }
 
 class EntityProxy extends EntityBE
