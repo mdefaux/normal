@@ -25,6 +25,18 @@ const URLquery = {
             if ( reqField.startsWith( "c" ) ) {
                 newCondition = new FieldCondition.textMatch();
             }
+            else if ( reqField.startsWith( "l" ) ) {
+                newCondition = new FieldCondition.less();
+            }
+            else if ( reqField.startsWith( "s" ) ) {
+                newCondition = new FieldCondition.lessOrEqual();
+            }
+            else if ( reqField.startsWith( "g" ) ) {
+                newCondition = new FieldCondition.greater();
+            }
+            else if ( reqField.startsWith( "r" ) ) {
+                newCondition = new FieldCondition.greaterOrEqual();
+            }
             
             if ( !newCondition ) {
                 return filters;

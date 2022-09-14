@@ -79,7 +79,7 @@ const FieldCondition = {
 
     in: include,
 
-    notIn: class include extends FieldConditionDef {
+    notIn: class extends FieldConditionDef {
 
         constructor () {
             super( 'not in', undefined, undefined, undefined, undefined ) ;
@@ -142,7 +142,6 @@ const FieldCondition = {
         }
     },
 
-    
     textMatch: textMatch,
     // {
     //     name: "textMatch",
@@ -168,53 +167,67 @@ const FieldCondition = {
     //         }
     // },
 
-    less: 
-    {
-        name: "less",
-        description: "xxxxxxxxxxxxxxxxxxxxxx",
-        toQueryString: function( column, value )
-            {
-                return `l${column.getSourceName()}[]=${column.toQueryString(value)}`;
-            },
-        match: function ( value ) { 
+    less: class extends FieldConditionDef {
+
+        constructor () {
+            super( '<', undefined, undefined, undefined, undefined ) ;
+        }
+    
+        toQueryString ( column, value )
+        {
+            return `l${column.getSourceName()}[]=${column.toQueryString(value)}`;
+        }
+
+        match ( value ) { 
             return ( this.column.compare( value, this.value ) < 0 ) 
         } // value <= compare )( value, compare ) => ( value < compare )
     },
-    lessOrEqual: 
-    {
-        name: "lessOrEqual",
-        description: "xxxxxxxxxxxxxxxxxxxxxx",
-        toQueryString: function( column, value )
-            {
-                return `s${column.getSourceName()}[]=${column.toQueryString(value)}`;
-            },
-        match: function ( value ) { 
+
+    lessOrEqual: class extends FieldConditionDef {
+
+        constructor () {
+            super( '<=', undefined, undefined, undefined, undefined ) ;
+        }
+    
+        toQueryString( column, value ) {
+            return `s${column.getSourceName()}[]=${column.toQueryString(value)}`;
+        }
+
+        match ( value ) { 
             return ( this.column.compare( value, this.value ) <= 0 ) 
         } // value <= compare )
     },
-    greater: 
-    {
-        name: "greater",
-        description: "xxxxxxxxxxxxxxxxxxxxxx",
-        toQueryString: function( column, value )
-            {
-                return `g${column.getSourceName()}[]=${column.toQueryString(value)}`;
-            },
-        match: function ( value ) { 
+
+    greater: class extends FieldConditionDef {
+
+        constructor () {
+            super( '>', undefined, undefined, undefined, undefined ) ;
+        }
+    
+        toQueryString( column, value )
+        {
+            return `g${column.getSourceName()}[]=${column.toQueryString(value)}`;
+        }
+
+        match ( value ) { 
             return ( this.column.compare( value, this.value ) > 0 ) 
-        } // value > compare )
+        }
     },
-    greaterOrEqual: 
-    {
-        name: "greaterOrEqual",
-        description: "xxxxxxxxxxxxxxxxxxxxxx",
-        toQueryString: function( column, value )
-            {
-                return `r${column.getSourceName()}[]=${column.toQueryString(value)}`;
-            },
-        match: function ( value ) { 
+    
+    greaterOrEqual:   class extends FieldConditionDef {
+
+        constructor () {
+            super( '>=', undefined, undefined, undefined, undefined ) ;
+        }
+    
+        toQueryString( column, value )
+        {
+            return `r${column.getSourceName()}[]=${column.toQueryString(value)}`;
+        }
+
+        match ( value ) { 
             return ( this.column.compare( value, this.value ) >= 0 ) 
-        } // ( value >= compare )
+        }
     },
 }
 
