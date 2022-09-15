@@ -263,6 +263,7 @@ class KdbQuery extends Query {
         // if fields is passed, it's the only elaboration made.
         // otherwise, check groupBy condition, then select conditions.
         let fields = fieldsList || this.columns;
+        let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
         if ( !fields ) {
             fields = Object.entries(this.entity.model.fields).map( (f) => (f) );
@@ -305,6 +306,7 @@ class KdbQuery extends Query {
 
             //return 
             this.qb.count('*', {as: 'COUNT'});
+            return;
             
             /*.then(result => {
                 // ottenuto il risultato primario, esegue le query dipendenti
@@ -315,6 +317,9 @@ class KdbQuery extends Query {
             */
         }
 
+        if ( fields.length === 0 ) {
+            this.qb.select( `${tableName}.*` );
+        }
 
         // ciclo fields e faccio qualcosa
 
@@ -324,7 +329,7 @@ class KdbQuery extends Query {
                 if (!field)
                     throw new Error(`Unknown field '${f}' in entity '${this.model.name}'.`);
     
-                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+                
                 this.qb.select(`${tableName}.${field.sqlSource}`);
     
             }
