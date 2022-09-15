@@ -109,6 +109,26 @@ const URLquery = {
 
     },
 
+    parseSort( req, responseModel, relation ) {
+
+        return Object.entries( req ).reduce( (sortedColumns, [reqField, reqValue]) => {
+                let newColumnSortBy;
+                if ( reqField === "asc" ) {
+                    newColumnSortBy = { order: "asc", columnName: reqValue };
+                }
+                else if ( reqField === "desc" ) {
+                    newColumnSortBy = { order: "desc", columnName: reqValue };
+                }
+                else {
+                    return sortedColumns;
+                }
+
+                return [...sortedColumns, newColumnSortBy ];
+
+            }, [] );
+
+    },
+
     parse( req, responseModel, relation ) {
 
         let params = req; // .params;
@@ -116,8 +136,9 @@ const URLquery = {
         let filters = this.parseFilter( params, responseModel, relation );
         let selectedFields = URLquery.parseSelect( params, responseModel, relation );
         let groupedFields = this.parseGroup(params, responseModel, relation);
+        let sortingFields = this.parseSort(params, responseModel, relation);
 
-        return {filters, selectedFields, groupedFields};
+        return {filters, selectedFields, groupedFields, sortingFields};
     }
 };
 

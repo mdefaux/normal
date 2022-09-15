@@ -27,6 +27,7 @@ class Query {
     this.relateds = false;
     this.joins = false;
     this.groups = false;
+    this.orderedColumns = [];
     this.range = { start: 0, size: 50 };
 
     this.setup();
@@ -73,6 +74,20 @@ class Query {
     // 
     if ( !columns ) {
       return this;
+    }
+    return this;
+  }
+  
+  sortBy(columns) {
+    // 
+    if ( !columns || columns.length === 0 ) {
+      return this;
+    }
+    if ( Array.isArray(columns) ) {
+      this.orderedColumns = [ ...this.orderedColumns, ...columns ];
+    }
+    else {
+      this.orderedColumns = [ ...this.orderedColumns, columns ];
     }
     return this;
   }

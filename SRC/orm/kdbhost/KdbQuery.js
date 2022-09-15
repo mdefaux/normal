@@ -351,6 +351,14 @@ class KdbQuery extends Query {
 
     }
 
+    buildSorting() {
+
+        if ( this.orderedColumns.length === 0 ) {
+            return;
+        }
+        this.qb.orderBy( this.orderedColumns[0].columnName, this.orderedColumns[0].order );
+    }
+
     selectAllRelated() {
         if (!this.relateds)
             return;
@@ -495,6 +503,8 @@ class KdbQuery extends Query {
 
 
         this.buildSelect();
+
+        this.buildSorting();
 
 /*         if (!this.columns || this.columns.length === 0) {
             if(this.groups) {
