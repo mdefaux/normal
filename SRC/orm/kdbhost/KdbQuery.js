@@ -163,8 +163,11 @@ class KdbQuery extends Query {
             }
             else if (builtCondition instanceof FieldCondition.textMatch) {
 
+                let viewAlias = builtCondition.field.sourceAlias;
+
                 this.qb.where(
-                    this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
+                    this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
+                    // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                     builtCondition.type,
                     typeof value === 'string' ? value.toUpperCase() :
                         this.knex.raw( `UPPER( ${value} )` )
