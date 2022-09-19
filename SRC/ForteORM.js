@@ -229,10 +229,17 @@ class ModelDef {
             throw new Error( `Action '${actionName}' already defined in entity '${this.entity.name}' ` );
         }
 
+        let newAction = new Action( actionName, this.entity, callback );
+
         this.entity.actionDictionary = {
             ... this.entity.actionDictionary || {},
 
-            [actionName]: new Action( actionName, this.entity, callback )
+            [actionName]: newAction
+        }
+
+        this.entity[ actionName ] = function( data ) {
+
+            return newAction.execute( data );
         }
 
     }
