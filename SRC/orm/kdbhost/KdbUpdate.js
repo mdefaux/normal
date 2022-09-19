@@ -15,7 +15,7 @@ class KdbUpdate /*extends InsertStatement */ {
 
     then(callback/* , returning */) {
     
-        let rowId =  {
+        let rowId = typeof this.recordId === 'object' ? this.recordId : {
             id: this.recordId
         };
 

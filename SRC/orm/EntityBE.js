@@ -102,6 +102,15 @@ class EntityBE {
      * @returns 
      */
     async getRecord( id ) {
+
+        if ( typeof id === 'object' ) {
+
+            let rr = await this.select()
+                .modify( qb => qb.where( id ) )
+                .first();
+            return rr;
+        }
+
         return this.host.createQuery( this )
             .fetch()
             .where( (qb) => (qb[ this.model.idField ].equals( id )) )
