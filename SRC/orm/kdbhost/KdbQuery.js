@@ -127,6 +127,11 @@ class KdbQuery extends Query {
         return this;
     }
 
+    modify( callback ) {
+        callback( this.qb );
+        return this;
+    }
+
     where(conditions) {
         if (!conditions){
             return this;
@@ -135,6 +140,7 @@ class KdbQuery extends Query {
             conditions.forEach( (c) => (this.where(c) ) );
             return this;
         }
+
         let builtCondition = this.buildCondition(conditions);
 
         // this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
