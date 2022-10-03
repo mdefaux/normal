@@ -191,6 +191,10 @@ class EntityBE {
 
         return this.actionDictionary[ actionName ];
     }
+
+    allign( parameters ) {
+        
+    }
 }
 
 exports.EntityBE = EntityBE;
