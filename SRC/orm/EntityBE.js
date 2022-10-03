@@ -194,6 +194,15 @@ class EntityBE {
 
     allign( parameters ) {
         
+        if ( !parameters.source ) {
+            throw new Error( `source parameter is mandatory for allign function` );
+        }
+        let source = parameters.source;
+        let destination = parameters.destination || this.select().pageSize( 500 );
+
+        // TODO: alligment procedure
+        // ...
+        // 
     }
 }
 
