@@ -111,7 +111,7 @@ class EntityBE {
             return rr;
         }
 
-        return this.host.createQuery( this )
+        return this.createQuery( this )
             .fetch()
             .where( (qb) => (qb[ this.model.idField ].equals( id )) )
             // .where( this[ this.model.idField ].equals( newId ) )
@@ -190,18 +190,6 @@ class EntityBE {
         }
 
         return this.actionDictionary[ actionName ];
-
-        // if ( [actionName] === 'renew' ) {
-        //     return {
-        //         execute: ( body ) => {
-
-        //             return new Promise( ( resolve, reject ) => {
-
-        //                 resolve( { projectId: 1 } );
-        //             } );
-        //         }
-        //     };
-        // }
     }
 }
 
