@@ -1,3 +1,13 @@
+/**Knex DB Query is an implementation of abstract Query for db
+ * connected with knex library.
+ * 
+ * TODO: 
+ * - refactor then vs exec method
+ * - rename fetch method
+ * - ensure setup is done always
+ * - create knex query builder (this.qb) only after exec is called
+ * 
+ */
 
 // const { ObjectLink } = require('../Model');
 const { Query } = require('../Query');
@@ -6,6 +16,10 @@ const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef }
 const FieldCondition = require( '../FieldCondition' );
 const { FieldAggregation, FieldAggregationCount } = require('../FieldAggregation');
 
+/**Implementation of abstract Query for db
+ * connected with knex library.
+ * 
+ */
 class KdbQuery extends Query {
 
     constructor( entity, knex ) {
@@ -306,31 +320,19 @@ class KdbQuery extends Query {
             return this;
         }
 
-    //    if(!fields || fields.length === 0) return this;
-
         // handle FieldAggregationCounts
         if ( fields.find( (c) => ( c instanceof FieldAggregationCount ) ) ) {
 
-        //    countAllMode = true;
-
-            //return 
             this.qb.count('*', {as: 'COUNT'});
-            return;
-            
-            /*.then(result => {
-                // ottenuto il risultato primario, esegue le query dipendenti
-                // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
-                return result.map((rec) => (this.readRecord(rec)));
-            })
-            .then(callback);
-            */
+            return this;
         }
 
+        // if selected filed is empty, takes all columns with *
         if ( fields.length === 0 ) {
             this.qb.select( `${tableName}.*` );
         }
 
-        // ciclo fields e faccio qualcosa
+        // checks for field type: select, aggregation, object links...
 
         fields.forEach(f => {
             if (typeof f === 'string') {
@@ -338,7 +340,7 @@ class KdbQuery extends Query {
                 if (!field)
                     throw new Error(`Unknown field '${f}' in entity '${this.model.name}'.`);
     
-                
+                // adds column to select clause
                 this.qb.select(`${tableName}.${field.sqlSource}`);
     
             }
@@ -353,11 +355,8 @@ class KdbQuery extends Query {
                 this.selectRelatedDetails(f);
             }
     
-            return this;
         });
-
-
-
+        return this;
     }
 
     buildSorting() {
