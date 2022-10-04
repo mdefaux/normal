@@ -368,6 +368,10 @@ const defs = {
         this.setupEntity(name);
 
         return this.entities[ name ];
+    },
+
+    today() {
+        return (new Date()).getDate();
     }
 }
 
