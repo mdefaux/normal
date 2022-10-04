@@ -96,6 +96,11 @@ class ModelDef {
         this.model.dbTableName = sourceName;
     }
 
+    host( storeHost ) {
+        
+        this.entity.host = storeHost;
+    }
+
     useClass( clazz )
     {
 
@@ -274,17 +279,23 @@ const defs = {
 
     mainHost: undefined, // new KdbStoreHost( knex ),
 
+    hosts: {},
+
     /**Setups main Store with a specific host
      * 
      * @param {*} storeHost 
      */
-    host( storeHost ) {
+    setupMainHost( storeHost ) {
         this.mainHost = storeHost;
     },
 
     setup( storeHost ) {
-        this.host( storeHost );
+        this.setupMainHost( storeHost );
         return this;
+    },
+
+    createHost( storeHost ) {
+        return this.hosts[ storeHost.id() || 'anonymous-host' ] = storeHost;
     },
 
     data( name, jsonData ) {
