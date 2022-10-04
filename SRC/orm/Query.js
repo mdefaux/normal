@@ -92,7 +92,7 @@ class Query {
     return this;
   }
   
-  then(callback) {
+  async exec() {
     // 
     if( !this.dataStorage )
       return Promise.resolve( callback( [] ) );
@@ -123,7 +123,12 @@ class Query {
     // TODO: applies groupby
     
 
-    return Promise.resolve( callback( rsData ) );
+    return rsData; // Promise.resolve( callback( rsData ) );
+  }
+
+  then(callback) {
+
+      return this.exec().then(callback);
   }
 
   debug() {

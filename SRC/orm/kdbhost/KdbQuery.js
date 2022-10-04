@@ -2,7 +2,6 @@
  * connected with knex library.
  * 
  * TODO: 
- * - refactor then vs exec method
  * - rename fetch method
  * - ensure setup is done always
  * - create knex query builder (this.qb) only after exec is called
@@ -492,66 +491,32 @@ class KdbQuery extends Query {
 
     async first() {
         
-        let result = await this.then();
+        let result = await this.exec();
         return result[0];
     }
 
-    then(callback) {
+    async exec() {
 
         if ( !this.qb ) {
             let tableName = this.model.dbTableName || this.model.name;
             this.qb = this.knex(tableName);
         }
-        let countAllMode = false;
+        // let countAllMode = false;
 
-
+        // builds filter condition
         this.builtCondition?.forEach( (bc) => {
             this.applyWhereCondition(bc);
         });
 
-
+        // builds select clause
         this.buildSelect();
 
+        // builds sorting
         this.buildSorting();
 
-/*         if (!this.columns || this.columns.length === 0) {
-            if(this.groups) {
-                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
-                // this.qb.select(`${tableName}.${this.groups[0].name}`);
-                this.buildSelect(this.groups);
-
-            }
-            else {
-                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
-                this.qb.select(`${tableName}.*`);
-                this.selectAllRelated();
-            }
-
-        }
-        else {
-            // checks for count( * )
-            if ( this.columns.find( (c) => ( c instanceof FieldAggregationCount ) ) ) {
-
-                countAllMode = true;
-
-                //return 
-                this.qb.count('*', {as: 'COUNT'});
-                
-                //.then(result => {
-                    // ottenuto il risultato primario, esegue le query dipendenti
-                    // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
-              //      return result.map((rec) => (this.readRecord(rec)));
-               // })
-               // .then(callback);
-                
-            }
-            else {
-
-            }
-        } */
 
         let limit = parseInt(this.limit) || 50;
-      //  let offset = parseInt(this.pageNumber) > 1 ? (parseInt(limit) * (parseInt(this.pageNumber)-1)) +1 : 0;
+        //  let offset = parseInt(this.pageNumber) > 1 ? (parseInt(limit) * (parseInt(this.pageNumber)-1)) +1 : 0;
         let offset = parseInt(this.offset) || 0;
         this.qb.limit(limit).offset(offset);
         // this.qb.fetchPage({
@@ -565,7 +530,6 @@ class KdbQuery extends Query {
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
             return result.map((rec) => (this.readRecord(rec)));
         })
-            .then(callback);
     }
 
     debug() {
