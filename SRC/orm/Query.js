@@ -63,10 +63,27 @@ class Query {
   }
 
   where( filters ) {
+
     if ( !filters || filters.length === 0 ) {
       return this;
     }
-    this.filters = [...(this.filters || []), ...filters ];
+    
+    if ( Array.isArray(filters) ) {
+      filters.forEach( (c) => (this.where(c) ) );
+      return this;
+    }
+
+    this.filters = [...(this.filters || []), filters ];
+    return this;
+  }
+  
+
+  andWhere( filters ) {
+    return this.where( filters );
+  }
+
+  pageSize( numberOfRecord ) {
+    // TODO:
     return this;
   }
   
