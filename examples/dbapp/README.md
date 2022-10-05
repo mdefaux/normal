@@ -5,20 +5,20 @@ Create a db application that uses a PG docker container and builds a model
 
 ## How to test library without publishing
 
-        cd ./route-to-normalize-library
+        cd ./route-to-normaly-library
         npm link
 
         cd ./examples/dbapp
-        npm link normalize
+        npm link normaly
 
-On Mac you should run `sudo npm link` command, then normal `npm link normalize`.
+On Mac you should run `sudo npm link` command, then normal `npm link normaly`.
 
-Note: `npm link normalize` command must be run every time you launch npm ci on example app.
+Note: `npm link normaly` command must be run every time you launch npm ci on example app.
 
 ## DB on docker
-Use the command to create container pg-normalize-dbapp exposing port 5433 with "postgre" image.
+Use the command to create container pg-normaly-dbapp exposing port 5433 with "postgre" image.
 
-        docker run --name pg-normalize-dbapp \
+        docker run --name pg-normaly-dbapp \
             -p 5433:5432 \
             -e POSTGRES_USER=test-user -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test-db \
             -e "TZ=UTC-2" \

@@ -15,6 +15,6 @@ Write all requested information
 
         npm i -D mocha chai chai-http
 
-### link to library normalize
+### link to library normaly
 
-        npm link normalize
+        npm link normaly
