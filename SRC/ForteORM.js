@@ -249,13 +249,25 @@ class ModelDef {
 
     }
 
-    relation( relationName, queryFactoryCallback ) {
+    relation( relationName, factoryCallback ) {
+
+        // TODO: use Relation class
+        let newRelation = {};
+        // {
+        //     queryFactory: newRelation
+        // }
+
+        let relationDefinitor = {
+            select: ( selectCallback ) => { 
+                newRelation.select = selectCallback
+            }
+        };
+
+        factoryCallback( relationDefinitor );
 
         this.entity.metaData.relations = {
             ...this.entity.metaData.relations,
-            [ relationName ]: {
-                queryFactory: queryFactoryCallback
-            }
+            [ relationName ]: newRelation
         }
     }
 
@@ -348,7 +360,7 @@ const defs = {
     },
 
     entity( name, callback, clazz ) {
-        console.log( `Setting up class ${name}.` );
+        // console.log( `Setting up class ${name}.` );
         if( this.entities[ name ] ) {
             return;
             throw new Error( `Entity '${name}' already defined.` );

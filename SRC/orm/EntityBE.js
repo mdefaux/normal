@@ -84,6 +84,30 @@ class EntityBE {
         return relationQuery;
     }
 
+    getRelation( relatedEntityName ) {
+
+        
+        if ( !this.metaData.relations[ relatedEntityName ] ) {
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+        }
+        
+        const queryFactory = this.metaData.relations[ relatedEntityName ];
+        
+        if ( !queryFactory ) {
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+        }
+        if ( !queryFactory.select ) {
+            throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+        }
+        let relationQuery = queryFactory; // .select();
+
+        if ( !relationQuery ) {
+            throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+        }
+
+        return relationQuery;
+    }
+
     // fetch() {
     //     return this.createQuery().fetch();
     // }
