@@ -20,6 +20,11 @@ class FieldQueryItem {
         }
         return this.sourceField || this.name;
     }
+    
+
+    processValue(obj) {
+        return obj[this.name];
+    }
 
     in(arrayOrFunction) {
         if (Array.isArray(arrayOrFunction)) {
@@ -82,6 +87,8 @@ class FieldConditionDef {
     sqlValue(query) {
         if (typeof this.value === 'object') {
             if (this.value instanceof Query) {
+                this.value.build();
+                // console.log( this.value.qb )
                 return this.value.qb;
             }
             // else if (this.value instanceof Field) {
