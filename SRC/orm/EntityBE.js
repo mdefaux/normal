@@ -203,6 +203,61 @@ class EntityBE {
         // TODO: alligment procedure
         // ...
         // 
+        let pageA = 1
+        let pageB = 1
+        //il primo array è as400
+        arrayA = externals.queryWsdl( queryentity(pageA, source));
+        //il secondo array è locale
+        arrayB =   knex(destination).select;
+        
+        for (ia=0,ib=0; ( (arrayA.length!=0)&&(arrayB.length!=0) ); ) {
+         
+            if(arrayA[ia] == arrayB[ib]) {
+                for(i=0;i<columnmap.length;i++)
+                {
+                    
+                /* 
+                     confronto campo per campo e eventualmente faccio update se ho differenze
+                     indexA ++
+                     indexB ++
+                 */
+                    if(arrayA[ia].columnmap[i]!=arrayB[ib].columnmap[i]){
+                        arrayB[ib].columnmap[i]=arrayA[ia].columnmap[i];
+                    }
+    
+                }
+                ia ++;
+                ib ++;
+            }
+          else {  
+            if(arrayA[ia].chiave < arrayB[ib].chiave)  {
+          
+                     arrayB.splice(ib, 0, arrayA[ia]);
+                     ib ++; //verificare se non va aumentato anche ia
+              }
+              else { 
+                  //  A>B oppure B è nulla: record da cancellare da B
+                    arrayB.splice(ib, 1); 
+                    iA ++
+              }
+          }
+        
+          if(arrayA.length==0) {
+            ia = 0
+            pageA ++;
+            A = externals.queryWsdl( queryentity(pageA, entity));
+          }
+        
+          if(arrayB.length==0) {
+            ia = 0
+            pageB ++;
+            A =  knex( tabella     );
+          }
+           
+        }
+     return arrayB;
+     // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
+    //fine funzione
     }
 }
 
