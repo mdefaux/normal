@@ -495,7 +495,7 @@ class KdbQuery extends Query {
         return result[0];
     }
 
-    async exec() {
+    build() {
 
         if ( !this.qb ) {
             let tableName = this.model.dbTableName || this.model.name;
@@ -524,6 +524,13 @@ class KdbQuery extends Query {
         //     page: page, // Defaults to 1 if not specified
         //     // withRelated: ["Vendor", "Categoria"] // Passed to Model#fetchAll
         //   })
+    }
+
+    async exec() {
+        if ( this.beforeExecCallback ) {
+            await this.beforeExecCallback( this );
+        }
+        this.build();
 
         return this.qb.then(result => {
             // ottenuto il risultato primario, esegue le query dipendenti

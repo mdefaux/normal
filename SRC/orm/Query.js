@@ -108,8 +108,16 @@ class Query {
     }
     return this;
   }
+
+  beforeExec( callback ) {
+    this.beforeExecCallback = callback;
+    return this;
+  }
   
   async exec() {
+    if ( this.beforeExecCallback ) {
+        await this.beforeExecCallback( this );
+    }
     // 
     if( !this.dataStorage )
       return Promise.resolve( callback( [] ) );
