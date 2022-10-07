@@ -110,12 +110,16 @@ class ModelDef {
     {
         if( this.model.idField === fieldName )
             return;
-        if( this.model.idField )
-        {
+
+        if ( Array.isArray( fieldName ) ) {
+            this.model.idField = fieldName;
+            return fieldName.map( (f) => this.model.fields[ f] );
+        }
+
+        if( this.model.idField ) {
             delete this.model.fields[ fieldName ];
         }
-        else 
-        {
+        else {
             this.model.fields[ fieldName ] = new fields.PrimaryKeyField( fieldName );
         }
         this.model.idField = fieldName;
