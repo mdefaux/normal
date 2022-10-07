@@ -150,7 +150,7 @@ class EntityBE {
         // saves temporary ids
         let tempId = record._id;
         delete record._id;
-        delete record[ this.model.idField ];
+        // delete record[ this.model.idField ];
 
         // creates the insert statement
         let insert = this.host.createInsert( this );
