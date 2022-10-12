@@ -29,14 +29,16 @@ const { DeleteStatement } = require("../DeleteStatement");
     async exec() {
 
         // TODO: move to exec
-        return new Promise( (resolve, reject ) => (
-            this.knex( this.entity.model.dbTableName )
-                .delete( this.processedRecord )
+        // return new Promise( (resolve, reject ) => (
+        return await this.knex( this.entity.model.dbTableName )
+                .delete()
+                .debug( this.debugOn )
+                .where ( this.processedRecord )
                 // .into( this.entity.model.dbTableName )
                 // .returning( this.entity.model.idField )
-                .then( rows => (rows[0]) )
-                .then( (rec) => ( resolve( rec ) ) )
-        ))
+                // .then( rows => (rows[0]) )
+                // .then( (rec) => ( resolve( rec ) ) )
+        // ))
     }
 
 
@@ -45,7 +47,8 @@ const { DeleteStatement } = require("../DeleteStatement");
         // should handle object link's field values passed 
         // as ObjectLink: { id: xxx, label: 'xxx' }
         // can use this.entity.parse( record )...
-        this.processedRecord = record;
+
+        this.processedRecord = this.toRaw( record );
         return this;
     }
 

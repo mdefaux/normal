@@ -33,6 +33,16 @@ class Statement {
         this.debugOn = true;
         return this;
     }
+
+    toRaw( objectRecord ) {
+
+        let rawEntries = Object.entries( objectRecord )
+            .map( ([fieldName,value]) => (
+                this.entity.model.fields[ fieldName ].toRaw( value )
+            ));
+
+        return Object.fromEntries( rawEntries );
+    }
 }
 
 exports.Statement = Statement;

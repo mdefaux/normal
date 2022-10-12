@@ -1,8 +1,18 @@
+/**Fields models are parts of Entity.
+ * There is a field class for each type of data such as strings, 
+ * numbers, date or ObjectLinks.
+ * ObjectLinks are particular type which value is present to another 
+ * linked Entity, like data base foreign key.
+ * 
+ * 
+ */
 const { FieldAggregationMax } = require("./FieldAggregation");
 const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef, FieldQueryItem } = require("./FieldConditionDef");
 
 
-
+/**Model of a Field
+ * Base class for all field types.
+ */
 class Field {
     constructor(name, type) {
         this.name = name;
@@ -78,6 +88,10 @@ class Field {
             ...this.visibile !== undefined && {visible: this.visible},
             ...this.defaultColumnWidth !== undefined && {defaultColumnWidth: this.defaultColumnWidth},
         }
+    }
+
+    toRaw( value ) {
+        return [ this.sqlSource, value ];
     }
 }
 
