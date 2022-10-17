@@ -150,7 +150,7 @@ class EntityBE {
         // saves temporary ids
         let tempId = record._id;
         delete record._id;
-        delete record[ this.model.idField ];
+        // delete record[ this.model.idField ];
 
         // creates the insert statement
         let insert = this.host.createInsert( this );
@@ -180,6 +180,38 @@ class EntityBE {
         
 
         return r;
+    }
+
+    /**Updates a record
+     * 
+     * @param {*} record 
+     * @returns 
+     */
+    async delete( id ) {
+        
+        // creates the delete statement
+        let delStatement = this.host.createDelete( this );
+
+        if ( Array.isArray( id ) ) {
+            await delStatement.values( id ).exec(); // executes the delete
+        }
+        else {
+            await delStatement.value( id ).exec(); // executes the delete
+        }
+    }
+
+    parse( object ) {
+
+        return Object.entries(object).reduce( 
+            ( prevValue, [currentKey, currentValue] ) => {
+
+                if ( this.model.fields[ currentKey ] ) {
+                    return { ...prevValue, [ currentKey ]: currentValue }
+                }
+                return prevValue;
+            },
+        {} );
+
     }
 
     /**Saves record wheter is already present in db or not.
