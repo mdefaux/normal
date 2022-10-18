@@ -248,17 +248,90 @@ class EntityBE {
         return this.actionDictionary[ actionName ];
     }
 
-    allign( parameters ) {
+  async  allign( parameters ) {
         
         if ( !parameters.source ) {
             throw new Error( `source parameter is mandatory for allign function` );
         }
         let source = parameters.source;
-        let destination = parameters.destination || this.select().pageSize( 500 );
-
+        let destination = parameters.destination || this.select().pageSize( 5);
+console.log('sono nella allign');
         // TODO: alligment procedure
         // ...
         // 
+        let pageA = 1
+        let pageB = 1
+        //il primo array è as400
+        source.page(pageA);
+        let arrayA = await source.exec();
+        console.log(arrayA);
+        //il secondo array è locale
+        destination.page(5,1);
+        let arrayB =   await destination.exec();
+        console.log(arrayB);
+        let arrayI=[];
+       // var arrayI = new Array();
+        let arrayD=[];
+        for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
+        {
+                if( arrayA.length===ia) {
+                    ia = 0
+                    pageA ++;
+                    source.page(pageA);
+                    arrayA = await source.exec();
+                  }
+                
+                if(arrayB.length===ib) {
+                    ib = 0
+                    pageB ++;
+                    destination.page(5,pageB);
+                    arrayB =   await destination.exec();
+
+                    
+                }
+                
+                    if(ib >= arrayB.length && ia >= arrayA.length )
+                    {
+                            break ;
+                    }
+                        if(ia < arrayA.length && ib < arrayB.length && arrayA[ia].CHIAVE === arrayB[ib].CHIAVE) {
+
+                            let recordtoupdate=parameters.columnMap(arrayA[ia]);
+
+
+                            let arrayupdate=Object.entries(recordtoupdate);
+                            let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
+                           // this.update(arrayB[ib].id,arrayA[ia]);
+                            if(shouldupdate){
+                                this.update(arrayB[ib].id,recordtoupdate); 
+                            }
+                           
+                            ia ++;
+                            ib++;
+                        }
+                        else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia].CHIAVE < arrayB[ib].CHIAVE ))  
+                        {
+                    
+                            //  arrayB.splice(ib, 0, arrayA[ia]);
+                                arrayI.push(arrayA[ia]); //inserisco nell'array I gli elementi da aggiungere
+                                ia ++; //verificare se non va aumentato anche ia
+                        }
+                        else { 
+                            //  A>B oppure B è nulla: record da cancellare da B
+                                arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
+
+                                ib ++;
+                            }
+                         
+                    
+     
+           
+        }
+ //manca ancora la delete
+
+     return ;
+     // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
+    //fine funzione
     }
 }
 
