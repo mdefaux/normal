@@ -1,7 +1,7 @@
 # Example application
 
 ## TODO
-Create a db application that uses a PG docker container and builds a model
+Create a backend db application that expose some API. It uses a PG docker container and builds a model
 
 ## How to test library without publishing
 
