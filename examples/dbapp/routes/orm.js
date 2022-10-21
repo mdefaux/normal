@@ -119,9 +119,6 @@ ormGenericRoute.route("/count/:entity/").get((req, res) => {
 
         } );
     ndef +=( `\n  }` );
-
-    // otherDefs.forEach( (od) => console.log( od ) );
-    // console.log( ndef );
   }
 
 // /groupby/:columnName/:recordToExtract/:startingFromIndex

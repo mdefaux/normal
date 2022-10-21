@@ -3,6 +3,7 @@ const { StoreHost } = require('../StoreHost');
 const { KdbInsert } = require('./KdbInsert');
 const { KdbQuery } = require('./KdbQuery');
 const { KdbUpdate } = require('./KdbUpdate');
+const { KdbDelete } = require('./KdbDelete');
 
 class KdbStoreHost extends StoreHost 
 {
@@ -25,7 +26,7 @@ class KdbStoreHost extends StoreHost
     }
 
     createDelete( entity ) {
-        return undefined;
+        return new KdbDelete( entity, this.knex );
     }
 
 }
