@@ -51,7 +51,8 @@ class KdbQuery extends Query {
     readRecord(record) {
         // definizione oggetto vuoto per ogni ObjectLink
         let related_object = {};
-        let columns = this.columns || Object.entries(this.model.fields).map(([, f]) => (f));
+        // let columns = this.columns || Object.entries(this.model.fields).map(([, f]) => (f));
+        let columns = this.columns.length !== 0 ? this.columns : Object.entries(this.model.fields).map(([, f]) => (f));
 
         // Object.entries(this.model.fields)
         columns
@@ -62,7 +63,8 @@ class KdbQuery extends Query {
                 let fieldName = field.name;
                 let r = field.getSelection();
 
-                let fieldKey = `${r.joinedFieldsAlias}.${r.joinTableLabel}`;
+               // let fieldKey = `${r.joinedFieldsAlias}.${r.joinTableLabel}`;
+                let fieldKey = `${r.joinedTableAlias}.${r.joinedFieldsAlias}`;
 
                 // checks if field was already processed... (column was probabily selected twice)
                 if (!record[fieldKey] && related_object[fieldName])
@@ -300,18 +302,18 @@ class KdbQuery extends Query {
 
       
         // handle groupBy
-        if(this.groups && (!fieldsList || fieldsList.length === 0)) {
+        if (this.groups && (!fieldsList || fieldsList.length === 0)) {
             this.groups.forEach(e => {
                 if (e instanceof ObjectLink) {
                     this.selectRelatedDetails(e);
                 }
 
-            field = this.model.fields[e.name];
-            if (!field)
-                throw new Error(`Unknown field '${e}' in entity '${this.model.name}'.`);
+                field = this.model.fields[e.name];
+                if (!field)
+                    throw new Error(`Unknown field '${e}' in entity '${this.model.name}'.`);
 
-            let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
-            this.qb.select(`${tableName}.${field.sqlSource}`);  
+                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+                this.qb.select(`${tableName}.${field.sqlSource}`);
 
 
             });
@@ -329,6 +331,17 @@ class KdbQuery extends Query {
         // if selected filed is empty, takes all columns with *
         if ( fields.length === 0 ) {
             this.qb.select( `${tableName}.*` );
+
+        // if there is any objectLink, add its columns to selection
+            let ObjLinks = Object.entries(this.entity.model.fields).reduce((tot, [k, f]) => { 
+                if(f instanceof ObjectLink) {tot.push(f); }
+                return tot;
+             }, [] );
+
+            ObjLinks.forEach(f => {
+                this.selectRelatedDetails(f);
+            });
+
         }
 
         // checks for field type: select, aggregation, object links...
@@ -378,7 +391,8 @@ class KdbQuery extends Query {
 
     selectRelatedDetails(field) {
         let r = field.getSelection();
-        this.qb.select(`${r.joinedTableAlias}.${r.joinTableLabel} as ${r.joinedFieldsAlias}.${r.joinTableLabel}`);
+        //this.qb.select(`${r.joinedTableAlias}.${r.joinTableLabel} as ${r.joinedFieldsAlias}.${r.joinTableLabel}`);
+        this.qb.select(`${r.joinedTableAlias}.${r.joinTableLabel} as ${r.joinedTableAlias}.${r.joinedFieldsAlias}`);
         this.joinRelated(field);
     }
 
@@ -515,10 +529,14 @@ class KdbQuery extends Query {
         this.buildSorting();
 
 
-        let limit = parseInt(this.limit) || 50;
+        let limit = parseInt(this.limit) >= 0 ? parseInt(this.limit) : 50;
         //  let offset = parseInt(this.pageNumber) > 1 ? (parseInt(limit) * (parseInt(this.pageNumber)-1)) +1 : 0;
         let offset = parseInt(this.offset) || 0;
-        this.qb.limit(limit).offset(offset);
+
+        if(limit !== 0 && offset !== -1) {
+            this.qb.limit(limit).offset(offset);
+        }
+        
         // this.qb.fetchPage({
         //     pageSize: limit, // Defaults to 10 if not specified
         //     page: page, // Defaults to 1 if not specified
@@ -535,6 +553,11 @@ class KdbQuery extends Query {
         return this.qb.then(result => {
             // ottenuto il risultato primario, esegue le query dipendenti
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
+
+            if(this.limit == 0 && this.offset == -1) {
+                return [{COUNT: result.length}];
+            }
+            
             return result.map((rec) => (this.readRecord(rec)));
         })
     }
