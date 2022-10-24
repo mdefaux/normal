@@ -36,6 +36,8 @@ class Statement {
 
     toRaw( objectRecord ) {
 
+        objectRecord = this.entity.parse( objectRecord );
+
         let rawEntries = Object.entries( objectRecord )
             .map( ([fieldName,value]) => (
                 this.entity.model.fields[ fieldName ].toRaw( value )
@@ -45,7 +47,7 @@ class Statement {
     }
 
     value( record ) {
-        this.recordId = id;
+        // this.recordId = id;
         this.processedRecord = this.toRaw( record );
         return this;
     }

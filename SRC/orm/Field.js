@@ -268,6 +268,17 @@ class ObjectLink extends Relation {
             ...this.sourceField !== undefined && {sourceField: this.sourceField},
         }
     }
+    
+
+    toRaw( value ) {
+
+        if ( value.id ) {
+            return [ this.sqlSource, value.id ];
+        }
+        else {
+            return [ this.sqlSource, value ];
+        }
+    }
 }
 class RelatedObjects extends Relation
 {

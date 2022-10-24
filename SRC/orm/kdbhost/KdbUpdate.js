@@ -41,7 +41,8 @@ class KdbUpdate extends UpdateStatement {
 
     value(id, record ) {
         this.recordId = id;
-        this.processedRecord = this.toRaw( record );
+        // this.processedRecord = this.toRaw( record );
+        super.value( record );
         return this;
     }
 
