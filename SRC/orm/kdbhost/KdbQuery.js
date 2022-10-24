@@ -52,7 +52,7 @@ class KdbQuery extends Query {
         // definizione oggetto vuoto per ogni ObjectLink
         let related_object = {};
         // let columns = this.columns || Object.entries(this.model.fields).map(([, f]) => (f));
-        let columns = this.columns.length !== 0 ? this.columns : Object.entries(this.model.fields).map(([, f]) => (f));
+        let columns = this.columns?.length > 0 ? this.columns : Object.entries(this.model.fields).map(([, f]) => (f));
 
         // Object.entries(this.model.fields)
         columns
