@@ -483,7 +483,7 @@ class KdbQuery extends Query {
     }
 
     page(limit, offset) {
-        this.limit = limit || 5;
+        this.limit = limit || 50;
         this.offset = parseInt(offset-1) || 0;
 
         return this;
