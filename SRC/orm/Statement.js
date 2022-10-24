@@ -43,6 +43,12 @@ class Statement {
 
         return Object.fromEntries( rawEntries );
     }
+
+    value( record ) {
+        this.recordId = id;
+        this.processedRecord = this.toRaw( record );
+        return this;
+    }
 }
 
 exports.Statement = Statement;
