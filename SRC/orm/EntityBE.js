@@ -160,12 +160,9 @@ class EntityBE {
         // creates the insert statement
         let insert = this.host.createInsert( this );
         let newId = await insert.value( record ).exec(); // executes the insert
-console.log('faccio vedere il nuovo id');
-        console.log(newId);
+
         // after getting the new id, queries the new record
         let r = await this.getRecord( newId );
-console.log('vediamo sta R!!');
-        console.log(r);
         return { ...r, _id: tempId };
     }
 
