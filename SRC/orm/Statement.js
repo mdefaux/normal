@@ -47,8 +47,15 @@ class Statement {
     }
 
     value( record ) {
-        // this.recordId = id;
-        this.processedRecord = this.toRaw( record );
+        // checks if array is passed
+        if ( Array.isArray( record ) ) {
+            this.processedRecord = record.map( (r) => (
+                this.toRaw( r )
+            ));
+        }
+        else {
+            this.processedRecord = this.toRaw( record );
+        }
         return this;
     }
 }
