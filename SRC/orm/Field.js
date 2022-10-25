@@ -272,7 +272,7 @@ class ObjectLink extends Relation {
 
     toRaw( value ) {
 
-        if ( value.id ) {
+        if ( value?.id !== undefined ) {
             return [ this.sqlSource, value.id ];
         }
         else {
