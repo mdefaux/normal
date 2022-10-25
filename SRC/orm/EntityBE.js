@@ -204,13 +204,27 @@ class EntityBE {
         }
     }
 
-    parse( object ) {
+    parse( object, parserData ) {
 
         return Object.entries(object).reduce( 
             ( prevValue, [currentKey, currentValue] ) => {
 
                 if ( this.model.fields[ currentKey ] ) {
                     return { ...prevValue, [ currentKey ]: currentValue }
+                }
+
+                let [,field] = Object.entries( this.model.fields )
+                    .find( ([,f])=> (f.sourceField === currentKey) );
+
+                if ( field ) {
+                    return { ...prevValue, [ field.name ]: currentValue }
+                }
+
+                if ( parserData?.unknownFields ) {
+                    parserData.unknownFields.push( { name: currentKey, value: currentValue } )
+                }
+                else if ( ! parserData?.ignoreUnknownField ) {
+                    throw new Error( `Unknown field '${currentKey}' value '${currentValue}', in entity '${this.name}'.`)
                 }
                 return prevValue;
             },
