@@ -1,11 +1,16 @@
-class KdbUpdate /*extends InsertStatement */ {
+const { UpdateStatement } = require("../UpdateStatement");
+
+/**Knex Update
+ * 
+ */
+class KdbUpdate extends UpdateStatement {
 
     constructor( entity, knex ) {
-        // super( entity );
+        super( entity );
         this.knex = knex;
-        this.entity = entity;
+        // this.entity = entity;
 
-        this.setup();
+        // this.setup();
     }
 
 
@@ -13,7 +18,7 @@ class KdbUpdate /*extends InsertStatement */ {
         
     }
 
-    then(callback/* , returning */) {
+    async exec( ) {
     
         let rowId = typeof this.recordId === 'object' ? this.recordId : {
             id: this.recordId
@@ -26,26 +31,18 @@ class KdbUpdate /*extends InsertStatement */ {
             rowId = this.recordId;
         }
 
-        return new Promise( (resolve, reject ) => (
-            this.knex( this.entity.model.dbTableName)
-                .where(rowId)
-                .update(this.processedRecord /* , returning */)
-                .then( 
-                    rows => (rows[0]) )
-                .then( (rec) => (
-                     resolve( callback ? callback(rec) : rec ) ) )
-        ))
+        return await this.knex( this.entity.model.dbTableName )
+            .where(rowId)
+            .update(this.processedRecord /* , returning */)
+            .debug( this.debugOn )
+            .then( 
+                rows => (rows[0]) )
     }
 
-    exec(/* returning */){
-     //   if(!returning ||  returning.length === 0) returning = this.getDefaultSelectFields();
-        return this.then(null /*, returning */);
-    }
-
-    value(id, record )
-    {
+    value(id, record ) {
         this.recordId = id;
-        this.processedRecord = record;
+        // this.processedRecord = this.toRaw( record );
+        super.value( record );
         return this;
     }
 

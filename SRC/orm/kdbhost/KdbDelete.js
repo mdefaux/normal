@@ -15,7 +15,7 @@ const { DeleteStatement } = require("../DeleteStatement");
         // keeps knex reference to create the knex statement
         this.knex = knex;
 
-        this.setup();
+        // this.setup();
     }
 
 
@@ -34,6 +34,7 @@ const { DeleteStatement } = require("../DeleteStatement");
                 .delete()
                 .debug( this.debugOn )
                 .where ( this.processedRecord )
+                .then()
                 // .into( this.entity.model.dbTableName )
                 // .returning( this.entity.model.idField )
                 // .then( rows => (rows[0]) )

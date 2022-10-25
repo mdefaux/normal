@@ -261,17 +261,18 @@ class ModelDef {
         //     queryFactory: newRelation
         // }
 
-        let relationDefinitor = {
-            select: ( selectCallback ) => { 
-                newRelation.select = selectCallback
-            }
-        };
+        // let relationDefinitor = {
+        //     select: ( selectCallback ) => { 
+        //         newRelation.select = selectCallback
+        //     }
+        // };
 
-        factoryCallback( relationDefinitor );
+        // factoryCallback( relationDefinitor );
 
         this.entity.metaData.relations = {
             ...this.entity.metaData.relations,
-            [ relationName ]: newRelation
+            [ relationName ]: factoryCallback
+            // [ relationName ]: newRelation
         }
     }
 

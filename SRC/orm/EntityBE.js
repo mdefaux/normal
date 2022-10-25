@@ -3,6 +3,8 @@
  * 
  */
 
+const { RelationEntity } = require("./RelationEntity");
+
 class EntityBE {
     /**
      *
@@ -96,10 +98,12 @@ class EntityBE {
         if ( !queryFactory ) {
             throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
         }
-        if ( !queryFactory.select ) {
-            throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
-        }
-        let relationQuery = queryFactory; // .select();
+        // if ( !queryFactory.select ) {
+        //     throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+        // }
+        let newRelation = new RelationEntity();
+        let relationQuery = queryFactory( newRelation, this ); // .select();
+        return newRelation;
 
         if ( !relationQuery ) {
             throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
