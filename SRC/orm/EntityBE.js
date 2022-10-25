@@ -151,14 +151,17 @@ class EntityBE {
         let tempId = record._id;
         delete record._id;
         // delete record[ this.model.idField ];
+//array.isArray per fare controllo se è un array
 
         // creates the insert statement
         let insert = this.host.createInsert( this );
         let newId = await insert.value( record ).exec(); // executes the insert
-
+console.log('faccio vedere il nuovo id');
+        console.log(newId);
         // after getting the new id, queries the new record
         let r = await this.getRecord( newId );
-
+console.log('vediamo sta R!!');
+        console.log(r);
         return { ...r, _id: tempId };
     }
 
@@ -264,17 +267,17 @@ console.log('sono nella allign');
         //il primo array è as400
         source.page(pageA);
         let arrayA = await source.exec();
-        console.log(arrayA);
+       // console.log(arrayA);
         //il secondo array è locale
         destination.page(5,1);
         let arrayB =   await destination.exec();
-        console.log(arrayB);
+      //  console.log(arrayB);
         let arrayI=[];
        // var arrayI = new Array();
         let arrayD=[];
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
-                if( arrayA.length===ia) {
+                if( arrayA.length===ia && arrayI.length<=100 ) {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
@@ -292,6 +295,8 @@ console.log('sono nella allign');
                 
                     if(ib >= arrayB.length && ia >= arrayA.length )
                     {
+                    //    console.log('break');
+                    //    console.log(ii);
                             break ;
                     }
                         if(ia < arrayA.length && ib < arrayB.length && arrayA[ia].CHIAVE === arrayB[ib].CHIAVE) {
@@ -328,7 +333,9 @@ console.log('sono nella allign');
            
         }
  //manca ancora la delete
-
+ console.log('faccio la insert');
+   //  console.log(arrayI);
+     this.insert(arrayI);
      return ;
      // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
     //fine funzione
