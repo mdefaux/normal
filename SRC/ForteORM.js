@@ -126,9 +126,15 @@ class ModelDef {
         return this.model.fields[ fieldName ];
     }
 
-    label( fieldName )
-    {
+    label( fieldName ) {
+
+        if ( !this.model.fields[ fieldName ] ) {
+            this.string( fieldName );
+        }
+
         this.model.labelField = fieldName;
+
+        return this.model.fields[ fieldName ];
     }
 
     string( fieldName )
