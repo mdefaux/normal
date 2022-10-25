@@ -213,8 +213,9 @@ class EntityBE {
                     return { ...prevValue, [ currentKey ]: currentValue }
                 }
 
-                let [,field] = Object.entries( this.model.fields )
-                    .find( ([,f])=> (f.sourceField === currentKey) );
+                let field = Object.entries( this.model.fields )
+                    .map( ([,f]) => f )
+                    .find( f => (f.sourceField === currentKey) );
 
                 if ( field ) {
                     return { ...prevValue, [ field.name ]: currentValue }
