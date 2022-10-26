@@ -293,7 +293,7 @@ console.log('sono nella allign');
         let arrayD=[];
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
-                if( arrayA.length===ia && arrayI.length<=100 ) {
+                if( arrayA.length===ia) {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
