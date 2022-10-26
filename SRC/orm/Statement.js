@@ -58,6 +58,17 @@ class Statement {
         }
         return this;
     }
+
+    externalParameters ( externals ) {
+        if ( !externals ) {
+            return this;
+        }
+        if ( typeof externals !== 'object' ) {
+            throw new Error( `External parameters should be an object with key-values.` );
+        }
+        this.externals = { ...this.externals || {}, ...externals };
+        return this;
+    }
 }
 
 exports.Statement = Statement;
