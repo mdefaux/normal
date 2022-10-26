@@ -282,6 +282,10 @@ class ModelDef {
         }
     }
 
+    select( createSelectCallback ) {
+        this.entity.metaData.createSelectCallback = createSelectCallback;
+    }
+
 }
 
 class EntityProxy extends EntityBE

@@ -57,13 +57,18 @@ class EntityBE {
         );
     }
 
-    createQuery() {
+    createQuery( externalParameters ) {
         // TODO: host should create/factory for query 
         // TODO: use storage query if entity is marked 'local storage'
         if ( this.storage ) {
             return this.storage.createQuery( this );
         }
-        // return new KdbQuery(this);
+
+        if ( this.metaData.createSelectCallback ) {
+            return this.metaData.createSelectCallback( 
+                this.host.createQuery( this ), externalParameters );
+        }
+
         return this.host.createQuery( this );
     }
 
