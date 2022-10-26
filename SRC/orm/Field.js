@@ -272,7 +272,9 @@ class ObjectLink extends Relation {
 
     toRaw( value ) {
 
+        // TODO: check if value is an object
         if ( value?.id !== undefined ) {
+            // TODO: use the 'id' name
             return [ this.sqlSource, value.id ];
         }
         else {
@@ -280,6 +282,10 @@ class ObjectLink extends Relation {
         }
     }
 }
+
+/**TODO:
+ * 
+ */
 class RelatedObjects extends Relation
 {
     constructor(name, factory, tableModel)
@@ -294,6 +300,10 @@ class RelatedObjects extends Relation
         return this;
     }
 }
+
+/**TODO:
+ * 
+ */
 class PartsOf extends RelatedObjects
 {
     constructor(name, factory, tableModel)
