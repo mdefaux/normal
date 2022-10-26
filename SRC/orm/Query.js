@@ -1,6 +1,8 @@
 // var = require('../../db/knex');
 // const { ObjectLink, FieldConditionDef, Field, FieldAggregation } = require("../ForteORM");
 
+const { Statement } = require("./Statement");
+
 
 /**Oggetto per creare una query ed ottenere un recordset.
  * La query viene creata dalla Entity invocando i metodi
@@ -16,10 +18,11 @@
  *
  *
  */
-class Query {
+class Query extends Statement {
 
   constructor(entity) {
-    this.entity = entity;
+    super( entity );
+    // this.entity = entity;
     this.model = entity.model;
     this.factory = entity.factory;
     
@@ -29,8 +32,6 @@ class Query {
     this.groups = false;
     this.orderedColumns = [];
     this.range = { start: 0, size: 50 };
-
-    this.setup();
   }
 
   setup() {
