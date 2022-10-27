@@ -93,6 +93,25 @@ class Field {
     toRaw( value ) {
         return [ this.sqlSource, value ];
     }
+
+    parseValue( value ) {
+        return value;
+    }
+
+    equalValues( valueA, valueB ) {
+        return this.parseValue( valueA ) === this.parseValue( valueB );
+    }
+
+    compareValues( valueA, valueB ) {
+        if ( this.equalsValue( valueA, valueB ) ) {
+            return 0;
+        }
+        if ( this.parseValue( valueA ) < this.parseValue( valueB ) ) {
+            return -1;
+        }
+        // if ( this.parseValue( valueA ) > this.parseValue( valueB ) ) {
+        return 1;
+    }
 }
 
 class PrimaryKeyField extends Field
