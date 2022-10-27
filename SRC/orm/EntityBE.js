@@ -328,7 +328,9 @@ console.log('sono nella allign');
                     let arrayupdate=Object.entries(recordtoupdate);
                    // let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
                     let shouldupdate= arrayupdate.reduce((accumulator, [fieldName,fieldvalue]) => {
-                        if(fieldvalue !== arrayB[ib][fieldName]) return [...accumulator, {fieldName: fieldName, srcValue: fieldvalue, destValue: arrayB[ib][fieldName] }]
+                        let field = this.model.fields[fieldName];
+
+                        if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: fieldvalue, destValue: arrayB[ib][fieldName] }]
                         return accumulator;
                     }, []);
                     // this.update(arrayB[ib].id,arrayA[ia]);
