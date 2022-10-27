@@ -303,7 +303,7 @@ console.log('sono nella allign');
                     pageA ++;
                     source.page(pageA);
                     arrayA = await source.exec();
-                  }
+                }
                 
                 if(arrayB.length===ib) {
                     ib = 0
@@ -314,40 +314,44 @@ console.log('sono nella allign');
                     
                 }
                 
-                    if(ib >= arrayB.length && ia >= arrayA.length )
-                    {
-                    //    console.log('break');
-                    //    console.log(ii);
-                            break ;
+                if(ib >= arrayB.length && ia >= arrayA.length )
+                {
+                //    console.log('break');
+                //    console.log(ii);
+                        break ;
+                }
+                if(ia < arrayA.length && ib < arrayB.length && arrayA[ia].CHIAVE === arrayB[ib].CHIAVE) {
+
+                    let recordtoupdate=parameters.columnMap(arrayA[ia]);
+
+
+                    let arrayupdate=Object.entries(recordtoupdate);
+                   // let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
+                    let shouldupdate= arrayupdate.reduce((accumulator, [fieldName,fieldvalue]) => {
+                        if(fieldvalue !== arrayB[ib][fieldName]) return [...accumulator, {fieldName: fieldName, srcValue: fieldvalue, destValue: arrayB[ib][fieldName] }]
+                        return accumulator;
+                    }, []);
+                    // this.update(arrayB[ib].id,arrayA[ia]);
+                    if(shouldupdate.length > 0){
+                        this.update(arrayB[ib].id,recordtoupdate); 
                     }
-                        if(ia < arrayA.length && ib < arrayB.length && arrayA[ia].CHIAVE === arrayB[ib].CHIAVE) {
-
-                            let recordtoupdate=parameters.columnMap(arrayA[ia]);
-
-
-                            let arrayupdate=Object.entries(recordtoupdate);
-                            let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
-                           // this.update(arrayB[ib].id,arrayA[ia]);
-                            if(shouldupdate){
-                                this.update(arrayB[ib].id,recordtoupdate); 
-                            }
-                           
-                            ia ++;
-                            ib++;
-                        }
-                        else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia].CHIAVE < arrayB[ib].CHIAVE ))  
-                        {
                     
-                            //  arrayB.splice(ib, 0, arrayA[ia]);
-                                arrayI.push(arrayA[ia]); //inserisco nell'array I gli elementi da aggiungere
-                                ia ++; //verificare se non va aumentato anche ia
-                        }
-                        else { 
-                            //  A>B oppure B è nulla: record da cancellare da B
-                                arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
+                    ia ++;
+                    ib++;
+                }
+                else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia].CHIAVE < arrayB[ib].CHIAVE ))  
+                {
+            
+                    //  arrayB.splice(ib, 0, arrayA[ia]);
+                        arrayI.push(arrayA[ia]); //inserisco nell'array I gli elementi da aggiungere
+                        ia ++; //verificare se non va aumentato anche ia
+                }
+                else { 
+                    //  A>B oppure B è nulla: record da cancellare da B
+                        arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
 
-                                ib ++;
-                            }
+                        ib ++;
+                    }
                          
                     
      
