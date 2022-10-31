@@ -60,6 +60,13 @@ class FieldConditionDef {
         this.query = query;
     }
 
+    createChained() {
+        let chained = new FieldConditionDef();
+        chained.tableAlias = this.tableAlias;
+        chained.query = this.query;
+        return chained;
+    }
+
     apply ( query ) {
 
         if ( !this.field ) {
@@ -108,6 +115,72 @@ class FieldConditionDef {
         this.columnName= reqField;
         this.value= reqValue;
         return this;
+    }
+
+    in(arrayOrFunction) {
+        if (Array.isArray(arrayOrFunction)) {
+            if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
+                arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
+            }
+        }
+
+        this.type = 'in';
+        this.value = arrayOrFunction;
+        return this;
+    }
+
+    equals(objectOrFunction) {
+        // return new FieldConditionDef("=", this, objectOrFunction);
+        this.type = '=';
+        this.value = objectOrFunction;
+        return this;
+    }
+
+    greaterThan(objectOrFunction) {
+        // return new FieldConditionDef(">", this, objectOrFunction);
+        this.type = '>';
+        this.value = objectOrFunction;
+        return this;
+    }
+
+    isNull() {
+        // TODO: implement
+        assert ( false );
+        return new IsNullFieldConditionDef("is null", this, undefined);
+    }
+    
+
+    isNotNull() {
+        // TODO: implement
+        assert ( false );
+        return new IsNotNullFieldConditionDef("is not null", this, undefined);
+    }
+
+    get or() {
+
+        let chained = this.createChained();
+        chained.chainedCondition = {
+            op: 'or', next: this
+        }
+        return chained.createProxy();
+    }
+
+    createProxy() {
+
+        return new Proxy( this, {
+            get ( target, prop, receiver ) {
+
+                if ( target.model?.fields[ prop ] ) {
+                    target.field = target.model?.fields[ prop ];
+                }
+                else {
+                    target.columnName = prop;
+                }
+
+                return target;
+            }
+
+        })
     }
 }
 

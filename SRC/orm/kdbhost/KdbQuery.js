@@ -164,29 +164,56 @@ class KdbQuery extends Query {
         return this;
     }
 
-    applyWhereCondition(builtCondition) {
+    applyWhereCondition(builtCondition, qb, whereOp ) {
 
         if (builtCondition instanceof FieldConditionDef) {
+
+            if ( builtCondition.chainedCondition ) {
+                // const unchain = function( start, accumulator ) {
+                //     let next = start.chainedCondition;
+
+                //     return [...accumulator, start, ...unchain( )]
+                // }
+                // let chain = unchain( builtCondition, [] );
+                let chain = [ builtCondition, builtCondition.chainedCondition.next ];
+                // https://github.com/knex/knex/issues/2410
+                // qb
+                // .where('status', status.uuid)
+                // .andWhere((qB) => 
+                //     qB
+                //     .where('firstName', 'ilike', `%${q}%`)
+                //     .orWhere('lastName', 'ilike', `%${q}%`)
+                // )
+                chain[ 0 ].chainedCondition = undefined;
+                
+                qb.andWhere( (qB) => {
+                    chain.forEach( (c) => {
+                        this.applyWhereCondition( c, qB, 'or' );
+                    })
+                })
+                return this;
+            }
 
             builtCondition.apply( this );
             let value = typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
                 this.knex.raw(builtCondition.sqlValue(this)) :
                 builtCondition.sqlValue(this);
 
+
             
             if (builtCondition instanceof IsNullFieldConditionDef) {
 
-                this.qb.whereNull( builtCondition.sqlField(this) );
+                qb.whereNull( builtCondition.sqlField(this) );
             }
             else if (builtCondition instanceof IsNotNullFieldConditionDef) {
 
-                this.qb.whereNotNull( builtCondition.sqlField(this) );
+                qb.whereNotNull( builtCondition.sqlField(this) );
             }
             else if (builtCondition instanceof FieldCondition.textMatch) {
 
                 let viewAlias = builtCondition.field.sourceAlias;
 
-                this.qb.where(
+                qb.where(
                     this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
                     // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                     builtCondition.type,
@@ -195,18 +222,29 @@ class KdbQuery extends Query {
                 );
             }
             else {
-                this.qb.where(
-                    builtCondition.sqlField(this),
-                    builtCondition.type,
-                    typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
-                        this.knex.raw(builtCondition.sqlValue(this)) :
-                        builtCondition.sqlValue(this)
-                );
+                if ( whereOp === 'or' ) {
+                    qb.orWhere(
+                        builtCondition.sqlField(this),
+                        builtCondition.type,
+                        typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                            this.knex.raw(builtCondition.sqlValue(this)) :
+                            builtCondition.sqlValue(this)
+                    );
+                }
+                else {
+                    qb.where(
+                        builtCondition.sqlField(this),
+                        builtCondition.type,
+                        typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                            this.knex.raw(builtCondition.sqlValue(this)) :
+                            builtCondition.sqlValue(this)
+                    );
+                }
             }
         }
 
         else {
-            this.qb.where(builtCondition);
+            qb.where(builtCondition);
         }
 
         return this;
@@ -519,7 +557,7 @@ class KdbQuery extends Query {
 
         // builds filter condition
         this.builtCondition?.forEach( (bc) => {
-            this.applyWhereCondition(bc);
+            this.applyWhereCondition(bc, this.qb);
         });
 
         // builds select clause
@@ -555,6 +593,10 @@ class KdbQuery extends Query {
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
 
             if(this.limit == 0 && this.offset == -1) {
+                if ( result[0]?.COUNT !== undefined ) {
+                    return result;
+                }
+
                 return [{COUNT: result.length}];
             }
             

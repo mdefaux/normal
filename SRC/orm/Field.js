@@ -93,6 +93,25 @@ class Field {
     toRaw( value ) {
         return [ this.sqlSource, value ];
     }
+
+    parseValue( value ) {
+        return value;
+    }
+
+    equalValues( valueA, valueB ) {
+        return this.parseValue( valueA ) === this.parseValue( valueB );
+    }
+
+    compareValues( valueA, valueB ) {
+        if ( this.equalsValue( valueA, valueB ) ) {
+            return 0;
+        }
+        if ( this.parseValue( valueA ) < this.parseValue( valueB ) ) {
+            return -1;
+        }
+        // if ( this.parseValue( valueA ) > this.parseValue( valueB ) ) {
+        return 1;
+    }
 }
 
 class PrimaryKeyField extends Field
@@ -118,6 +137,45 @@ class DateField extends Field
     {
         super(name, "Date");
     }
+
+    parseValue( value ) {
+        if(value === null) return null;
+        if( !value ) return null;
+
+        let dt = null;
+        if( typeof value === 'string' )
+        {
+            let dtm;
+            if( dtm = value.match( /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/ ) )
+            {
+                return new Date( dtm[3], dtm[2]-1, dtm[1] );
+            }
+            else if( dtm = value.match( /^(\d{1,2})[\/\-\.](\d{1,2})/ ) )
+            {
+                return new Date( new Date().getFullYear(), 
+                    dtm[2]-1, dtm[1] );
+            }
+            else if( dtm = value.match( /(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/ ) )
+            {
+                return new Date( dtm[1], dtm[2]-1, dtm[3] );
+            }
+            return null;
+        }
+        dt = new Date(value);
+
+        if( !this.timeEnabled )
+        {
+            dt.setHours(0,0,0,0);
+        }
+
+        return dt;
+    
+    }
+
+    equalValues( valueA, valueB ) {
+        return this.parseValue( valueA )?.getTime() === this.parseValue( valueB )?.getTime();
+    }
+
 }
 class NumberField extends Field
 {
