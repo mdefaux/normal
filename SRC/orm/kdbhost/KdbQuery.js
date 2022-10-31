@@ -593,6 +593,10 @@ class KdbQuery extends Query {
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
 
             if(this.limit == 0 && this.offset == -1) {
+                if ( result[0]?.COUNT !== undefined ) {
+                    return result;
+                }
+
                 return [{COUNT: result.length}];
             }
             
