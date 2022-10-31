@@ -290,7 +290,7 @@ console.log('sono nella allign');
         let arrayA = await source.exec();
        // console.log(arrayA);
         //il secondo array è locale
-        destination.page(5,1);
+        destination.page(500,1);
         let arrayB =   await destination.exec();
       //  console.log(arrayB);
         let arrayI=[];
@@ -302,13 +302,14 @@ console.log('sono nella allign');
                     ia = 0
                     pageA ++;
                     source.page(pageA);
+                    console.log('righe AS400:' + pageA*500);
                     arrayA = await source.exec();
                 }
                 
                 if(arrayB.length===ib) {
                     ib = 0
                     pageB ++;
-                    destination.page(5,pageB);
+                    destination.page(500,pageB);
                     arrayB =   await destination.exec();
 
                     
