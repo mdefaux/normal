@@ -214,7 +214,7 @@ class KdbQuery extends Query {
                 let viewAlias = builtCondition.field.sourceAlias;
 
                 qb.where(
-                    this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
+                    this.knex.raw( `UPPER( \`${viewAlias}\`.\`${builtCondition.field.name}\` )` ),
                     // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                     builtCondition.type,
                     typeof value === 'string' ? value.toUpperCase() :
