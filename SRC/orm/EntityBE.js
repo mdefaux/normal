@@ -283,8 +283,8 @@ console.log('sono nella allign');
         // TODO: alligment procedure
         // ...
         // 
-        let pageA = 1
-        let pageB = 1
+        let pageA = 1;
+        let pageB = 0;
         //il primo array è as400
         source.page(pageA);
         let arrayA = await source.exec();
@@ -296,20 +296,26 @@ console.log('sono nella allign');
         let arrayI=[];
        // var arrayI = new Array();
         let arrayD=[];
+        let insertcount=0;
+        let updatecount=0;
+        let deletecount=0;
+
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
                 if( arrayA.length===ia) {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
-                    console.log('righe AS400:' + pageA*500);
+                    console.log('righe AS400:' + pageA*500 , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
                     arrayA = await source.exec();
                 }
                 
                 if(arrayB.length===ib) {
                     ib = 0
                     pageB ++;
-                    destination.page(500,pageB);
+                    let offset=(pageB*500)+1;
+                    destination.page(500,offset);
+                    console.log('offset arrayb:' + offset);
                     arrayB =   await destination.exec();
 
                     
@@ -337,6 +343,7 @@ console.log('sono nella allign');
                     // this.update(arrayB[ib].id,arrayA[ia]);
                     if(shouldupdate.length > 0){
                         this.update(arrayB[ib].id,recordtoupdate); 
+                        updatecount ++ ;
                     }
                     
                     ia ++;
@@ -347,12 +354,13 @@ console.log('sono nella allign');
             
                     //  arrayB.splice(ib, 0, arrayA[ia]);
                         arrayI.push(arrayA[ia]); //inserisco nell'array I gli elementi da aggiungere
+                        insertcount ++;
                         ia ++; //verificare se non va aumentato anche ia
                 }
                 else { 
                     //  A>B oppure B è nulla: record da cancellare da B
                         arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
-
+                        deletecount ++;
                         ib ++;
                     }
                          
@@ -361,6 +369,8 @@ console.log('sono nella allign');
            
         }
  //manca ancora la delete
+ console.log('faccio la delete');
+     this.delete(arrayD);
  console.log('faccio la insert');
    //  console.log(arrayI);
      this.insert(arrayI);
