@@ -18,7 +18,7 @@ class KdbUpdate extends UpdateStatement {
         
     }
 
-    async exec( ) {
+    async execute( ) {
     
         let rowId = typeof this.recordId === 'object' ? this.recordId : {
             id: this.recordId

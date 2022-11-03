@@ -582,7 +582,7 @@ class KdbQuery extends Query {
         //   })
     }
 
-    async exec() {
+    async execute() {
         if ( this.beforeExecCallback ) {
             await this.beforeExecCallback( this );
         }

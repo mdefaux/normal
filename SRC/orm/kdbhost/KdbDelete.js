@@ -26,9 +26,9 @@ const { DeleteStatement } = require("../DeleteStatement");
     /**Creates the knex statment and configure it
      *  
      */ 
-    async exec() {
+    async execute() {
 
-        // TODO: move to exec
+        // 
         // return new Promise( (resolve, reject ) => (
         return await this.knex( this.entity.model.dbTableName )
                 .delete()

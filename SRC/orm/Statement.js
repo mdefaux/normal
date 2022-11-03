@@ -19,9 +19,12 @@ class Statement {
         
     }
 
-    // TODO: 'then' should call 'exec'
+    // TODO: 'exec' should call 'execute'
     async exec(){
-        return this;
+
+        // TODO: call before exec
+
+        return this.execute();
     }
 
     then(callback) {
