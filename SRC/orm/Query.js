@@ -116,9 +116,9 @@ class Query extends Statement {
   }
   
   async execute() {
-    if ( this.beforeExecCallback ) {
-        await this.beforeExecCallback( this );
-    }
+    // if ( this.beforeExecCallback ) {
+    //     await this.beforeExecCallback( this );
+    // }
     // 
     if( !this.dataStorage )
       return undefined;

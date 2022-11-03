@@ -583,10 +583,6 @@ class KdbQuery extends Query {
     }
 
     async execute() {
-        if ( this.beforeExecCallback ) {
-            await this.beforeExecCallback( this );
-        }
-        this.build();
 
         return this.qb.then(result => {
             // ottenuto il risultato primario, esegue le query dipendenti

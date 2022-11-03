@@ -19,10 +19,24 @@ class Statement {
         
     }
 
+    /**Method to override for specific build
+     * 
+     */
+    build () {}
+
+    /**Method to override for specific execution
+     * 
+     */
+    execute () {}
+
     // TODO: 'exec' should call 'execute'
     async exec(){
 
         // TODO: call before exec
+        if ( this.beforeExecCallback ) {
+            await this.beforeExecCallback( this );
+        }
+        this.build();
 
         return this.execute();
     }
