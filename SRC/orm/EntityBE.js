@@ -272,14 +272,14 @@ class EntityBE {
         return this.actionDictionary[ actionName ];
     }
 
-  async  allign( parameters ) {
+    async  allign( parameters ) {
         
         if ( !parameters.source ) {
             throw new Error( `source parameter is mandatory for allign function` );
         }
         let source = parameters.source;
         let destination = parameters.destination || this.select().pageSize( 5);
-console.log('sono nella allign');
+        console.log('sono nella allign');
         // TODO: alligment procedure
         // ...
         // 
@@ -288,20 +288,21 @@ console.log('sono nella allign');
         //il primo array è as400
         source.page(pageA);
         let arrayA = await source.exec();
-       // console.log(arrayA);
+        // console.log(arrayA);
         //il secondo array è locale
-        destination.page(500,1);
+        let pageSize = 500;
+        destination.page(pageSize);
         let arrayB =   await destination.exec();
-      //  console.log(arrayB);
+        //  console.log(arrayB);
         let arrayI=[];
-       // var arrayI = new Array();
+        // var arrayI = new Array();
         let arrayD=[];
         let insertcount=0;
         let updatecount=0;
         let deletecount=0;
 
-        for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
-        {
+            for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
+            {
                 if( arrayA.length===ia) {
                     ia = 0
                     pageA ++;
@@ -313,12 +314,11 @@ console.log('sono nella allign');
                 if(arrayB.length===ib) {
                     ib = 0
                     pageB ++;
-                    let offset=(pageB*500)+1;
-                    destination.page(500,offset);
+                    let offset=(pageB*pageSize)+1;
+                    destination.page(pageSize,offset);
                     console.log('offset arrayb:' + offset);
                     arrayB =   await destination.exec();
 
-                    
                 }
                 
                 if(ib >= arrayB.length && ia >= arrayA.length )
@@ -327,15 +327,33 @@ console.log('sono nella allign');
                 //    console.log(ii);
                         break ;
                 }
+
+                
+                // 
+                let sourceRecord = arrayA[ia];
+                if(parameters.columnMap) sourceRecord = parameters.columnMap(arrayA[ia]);
+                if(parameters.parseValue) {
+                    let keys = Object.keys(sourceRecord);
+                    keys.forEach(key => {
+                        sourceRecord[key] = parameters.parseValue(sourceRecord[key]);
+                    })
+                }
+
+
                 if(ia < arrayA.length && ib < arrayB.length && arrayA[ia].CHIAVE === arrayB[ib].CHIAVE) {
 
-                    let recordtoupdate=parameters.columnMap(arrayA[ia]);
+                // let recordtoupdate=parameters.columnMap(arrayA[ia]);
 
 
-                    let arrayupdate=Object.entries(recordtoupdate);
-                   // let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
+                // let arrayupdate=Object.entries(recordtoupdate);
+                    let arrayupdate=Object.entries(sourceRecord);
+                // let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
                     let shouldupdate= arrayupdate.reduce((accumulator, [fieldName,fieldvalue]) => {
                         let field = this.model.fields[fieldName];
+
+                    //   let value = fieldvalue;
+
+                    //    if (parameters.parseValue) value = parameters.parseValue(fieldvalue);
 
                         if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: fieldvalue, destValue: arrayB[ib][fieldName] }]
                         return accumulator;
@@ -353,31 +371,34 @@ console.log('sono nella allign');
                 {
             
                     //  arrayB.splice(ib, 0, arrayA[ia]);
-                        arrayI.push(arrayA[ia]); //inserisco nell'array I gli elementi da aggiungere
-                        insertcount ++;
-                        ia ++; //verificare se non va aumentato anche ia
+                    //    arrayI.push(arrayA[ia]); //inserisco nell'array I gli elementi da aggiungere
+                    arrayI.push(sourceRecord); //inserisco nell'array I gli elementi da aggiungere
+                    insertcount ++;
+                    ia ++; //verificare se non va aumentato anche ia
                 }
                 else { 
                     //  A>B oppure B è nulla: record da cancellare da B
-                        arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
-                        deletecount ++;
-                        ib ++;
+                    //    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
+                    //    arrayD.push(sourceRecord[this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                    arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                    deletecount ++;
+                    ib ++;
                     }
-                         
-                    
-     
-           
+                            
+                        
+        
+            
+            }
+        //manca ancora la delete
+        console.log('faccio la delete');
+        this.delete(arrayD);
+        console.log('faccio la insert');
+        //  console.log(arrayI);
+        this.insert(arrayI);
+        return ;
+        // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
+        //fine funzione
         }
- //manca ancora la delete
- console.log('faccio la delete');
-     this.delete(arrayD);
- console.log('faccio la insert');
-   //  console.log(arrayI);
-     this.insert(arrayI);
-     return ;
-     // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
-    //fine funzione
-    }
 }
 
 exports.EntityBE = EntityBE;
