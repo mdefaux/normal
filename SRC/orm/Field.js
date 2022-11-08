@@ -47,13 +47,18 @@ class Field {
     }
 
     in(arrayOrFunction) {
-        if (Array.isArray(arrayOrFunction)) {
-            if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
-                arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
-            }
-        }
+        // if (Array.isArray(arrayOrFunction)) {
+        //     if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
+        //         arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
+        //     }
+        // }
 
-        return new FieldConditionDef("in", this, arrayOrFunction);
+        // return new FieldConditionDef("in", this, arrayOrFunction);
+        return new FieldConditionDef(undefined, this).in( arrayOrFunction );
+    }
+
+    notIn(arrayOrFunction) {
+        return new FieldConditionDef(undefined, this).notIn( arrayOrFunction );
     }
 
     equals(objectOrFunction) {

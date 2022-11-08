@@ -129,6 +129,18 @@ class FieldConditionDef {
         return this;
     }
 
+    notIn(arrayOrFunction) {
+        if (Array.isArray(arrayOrFunction)) {
+            if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
+                arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
+            }
+        }
+
+        this.type = 'not in';
+        this.value = arrayOrFunction;
+        return this;
+    }
+
     equals(objectOrFunction) {
         // return new FieldConditionDef("=", this, objectOrFunction);
         this.type = '=';
