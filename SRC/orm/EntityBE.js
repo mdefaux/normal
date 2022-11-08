@@ -299,25 +299,34 @@ console.log('sono nella allign');
         let insertcount=0;
         let updatecount=0;
         let deletecount=0;
+        let offsetend=0;
+        let arraybend=0;
+        let arrayaend=0;
 
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
-                if( arrayA.length===ia) {
+                if( arrayA.length===ia && arrayaend===0) {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
                     console.log('righe AS400:' + pageA*500 , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
                     arrayA = await source.exec();
+                    if(arrayA.length===0){
+                        arrayaend=1;
+                    }
+
                 }
                 
-                if(arrayB.length===ib) {
+                if(arrayB.length===ib && arraybend===0) {
                     ib = 0
                     pageB ++;
-                    let offset=(pageB*500)+1;
+                    let offset=(pageB*500)+1+offsetend;
                     destination.page(500,offset);
                     console.log('offset arrayb:' + offset);
                     arrayB =   await destination.exec();
-
+                    if(arrayB.length===0){
+                        arraybend=1;
+                    }
                     
                 }
                 
@@ -363,17 +372,21 @@ console.log('sono nella allign');
                         deletecount ++;
                         ib ++;
                     }
-                         
+                if(arrayI.length>=50){
+                console.log('faccio la insert');
+                //  console.log(arrayI);
+                this.insert(arrayI);
+                offsetend=offsetend+arrayI.length;
+                }         
                     
      
            
         }
- //manca ancora la delete
- console.log('faccio la delete');
-     this.delete(arrayD);
- console.log('faccio la insert');
-   //  console.log(arrayI);
-     this.insert(arrayI);
+        console.log('faccio la insert');
+        //  console.log(arrayI);
+        this.insert(arrayI);
+        console.log('faccio la delete');
+        this.delete(arrayD);
      return ;
      // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
     //fine funzione
