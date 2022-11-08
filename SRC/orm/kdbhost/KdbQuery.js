@@ -213,13 +213,35 @@ class KdbQuery extends Query {
 
                 let viewAlias = builtCondition.field.sourceAlias;
 
-                qb.where(
-                    this.knex.raw( `UPPER( \`${viewAlias}\`.\`${builtCondition.field.name}\` )` ),
-                    // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
-                    builtCondition.type,
-                    typeof value === 'string' ? value.toUpperCase() :
-                        this.knex.raw( `UPPER( ${value} )` )
-                );
+                if( JSON.stringify( this.qb.client.driver ).indexOf( 'PG_DEPENDENCIES' ) > -1 ) {
+                    // 
+                    qb.where(
+                        builtCondition.sqlField(this),
+                        'ILIKE',
+                        typeof value === 'string' ? value.toUpperCase() :
+                            this.knex.raw( `UPPER( ${value} )` )
+                    );
+                }
+                else if ( this.qb.client.config.client === 'mysql' ) {
+                    // 
+                    qb.where(
+                        this.knex.raw( `UPPER( \`${viewAlias}\`.\`${builtCondition.field.name}\` )` ),
+                        // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
+                        builtCondition.type,
+                        typeof value === 'string' ? value.toUpperCase() :
+                            this.knex.raw( `UPPER( ${value} )` )
+                    );
+                }
+                else {
+                    // 
+                    qb.where(
+                        this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
+                        // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
+                        builtCondition.type,
+                        typeof value === 'string' ? value.toUpperCase() :
+                            this.knex.raw( `UPPER( ${value} )` )
+                    );
+                }
             }
             else {
                 if ( whereOp === 'or' ) {
@@ -582,11 +604,7 @@ class KdbQuery extends Query {
         //   })
     }
 
-    async exec() {
-        if ( this.beforeExecCallback ) {
-            await this.beforeExecCallback( this );
-        }
-        this.build();
+    async execute() {
 
         return this.qb.then(result => {
             // ottenuto il risultato primario, esegue le query dipendenti

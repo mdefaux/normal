@@ -20,7 +20,7 @@ class KdbInsert extends InsertStatement {
     }
 
     // executes the statment
-    async exec( ) {
+    async execute( ) {
 
         return this.knex
             .insert( this.processedRecord )

@@ -183,6 +183,14 @@ class NumberField extends Field
     {
         super(name, "number");
     }
+
+    parseValue( value ) {
+        return parseFloat(value);
+    }
+
+    equalValues( valueA, valueB ) {
+        return this.parseValue( valueA ) === this.parseValue( valueB );
+    }
 }
 class IntegerField extends Field
 {
@@ -190,12 +198,32 @@ class IntegerField extends Field
     {
         super(name, "integer");
     }
+
+    parseValue( value ) {
+        return parseInt(value);
+    }
+
+    equalValues( valueA, valueB ) {
+        return this.parseValue( valueA ) === this.parseValue( valueB );
+    }
 }
 class BooleanField extends Field
 {
     constructor(name)
     {
         super(name, "boolean");
+    }
+
+    parseValue( value ) {
+        
+        if(value === 1 || value === '1' || value === 'true' || value === true || value === "Si" || value === "Y" || value === "S" || value === "T"  ) return true;
+
+        return false;
+    
+    }
+
+    equalValues( valueA, valueB ) {
+        return this.parseValue( valueA ) === this.parseValue( valueB );
     }
 }
 

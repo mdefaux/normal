@@ -19,9 +19,47 @@ class Statement {
         
     }
 
-    // TODO: 'then' should call 'exec'
+    /**Method to override for specific build
+     * 
+     */
+    build () {}
+
+    /**Method to override for specific execution
+     * 
+     */
+    execute () {}
+
+    // TODO: 'exec' should call 'execute'
     async exec(){
-        return this;
+
+        // TODO: call before exec
+        if ( this.beforeExecCallback ) {
+            await this.beforeExecCallback( this );
+        }
+        this.build();
+
+        // handle value to insert/update/delete if array
+        // exceed the maximum number of element of the chunk
+        const chunkSize = 100;
+        if ( this.processedRecord 
+            && Array.isArray( this.processedRecord ) 
+            && this.processedRecord.length > chunkSize ) 
+        {
+            // stores the array of record to process
+            let tempArray = this.processedRecord;
+            // array of promise returned by each execution
+            let promises = [];
+            // calls execution for each chunk of the array
+            for (let i = 0; i < array.length; i += chunkSize) {
+                this.processedRecord = tempArray.slice(i, i + chunkSize);
+                // do whatever
+                promises.push( await this.execute() );
+            }
+            // syncronizes all execution promises
+            return Promise.all( promises );
+        }
+
+        return this.execute();
     }
 
     then(callback) {

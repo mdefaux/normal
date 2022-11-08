@@ -115,13 +115,13 @@ class Query extends Statement {
     return this;
   }
   
-  async exec() {
-    if ( this.beforeExecCallback ) {
-        await this.beforeExecCallback( this );
-    }
+  async execute() {
+    // if ( this.beforeExecCallback ) {
+    //     await this.beforeExecCallback( this );
+    // }
     // 
     if( !this.dataStorage )
-      return Promise.resolve( callback( [] ) );
+      return undefined;
 
     // TODO: make a plan listing all needed sources
     // TODO: fetch some records from all sources 
