@@ -64,58 +64,61 @@ module.exports = User;
  * Creates a model for Projects.
  * There is a foreign key on project_t on column id_user to user_t table.
  */
-const store = require("./store");
-const User = require("./User");
-
-var Project = store.entity("Project", model => {
-  // there is a table called 'project_t' on DB
-  model.source("project_t");
-
-  // model.id( "id" );      // optional, primary key is 'id' by default
-  model.label("name");      // the label field can be used to briefly stringify the project
-
-  model.string("name");         // specifies the name field (optional)
-  model.string("description");  // description
-  
-  model.objectLink( User )      // Links to User model
-      .source( "id_user" );     // specifies the foreign key column on table project_t to user_t
-})
-
-module.exports = Project;
+ const store = require("./store");
+ const User = require("./User");
+ 
+ var Project = store.entity("Project", model => {
+   // there is a table called 'project_t' on DB
+   model.source("project_t");
+ 
+   // model.id( "id" );      // optional, primary key is 'id' by default
+   model.label("name");      // the label field can be used to briefly stringify the project
+ 
+   model.string("name");         // specifies the name field (optional)
+   model.string("description");  // description
+   
+   model.objectLink( User )      // Links to User model
+       .source( "id_user" );     // specifies the foreign key column on table project_t to user_t
+ });
+ 
+ module.exports = Project;
 ```
 
 ## Defines a route in node express
 
 ```javascript
-/**File: api/orm.js
+
+/**File: routes/projectRoute.js
  * queries the project table, 
  * filtering for those project of the given user passed to url
  */
-var Project = require("../models/Project");
-var User = require("../models/User");
-var orm = require("express").Router();
+ const Project = require("../models/Project");
+ const User = require("../models/User");
+ const projectRoute = require("express").Router();
+ 
+ projectRoute.route("/project/:username?")
+     .get((req, res) => {
+     
+     // queries the project table, 
+     // filtering for those project of the given user passed to url.
+     // if no username is specified, using .where( false ) all project will be 
+     // selected and returned.
+     return Project
+         .select()           // selects all fields
+         .joinAllRelated()   // all related table are join in order to filtering
+         .where( req.username && User.domain_name.equals( req.username ) )
+         .then( (data) => {
+ 
+             return res.send(data);
+         } )
+         .catch( (err) => {
+             
+             console.error(err.message);
+             res.status(500).json({ error: true, data: { message: err.message } });
+         } );
+ 
+ });
 
-orm.route("/projectapi/:username?")
-    .get((req, res) => {
-    
-    // queries the project table, 
-    // filtering for those project of the given user passed to url.
-    // if no username is specified, using .where( false ) all project will be 
-    // selected
-    return Project
-        .select()           // select all fields
-        .joinAllRelated()   // all related table are join in order to filtering
-        .where( req.username && User.domain_name.equals( req.username ) )
-        .then( (data) => {
-
-            return res.send(data);
-        } )
-        .catch( (err) => {
-            
-            console.error(err.message);
-            res.status(500).json({ error: true, data: { message: err.message } });
-        } );
-
-});
+module.exports = projectRoute;
 ```
 
