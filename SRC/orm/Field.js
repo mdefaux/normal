@@ -185,7 +185,8 @@ class NumberField extends Field
     }
 
     parseValue( value ) {
-        return parseFloat(value);
+        
+        return parseFloat(parseFloat(value).toFixed(2));
     }
 
     equalValues( valueA, valueB ) {

@@ -340,12 +340,22 @@ class EntityBE {
                 //    console.log(ii);
                         break ;
                 }
-
+                if(arraybend === 1 && arrayaend===1 )
+                {
+                    //  console.log(arrayI);
+                    console.log('faccio la insert');
+                    this.insert(arrayI);
+                    console.log('faccio la delete');
+                    this.delete(arrayD);
+                        break ;
+                }
                 
                 // 
                 let sourceRecord = arrayA[ia];
-                if(parameters.columnMap) sourceRecord = parameters.columnMap(arrayA[ia]);
-                if(parameters.parseValue) {
+                if(parameters.columnMap && arrayaend != 1) {
+                    sourceRecord = parameters.columnMap(arrayA[ia]);
+                }
+                if(parameters.parseValue && arrayaend != 1) {
                     let keys = Object.keys(sourceRecord);
                     keys.forEach(key => {
                         sourceRecord[key] = parameters.parseValue(sourceRecord[key]);
@@ -368,11 +378,13 @@ class EntityBE {
 
                     //    if (parameters.parseValue) value = parameters.parseValue(fieldvalue);
 
-                        if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: fieldvalue, destValue: arrayB[ib][fieldName] }]
+                        if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: field.parseValue(fieldvalue), destValue: field.parseValue(arrayB[ib][fieldName]) }]
                         return accumulator;
                     }, []);
                     // this.update(arrayB[ib].id,arrayA[ia]);
                     if(shouldupdate.length > 0){
+
+                        let recordtoupdate=Object.fromEntries(shouldupdate.map(u=>([u.fieldName, u.srcValue])));
                         this.update(arrayB[ib].id,recordtoupdate); 
                         updatecount ++ ;
                     }
@@ -398,21 +410,31 @@ class EntityBE {
                     ib ++;
                     }
 
-                if(arrayI.length>=50){
+                if(arrayI.length>=500){
                 console.log('faccio la insert');
                 //  console.log(arrayI);
-                this.insert(arrayI);
                 offsetend=offsetend+arrayI.length;
+                let arraytemp=arrayI;
+                console.log(arraytemp);
+                arrayI=[];
+                this.insert(arraytemp);
                 }         
                     
      
            
         }
-        console.log('faccio la insert');
-        //  console.log(arrayI);
-        this.insert(arrayI);
+        if(arrayI.length>=1)
+        {
+            console.log('faccio la insert');
+            //  console.log(arrayI);
+            this.insert(arrayI);
+        }
+        if(arrayD.length>=1)
+        {
+            // la delete di un array vuoto esplode
         console.log('faccio la delete');
         this.delete(arrayD);
+        }
      return ;
      // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
     //fine funzione
