@@ -1,4 +1,3 @@
-
 /**File: routes/projectRoute.js
  * queries the project table, 
  * filtering for those project of the given user passed to url
@@ -17,7 +16,7 @@
      return Project
          .select( '*' )      // selects all fields
          .joinAllRelated()   // all related table are join in order to filtering
-         .where( req.username && User.domainName.equals( req.username ) )
+         .where( req.params.username && User.domainName.equals( req.params.username ) )
          .then( (data) => {
  
              return res.send(data);
