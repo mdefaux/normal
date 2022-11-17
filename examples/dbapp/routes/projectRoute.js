@@ -15,16 +15,16 @@
      // if no username is specified, using .where( false ) all project will be 
      // selected and returned.
      return Project
-         .select()           // selects all fields
+         .select( '*' )      // selects all fields
          .joinAllRelated()   // all related table are join in order to filtering
-         .where( req.username && User.domain_name.equals( req.username ) )
+         .where( req.username && User.domainName.equals( req.username ) )
          .then( (data) => {
  
              return res.send(data);
          } )
          .catch( (err) => {
              
-             console.error(err.message);
+             console.error(err);
              res.status(500).json({ error: true, data: { message: err.message } });
          } );
  
