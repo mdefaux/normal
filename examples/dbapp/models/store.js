@@ -4,12 +4,12 @@
  */
 
 // includes the normaly store and the knex store
-const { store, KdbStoreHost } = require("normaly");
+const { store, KdbStoreHost } = require('normaly');
 // includes your knex connection definition 
-const knex = require( '../db/knex' );
+const knex = require('../db/knex');
 
 // Initializes store with your knex db connection
-store.setup( new KdbStoreHost( knex ) );
+store.setup(new KdbStoreHost(knex));
 
 // exports the store object
 module.exports = store;
