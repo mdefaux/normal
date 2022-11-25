@@ -13,7 +13,7 @@ const { Query } = require('../Query');
 const { Field, ObjectLink } = require('../Field');
 const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef } = require('../FieldConditionDef');
 const FieldCondition = require( '../FieldCondition' );
-const { FieldAggregation, FieldAggregationCount } = require('../FieldAggregation');
+const { FieldAggregation, FieldAggregationCount, FieldAllMainTable } = require('../FieldAggregation');
 
 /**Implementation of abstract Query for db
  * connected with knex library.
@@ -34,10 +34,10 @@ class KdbQuery extends Query {
     }
 
     setup() {
-        Object.entries(this.entity.model.fields).forEach(([key, field]) => {
+        Object.entries(this.entity.metaData.model.fields).forEach(([key, field]) => {
             Object.defineProperty(this, field.name, {
                 get: function () {
-                    let copy = this.entity.model.fields[field.name].copy();
+                    let copy = this.entity.metaData.model.fields[field.name].copy();
                     copy.sourceAlias = this.tableAlias || this.model.dbTableName || this.model.name;
                     return copy;
 
@@ -119,7 +119,7 @@ class KdbQuery extends Query {
         if( this.relateds && this.relateds[ field.name ] )
             return this;
 
-        let joinTable = this.factory[field.toEntityName].model.dbTableName;
+        let joinTable = this.factory[field.toEntityName].metaData.model.dbTableName;
         // let joinTableLabel =  this.factory[field.toEntityName].model.labelField;
         // let joinTableId = this.factory[field.toEntityName].model.idField;
         // let joinedFieldsAlias = this.getAliasFieldName(field.name);
@@ -326,7 +326,12 @@ class KdbQuery extends Query {
     }
 
     select(column) {
-        if ( !column ) {
+        if ( column === false ) {
+            return this;
+        }
+
+        if ( column === '*' ) {
+            this.columns = [...this.columns || [], new FieldAllMainTable()];
             return this;
         }
 
@@ -350,7 +355,7 @@ class KdbQuery extends Query {
         let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
         if ( !fields ) {
-            fields = Object.entries(this.entity.model.fields).map( (f) => (f) );
+            fields = Object.entries(this.entity.metaData.model.fields).map( ([,f]) => (f) );
         }
 
         let field;
@@ -389,18 +394,25 @@ class KdbQuery extends Query {
         }
 
         // if selected filed is empty, takes all columns with *
-        if ( fields.length === 0 ) {
+        if ( fields.length === 0 || fields.find( (c) => ( c instanceof FieldAllMainTable ) ) ) {
             this.qb.select( `${tableName}.*` );
 
         // if there is any objectLink, add its columns to selection
-            let ObjLinks = Object.entries(this.entity.model.fields).reduce((tot, [k, f]) => { 
-                if(f instanceof ObjectLink) {tot.push(f); }
-                return tot;
-             }, [] );
+            // let ObjLinks = Object.entries(this.entity.metaData.model.fields).reduce((tot, [k, f]) => { 
+            //     if(f instanceof ObjectLink) {tot.push(f); }
+            //     return tot;
+            // }, [] );
 
-            ObjLinks.forEach(f => {
-                this.selectRelatedDetails(f);
-            });
+            fields = this.columns = Object.entries(this.entity.metaData.model.fields).reduce( (acc, [k, f]) => { 
+
+                // TODO: check if column already present
+
+                return [...acc, f];
+            }, this.columns );
+
+            // ObjLinks.forEach(f => {
+            //     this.selectRelatedDetails(f);
+            // });
 
         }
 
@@ -417,7 +429,10 @@ class KdbQuery extends Query {
     
             }
     
-            if (typeof f === 'object' && f instanceof FieldAggregation && !(f instanceof FieldAggregationCount)) {
+            if (typeof f === 'object' && f instanceof FieldAggregation 
+                && !(f instanceof FieldAggregationCount) 
+                && !(f instanceof FieldAllMainTable) ) 
+            {
                 f.toQuery(this);
                 field = f.field;
                 return this;

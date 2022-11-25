@@ -20,12 +20,12 @@ In data management and normalization projects, we often met the need of using mo
  */
 
 // includes the normaly store and the knex store
-const { store, KdbStoreHost } = require("normaly");
+const { store, KdbStoreHost } = require('normaly');
 // includes your knex connection definition 
-const knex = require( '../../db/knex' );
+const knex = require('../db/knex');
 
 // Initializes store with your knex db connection
-store.setup( new KdbStoreHost( knex ) );
+store.setup(new KdbStoreHost(knex));
 
 // exports the store object
 module.exports = store;
@@ -38,21 +38,24 @@ module.exports = store;
  * Creates a simple model of User based on a db table 
  * called user_t.
  */
-const store = require("./store");
+const store = require('./store');
 
-/**User model is a simple 
+/**User model is a simple table with 
+ * domain name and name
  * 
  */
-var User = defs.entity( "User", (model) => {
+var User = store.entity('User', (model) => {
 
     // there is a table called 'user_t' on DB
-    model.source( "user_t" );
+    model.source('user_t');
 
-    // defines the columns/fields of thi model
-    model.id( "id" );
-    model.label( "domain_name" );   // there is a string field domain_name that id used as label for that row
-    model.string("name");           // name of user
-} );
+    // defines the columns/fields of this model
+    model.id('id');
+    model.label('domainName')    // domainName is used as 'label' for this entity
+        .source('domain_name');     // domain_name is the name of the column on the table
+
+    model.string('name');          // name of user
+});
 
 module.exports = User;
 ```
@@ -64,60 +67,59 @@ module.exports = User;
  * Creates a model for Projects.
  * There is a foreign key on project_t on column id_user to user_t table.
  */
- const store = require("./store");
- const User = require("./User");
- 
- var Project = store.entity("Project", model => {
-   // there is a table called 'project_t' on DB
-   model.source("project_t");
- 
-   // model.id( "id" );      // optional, primary key is 'id' by default
-   model.label("name");      // the label field can be used to briefly stringify the project
- 
-   model.string("name");         // specifies the name field (optional)
-   model.string("description");  // description
-   
-   model.objectLink( User )      // Links to User model
-       .source( "id_user" );     // specifies the foreign key column on table project_t to user_t
- });
- 
- module.exports = Project;
+const store = require('./store');
+const User = require('./User');
+
+var Project = store.entity('Project', model => {
+  // there is a table called 'project_t' on DB
+  model.source('project_t');
+
+  // model.id( 'id' );      // optional, primary key is 'id' by default
+  model.label('name');      // the label field can be used to briefly stringify the project
+
+  model.string('name');         // specifies the name field (optional)
+  model.string('description');  // description
+
+  model.objectLink(User)      // Links to User model
+    .source('id_user');     // specifies the foreign key column on table project_t to user_t
+});
+
+module.exports = Project;
 ```
 
 ## Defines a route in node express
 
 ```javascript
-
 /**File: routes/projectRoute.js
  * queries the project table, 
  * filtering for those project of the given user passed to url
  */
- const Project = require("../models/Project");
- const User = require("../models/User");
- const projectRoute = require("express").Router();
- 
- projectRoute.route("/project/:username?")
-     .get((req, res) => {
-     
-     // queries the project table, 
-     // filtering for those project of the given user passed to url.
-     // if no username is specified, using .where( false ) all project will be 
-     // selected and returned.
-     return Project
-         .select()           // selects all fields
-         .joinAllRelated()   // all related table are join in order to filtering
-         .where( req.username && User.domain_name.equals( req.username ) )
-         .then( (data) => {
- 
-             return res.send(data);
-         } )
-         .catch( (err) => {
-             
-             console.error(err.message);
-             res.status(500).json({ error: true, data: { message: err.message } });
-         } );
- 
- });
+const Project = require('../models/Project');
+const User = require('../models/User');
+const projectRoute = require('express').Router();
+
+projectRoute.route('/project/:username?')
+    .get((req, res) => {
+
+        // queries the project table, 
+        // filtering for those project of the given user passed to url.
+        // if no username is specified, using .where( false ) all project will be 
+        // selected and returned.
+        return Project
+            .select('*')      // selects all fields
+            .joinAllRelated()   // all related table are join in order to filtering
+            .where(req.params.username && User.domainName.equals(req.params.username))
+            .then((data) => {
+
+                return res.send(data);
+            })
+            .catch((err) => {
+
+                console.error(err);
+                res.status(500).json({ error: true, data: { message: err.message } });
+            });
+
+    });
 
 module.exports = projectRoute;
 ```
