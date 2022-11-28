@@ -50,7 +50,7 @@ class Statement {
             // array of promise returned by each execution
             let promises = [];
             // calls execution for each chunk of the array
-            for (let i = 0; i < array.length; i += chunkSize) {
+            for (let i = 0; i < tempArray.length; i += chunkSize) {
                 this.processedRecord = tempArray.slice(i, i + chunkSize);
                 // do whatever
                 promises.push( await this.execute() );

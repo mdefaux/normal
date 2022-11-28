@@ -26,14 +26,28 @@ const { DeleteStatement } = require("../DeleteStatement");
     /**Creates the knex statment and configure it
      *  
      */ 
-    async execute() {
+     async execute() {
+
+
+        let ids = this.processedRecord;
+        
+        if(Array.isArray(this.processedRecord)) {
+                ids = this.processedRecord.map(e=> {
+                return e[this.entity.metaData.model.idField];
+            });
+    
+        }
+        
+        let whereCondition = {
+            [this.entity.metaData.model.idField]: ids
+        };
 
         // 
         // return new Promise( (resolve, reject ) => (
         return await this.knex( this.entity.model.dbTableName )
                 .delete()
                 .debug( this.debugOn )
-                .where ( this.processedRecord )
+                .where (this.entity.metaData.model.idField, 'in',ids )
                 .then()
                 // .into( this.entity.model.dbTableName )
                 // .returning( this.entity.model.idField )
@@ -43,7 +57,7 @@ const { DeleteStatement } = require("../DeleteStatement");
     }
 
 
-    value( record ) {
+   /* value( record ) {
         // TODO: parse object and keep only column defined in model
         // should handle object link's field values passed 
         // as ObjectLink: { id: xxx, label: 'xxx' }
@@ -51,7 +65,7 @@ const { DeleteStatement } = require("../DeleteStatement");
 
         this.processedRecord = this.toRaw( record );
         return this;
-    }
+    }*/
 
     // TODO: declare debug as abstract method of Statement, implemented here
     debug() {

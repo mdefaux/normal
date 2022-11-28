@@ -167,8 +167,9 @@ class EntityBE {
         let newId = await insert.value( record ).exec(); // executes the insert
 
         // after getting the new id, queries the new record
-        let r = await this.getRecord( newId );
-        return { ...r, _id: tempId };
+    //    let r = await this.getRecord( newId );
+      //  return { ...r, _id: tempId };
+      return newId;
     }
 
     /**Updates a record
@@ -185,10 +186,10 @@ class EntityBE {
 
         // for now, get the updated record data with a select.
         // if(!returning || returning.length === 0) 
-        let r = await this.getRecord( idFilter );
+       // let r = await this.getRecord( idFilter );
         
 
-        return r;
+        return idFilter;
     }
 
     /**Updates a record
@@ -201,12 +202,12 @@ class EntityBE {
         // creates the delete statement
         let delStatement = this.host.createDelete( this );
 
-        if ( Array.isArray( id ) ) {
-            await delStatement.values( id ).exec(); // executes the delete
-        }
-        else {
-            await delStatement.value( id ).exec(); // executes the delete
-        }
+        //   if ( Array.isArray( id ) ) {
+        await delStatement.value(id).exec(); // executes the delete
+     //   }
+     //   else {
+        //    await delStatement.value( id ).exec(); // executes the delete
+       // }
     }
 
     parse( object, parserData ) {
@@ -303,7 +304,8 @@ class EntityBE {
         let offsetend=0;
         let arraybend=0;
         let arrayaend=0;
-
+        let countarrayA=500;
+        let endfor=0;
 
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
@@ -312,12 +314,13 @@ class EntityBE {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
-                    console.log('righe AS400:' + pageA*500 , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
+                    console.log('righe AS400:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
                     arrayA = await source.exec();
                     if(arrayA.length===0){
                         arrayaend=1;
                     }
-
+                    countarrayA=countarrayA+arrayA.length;
+                    
                 }
                 
                 if(arrayB.length===ib && arraybend===0) {
@@ -325,7 +328,7 @@ class EntityBE {
                     pageB ++;
                     let offset=(pageB*pageSize)+1+offsetend;
                     destination.page(pageSize,offset);
-                    console.log('offset arrayb:' + offset);
+                   // console.log('offset arrayb:' + offset);
                     arrayB =   await destination.exec();
                     if(arrayB.length===0){
                         arraybend=1;
@@ -334,19 +337,20 @@ class EntityBE {
 
                 }
                 
-                if(ib >= arrayB.length && ia >= arrayA.length )
+             /*   if(ib >= arrayB.length && ia >= arrayA.length )
                 {
                 //    console.log('break');
                 //    console.log(ii);
                         break ;
-                }
+                }*/
                 if(arraybend === 1 && arrayaend===1 )
                 {
                     //  console.log(arrayI);
-                    console.log('faccio la insert');
+                   // console.log('faccio la insert pre break');
                     this.insert(arrayI);
-                    console.log('faccio la delete');
+                 //   console.log('faccio la delete');
                     this.delete(arrayD);
+                   endfor=1;
                         break ;
                 }
                 
@@ -385,6 +389,7 @@ class EntityBE {
                     if(shouldupdate.length > 0){
 
                         let recordtoupdate=Object.fromEntries(shouldupdate.map(u=>([u.fieldName, u.srcValue])));
+                        //console.log(recordtoupdate + ': ' + arrayB[ib].id);
                         this.update(arrayB[ib].id,recordtoupdate); 
                         updatecount ++ ;
                     }
@@ -405,34 +410,40 @@ class EntityBE {
                     //  A>B oppure B è nulla: record da cancellare da B
                     //    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
                     //    arrayD.push(sourceRecord[this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
-                    arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                   // arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                   // let element ={id: arrayB[ib][this.metaData.model.idField]}
+                    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
                     deletecount ++;
                     ib ++;
                     }
+                if(arrayD.length>=50){
 
+                    offsetend=offsetend-arrayD.length;
+                 //   console.log('faccio la delete');
+                    this.delete(arrayD);
+                    arrayD=[];
+                }       
                 if(arrayI.length>=500){
-                console.log('faccio la insert');
+               // console.log('faccio la insert da 500');
                 //  console.log(arrayI);
                 offsetend=offsetend+arrayI.length;
-                let arraytemp=arrayI;
-                console.log(arraytemp);
+                this.insert(arrayI);
                 arrayI=[];
-                this.insert(arraytemp);
                 }         
                     
      
            
         }
-        if(arrayI.length>=1)
+        if(arrayI.length>=1 && endfor!=1)
         {
-            console.log('faccio la insert');
+          //  console.log('faccio la insert');
             //  console.log(arrayI);
             this.insert(arrayI);
         }
-        if(arrayD.length>=1)
+        if(arrayD.length>=1 && endfor!=1)
         {
             // la delete di un array vuoto esplode
-        console.log('faccio la delete');
+      //  console.log('faccio la delete');
         this.delete(arrayD);
         }
      return ;
