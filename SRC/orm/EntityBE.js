@@ -34,7 +34,7 @@ class EntityBE {
                     get: function () {
                         return this.model.fields[field.name];
 
-                        //, this.alias || this.name );
+                        //, this.alias || this.metaData.name );
                     }
                 });
 
@@ -76,7 +76,7 @@ class EntityBE {
 
         
         if ( !this.metaData.relations[ relatedEntityName ] ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
         
         const queryFactory = this.metaData.relations[ relatedEntityName ].queryFactory;
@@ -85,7 +85,7 @@ class EntityBE {
         
         
         if ( !relationQuery ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
 
         return relationQuery;
@@ -95,23 +95,23 @@ class EntityBE {
 
         
         if ( !this.metaData.relations[ relatedEntityName ] ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
         
         const queryFactory = this.metaData.relations[ relatedEntityName ];
         
         if ( !queryFactory ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
         // if ( !queryFactory.select ) {
-        //     throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+        //     throw new Error( `Relation '${this.metaData.name}' - '${relatedEntityName}' has no selection query.`)
         // }
         let newRelation = new RelationEntity();
         let relationQuery = queryFactory( newRelation, this ); // .select();
         return newRelation;
 
         if ( !relationQuery ) {
-            throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+            throw new Error( `Relation '${this.metaData.name}' - '${relatedEntityName}' has no selection query.`)
         }
 
         return relationQuery;
@@ -230,7 +230,7 @@ class EntityBE {
                     parserData.unknownFields.push( { name: currentKey, value: currentValue } )
                 }
                 else if ( ! parserData?.ignoreUnknownField ) {
-                    throw new Error( `Unknown field '${currentKey}' value '${currentValue}', in entity '${this.name}'.`)
+                    throw new Error( `Unknown field '${currentKey}' value '${currentValue}', in entity '${this.metaData.name}'.`)
                 }
                 return prevValue;
             },
@@ -266,7 +266,7 @@ class EntityBE {
 
     actions( actionName ) {
         if ( !this.actionDictionary?.[ actionName ] ) {
-            throw new Error( `Action '${actionName}' not defined in entity '${this.name}' ` )
+            throw new Error( `Action '${actionName}' not defined in entity '${this.metaData.name}' ` )
         }
 
         return this.actionDictionary[ actionName ];
