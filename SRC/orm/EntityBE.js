@@ -13,7 +13,7 @@ class EntityBE {
      * @param {*} factory
      */
     constructor(name, model, factory, host) {
-        this.name = name;
+        // this.name = name;
         this.model = model;
         this.factory = factory;
         this.host = host;
@@ -138,14 +138,14 @@ class EntityBE {
 
         if ( typeof id === 'object' ) {
 
-            let rr = await this.select()
+            let rr = await this.select('*')
                 .modify( qb => qb.where( id ) )
                 .first();
             return rr;
         }
 
         return this.createQuery( this )
-            .fetch()
+            .select('*')
             .where( (qb) => (qb[ this.model.idField ].equals( id )) )
             // .where( this[ this.model.idField ].equals( newId ) )
             // .where( { [this.model.idField]: newId } )

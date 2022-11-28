@@ -86,7 +86,7 @@ class ModelDef {
     constructor ( entity, factory ) {
         this.factory = factory;
         this.entity = entity;
-        this.model = entity.model;
+        this.model = entity.metaData.model;
         this.id( "id" );    // sets default id column
         // this.fields = {};
     }
@@ -134,7 +134,7 @@ class ModelDef {
 
         this.model.labelField = fieldName;
 
-        return this.model.fields[ fieldName ];
+        return new FieldDef( this.model.fields[ fieldName ] );
     }
 
     string( fieldName )
@@ -190,7 +190,7 @@ class ModelDef {
             // object must inherith from EntityBE
             if( entity instanceof EntityBE )
             {
-                entityName = entity.name;
+                entityName = entity.metaData.name;
 
                 if( !this.factory[entityName] )
                 {
