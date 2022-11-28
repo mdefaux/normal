@@ -155,21 +155,24 @@ class EntityBE {
     /**Insert a new record
      * 
      */
-    async insert( record ) {
+    async insert(record) {
         // saves temporary ids
         let tempId = record._id;
         delete record._id;
         // delete record[ this.model.idField ];
-//array.isArray per fare controllo se è un array
+        //array.isArray per fare controllo se è un array
 
         // creates the insert statement
-        let insert = this.host.createInsert( this );
-        let newId = await insert.value( record ).exec(); // executes the insert
+        let insert = this.host.createInsert(this);
+        let newId = await insert.value(record).exec(); // executes the insert
 
         // after getting the new id, queries the new record
-    //    let r = await this.getRecord( newId );
-      //  return { ...r, _id: tempId };
-      return newId;
+        if (Array.isArray(record)) {
+            return newId;
+        }
+        return await this.getRecord(newId);
+        //  return { ...r, _id: tempId };
+        //   return newId;
     }
 
     /**Updates a record
@@ -186,10 +189,11 @@ class EntityBE {
 
         // for now, get the updated record data with a select.
         // if(!returning || returning.length === 0) 
-       // let r = await this.getRecord( idFilter );
-        
+        if ( Array.isArray( id ) ) {
+            return idFilter;
+        }
 
-        return idFilter;
+        return await this.getRecord( idFilter );
     }
 
     /**Updates a record
