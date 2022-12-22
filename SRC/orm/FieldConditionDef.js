@@ -114,11 +114,26 @@ class FieldConditionDef {
     setup( reqField, reqValue ) {
         this.columnName= reqField;
         this.value= reqValue;
+        
+        if(reqValue === 'null') this.value = null;
+
+        if(Array.isArray(reqValue)) {
+            let newReqValue = reqValue.map(e=> {
+                if(e === 'null') return null;
+                return e;
+            });
+            this.value = newReqValue;
+        }
+        
+        if(this.type === 'in') return this.in(this.value);
+
+        if(this.type === 'not in') return this.notIn(this.value);
+
         return this;
     }
 
     in(arrayOrFunction) {
-        if (Array.isArray(arrayOrFunction)) {
+/*         if (Array.isArray(arrayOrFunction)) {
             if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
                 arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
             }
@@ -126,11 +141,12 @@ class FieldConditionDef {
 
         this.type = 'in';
         this.value = arrayOrFunction;
-        return this;
+        return this; */
+        return this.handleInclusion(arrayOrFunction, 'in');
     }
 
     notIn(arrayOrFunction) {
-        if (Array.isArray(arrayOrFunction)) {
+/*         if (Array.isArray(arrayOrFunction)) {
             if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
                 arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
             }
@@ -138,8 +154,47 @@ class FieldConditionDef {
 
         this.type = 'not in';
         this.value = arrayOrFunction;
+        return this; */
+        return this.handleInclusion(arrayOrFunction, 'not in');
+    }
+
+    handleInclusion(arrayOrFunction, operator) {
+
+        // handle null value directly?
+        // ...
+
+
+        // handle array
+        let nullValue = null;
+
+        if (Array.isArray(arrayOrFunction)) {
+            nullValue = arrayOrFunction.indexOf(null) >= 0;
+
+            if(nullValue) arrayOrFunction.splice(arrayOrFunction.indexOf(null, 1));
+
+            if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
+                arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
+            }
+        }
+
+        if(operator === 'in' || operator === 'not in') this.type = operator;
+        this.value = arrayOrFunction;
+
+        if(operator === 'in') {
+            // this.or. <field>.isNull() ?
+            // will chain condition so better return now
+            return this.or[this.name].isNull();
+        }
+        if(operator === 'not in') {
+            // this
+            // will chain condition so better return now
+            return this.and[this.name].isNotNull();
+
+        }
+
         return this;
     }
+
 
     equals(objectOrFunction) {
         // return new FieldConditionDef("=", this, objectOrFunction);
@@ -157,15 +212,15 @@ class FieldConditionDef {
 
     isNull() {
         // TODO: implement
-        assert ( false );
-        return new IsNullFieldConditionDef("is null", this, undefined);
+       // assert ( false );
+        return new IsNullFieldConditionDef("is null", this.field, undefined);
     }
     
 
     isNotNull() {
         // TODO: implement
-        assert ( false );
-        return new IsNotNullFieldConditionDef("is not null", this, undefined);
+        // assert ( false );
+        return new IsNotNullFieldConditionDef("is not null", this.field, undefined);
     }
 
     get or() {
@@ -173,6 +228,15 @@ class FieldConditionDef {
         let chained = this.createChained();
         chained.chainedCondition = {
             op: 'or', next: this
+        }
+        return chained.createProxy();
+    }
+
+    get and() {
+
+        let chained = this.createChained();
+        chained.chainedCondition = {
+            op: 'and', next: this
         }
         return chained.createProxy();
     }
