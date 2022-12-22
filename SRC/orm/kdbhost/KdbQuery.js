@@ -2,9 +2,14 @@
  * connected with knex library.
  * 
  * TODO: 
- * - rename fetch method
- * - ensure setup is done always
+ * (done) rename fetch method
+ * (done) ensure setup is done always
  * - create knex query builder (this.qb) only after exec is called
+ * - move select, join, groupby, order definitions to abstract `Query` class
+ * - move readRecord to abstract `Query` class
+ * - returning RecordSet
+ * - move 'where clause' in super class common with `Update` and `Delete` classes
+ * - build 'where clause' in an exernal class used by update and delete
  * 
  */
 
@@ -13,10 +18,12 @@ const { Query } = require('../Query');
 const { Field, ObjectLink } = require('../Field');
 const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef } = require('../FieldConditionDef');
 const FieldCondition = require( '../FieldCondition' );
-const { FieldAggregation, FieldAggregationCount } = require('../FieldAggregation');
+const { FieldAggregation, FieldAggregationCount, FieldAllMainTable } = require('../FieldAggregation');
 
 /**Implementation of abstract Query for db
  * connected with knex library.
+ * 
+ * @implements Query abstract class
  * 
  */
 class KdbQuery extends Query {
@@ -34,10 +41,10 @@ class KdbQuery extends Query {
     }
 
     setup() {
-        Object.entries(this.entity.model.fields).forEach(([key, field]) => {
+        Object.entries(this.entity.metaData.model.fields).forEach(([key, field]) => {
             Object.defineProperty(this, field.name, {
                 get: function () {
-                    let copy = this.entity.model.fields[field.name].copy();
+                    let copy = this.entity.metaData.model.fields[field.name].copy();
                     copy.sourceAlias = this.tableAlias || this.model.dbTableName || this.model.name;
                     return copy;
 
@@ -48,6 +55,12 @@ class KdbQuery extends Query {
         });
     }
 
+    /**Composes the record adding the related objects
+     * TODO: move to abstract Query
+     * 
+     * @param {*} record 
+     * @returns 
+     */
     readRecord(record) {
         // definizione oggetto vuoto per ogni ObjectLink
         let related_object = {};
@@ -63,16 +76,16 @@ class KdbQuery extends Query {
                 let fieldName = field.name;
                 let r = field.getSelection();
 
-               // let fieldKey = `${r.joinedFieldsAlias}.${r.joinTableLabel}`;
-                let fieldKey = `${r.joinedTableAlias}.${r.joinedFieldsAlias}`;
+               // let fieldKey = `${r.foreignFieldsAlias}.${r.foreignTableLabel}`;
+                let fieldKey = `${r.foreignTableAlias}.${r.foreignFieldsAlias}`;
 
                 // checks if field was already processed... (column was probabily selected twice)
                 if (!record[fieldKey] && related_object[fieldName])
                     return;
 
                 related_object[fieldName] = {
-                    [r.joinTableId]: record[field.sqlSource],
-                    [r.joinTableLabel]: record[fieldKey]
+                    [r.foreignId]: record[field.sqlSource],
+                    [r.foreignLabelName]: record[fieldKey]
                 };
 
                 delete record[fieldKey];
@@ -81,6 +94,10 @@ class KdbQuery extends Query {
         return Object.assign({}, record, related_object);
     }
 
+    /**TODO: remove metod
+     * 
+     * @returns 
+     */
     fetch() {
         let tableName = this.model.dbTableName || this.model.name;
         this.qb = this.knex(tableName);
@@ -90,6 +107,10 @@ class KdbQuery extends Query {
         return this;
     }
 
+    /**TODO: valutate if it is to be removed
+     * 
+     * @returns 
+     */
     fetchWithRelated() {
         let tableName = this.model.dbTableName || this.model.name;
         this.qb = this.knex(tableName);
@@ -99,6 +120,11 @@ class KdbQuery extends Query {
         return this;
     }
 
+    /**Joins with all the related objects
+     * 
+     * TODO: gets relation from relation set instead scanning 
+     * field looking for ObjectLinks. Relations can be different for example 1-n
+     */
     joinAllRelated() {
         // ciclo le columns per trovare eventuali objectLink per eseguire le join sulle tabelle target
         Object.entries(this.model.fields)
@@ -112,22 +138,27 @@ class KdbQuery extends Query {
         return this;
     }
 
-    joinRelated(field)
-    {
+    /**Join a related object... actually identified by a field (to change)
+     * TODO: change argument to object related or a relation name instead a field
+     * 
+     * @param {*} field that identifies the relation (actually true only for ObjectLink)
+     * @returns 
+     */
+    joinRelated(field) {
         let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
         if( this.relateds && this.relateds[ field.name ] )
             return this;
 
-        let joinTable = this.factory[field.toEntityName].model.dbTableName;
-        // let joinTableLabel =  this.factory[field.toEntityName].model.labelField;
-        // let joinTableId = this.factory[field.toEntityName].model.idField;
-        // let joinedFieldsAlias = this.getAliasFieldName(field.name);
-        // let joinedTableAlias = `${joinTable}${index}`;
+        let foreignTableName = this.factory[field.toEntityName].metaData.model.dbTableName;
+        // let foreignTableLabel =  this.factory[field.toEntityName].model.labelField;
+        // let foreignId = this.factory[field.toEntityName].model.idField;
+        // let foreignFieldsAlias = this.getAliasFieldName(field.name);
+        // let foreignTableAlias = `${foreignTableName}${index}`;
         // potrebbe essere necessario in futuro aggiungere, all'interno del this.model della colonna in esame,
         // l'alias della tabella che viene utilizzato.
         // Potrebbe infatti essere necessario recuperare l'alias ad esempio in fase di sviluppo della where della query su campi dell'objectLink (applyFilter)
-        //this.model.columns[key].tableAlias = joinedTableAlias;
+        //this.model.columns[key].tableAlias = foreignTableAlias;
         let r = field.getSelection();
 
         this.relateds = {
@@ -135,9 +166,12 @@ class KdbQuery extends Query {
             [field.name]: field
         };
 
+        // TODO: move following query building part to building phase, 
+        // leave here the definition of join only
+
         // la select non viene fatta qui, ma solo alla fine se non sono state dichiarate altre select
-        // this.qb.select(`${joinedTableAlias}.${joinTableLabel} as ${joinedFieldsAlias}.${joinTableLabel}`);
-        this.qb.leftOuterJoin(`${joinTable} as ${r.joinedTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.joinedTableAlias}.${r.joinTableId}`);
+        // this.qb.select(`${foreignTableAlias}.${foreignTableLabel} as ${foreignFieldsAlias}.${foreignTableLabel}`);
+        this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.foreignTableAlias}.${r.foreignId}`);
         
         return this;
     }
@@ -164,10 +198,19 @@ class KdbQuery extends Query {
         return this;
     }
 
+    /**
+     * TODO: move to external file used by both KdbUpdate and KdbDelete statement
+     * 
+     * @param {*} builtCondition 
+     * @param {*} qb 
+     * @param {*} whereOp 
+     * @returns 
+     */
     applyWhereCondition(builtCondition, qb, whereOp ) {
 
         if (builtCondition instanceof FieldConditionDef) {
 
+            // TODO: support multiple conditions +2 (now only one concatenation is allowed)
             if ( builtCondition.chainedCondition ) {
                 // const unchain = function( start, accumulator ) {
                 //     let next = start.chainedCondition;
@@ -293,6 +336,13 @@ class KdbQuery extends Query {
         return this;
     }
 
+    /**
+     * TODO: rename to defineContdition as for build we intend 
+     * the final query building over knex qb.
+     * 
+     * @param {*} conditions 
+     * @returns the set of defined condition
+     */
     buildCondition(conditions) {
 
         if (!conditions)
@@ -326,7 +376,12 @@ class KdbQuery extends Query {
     }
 
     select(column) {
-        if ( !column ) {
+        if ( column === false ) {
+            return this;
+        }
+
+        if ( column === '*' || column === undefined ) {
+            this.columns = [...this.columns || [], new FieldAllMainTable()];
             return this;
         }
 
@@ -350,7 +405,7 @@ class KdbQuery extends Query {
         let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
         if ( !fields ) {
-            fields = Object.entries(this.entity.model.fields).map( (f) => (f) );
+            fields = Object.entries(this.entity.metaData.model.fields).map( ([,f]) => (f) );
         }
 
         let field;
@@ -389,18 +444,25 @@ class KdbQuery extends Query {
         }
 
         // if selected filed is empty, takes all columns with *
-        if ( fields.length === 0 ) {
+        if ( fields.length === 0 || fields.find( (c) => ( c instanceof FieldAllMainTable ) ) ) {
             this.qb.select( `${tableName}.*` );
 
         // if there is any objectLink, add its columns to selection
-            let ObjLinks = Object.entries(this.entity.model.fields).reduce((tot, [k, f]) => { 
-                if(f instanceof ObjectLink) {tot.push(f); }
-                return tot;
-             }, [] );
+            // let ObjLinks = Object.entries(this.entity.metaData.model.fields).reduce((tot, [k, f]) => { 
+            //     if(f instanceof ObjectLink) {tot.push(f); }
+            //     return tot;
+            // }, [] );
 
-            ObjLinks.forEach(f => {
-                this.selectRelatedDetails(f);
-            });
+            fields = this.columns = Object.entries(this.entity.metaData.model.fields).reduce( (acc, [k, f]) => { 
+
+                // TODO: check if column already present
+
+                return [...acc, f];
+            }, this.columns );
+
+            // ObjLinks.forEach(f => {
+            //     this.selectRelatedDetails(f);
+            // });
 
         }
 
@@ -417,13 +479,17 @@ class KdbQuery extends Query {
     
             }
     
-            if (typeof f === 'object' && f instanceof FieldAggregation && !(f instanceof FieldAggregationCount)) {
+            if (typeof f === 'object' && f instanceof FieldAggregation 
+                && !(f instanceof FieldAggregationCount) 
+                && !(f instanceof FieldAllMainTable) ) 
+            {
                 f.toQuery(this);
                 field = f.field;
                 return this;
             }
     
-            if (f instanceof ObjectLink) {
+            // TODO: change relateds keys to entity name
+            if (f instanceof ObjectLink && this.relateds[f.name] ) {
                 this.selectRelatedDetails(f);
             }
     
@@ -436,7 +502,9 @@ class KdbQuery extends Query {
         if ( this.orderedColumns.length === 0 ) {
             return;
         }
-        this.qb.orderBy( this.orderedColumns[0].columnName, this.orderedColumns[0].order );
+        // this.qb.orderBy( this.orderedColumns[0].columnName, this.orderedColumns[0].order );
+        // TODO: use model instead query fields
+        this.qb.orderBy( this[ this.orderedColumns[0].columnName ].sqlSource, this.orderedColumns[0].order );
     }
 
     selectAllRelated() {
@@ -451,8 +519,8 @@ class KdbQuery extends Query {
 
     selectRelatedDetails(field) {
         let r = field.getSelection();
-        //this.qb.select(`${r.joinedTableAlias}.${r.joinTableLabel} as ${r.joinedFieldsAlias}.${r.joinTableLabel}`);
-        this.qb.select(`${r.joinedTableAlias}.${r.joinTableLabel} as ${r.joinedTableAlias}.${r.joinedFieldsAlias}`);
+        //this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}.${r.foreignTableLabel}`);
+        this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignTableAlias}.${r.foreignFieldsAlias}`);
         this.joinRelated(field);
     }
 
@@ -480,7 +548,7 @@ class KdbQuery extends Query {
 
         if (field instanceof ObjectLink) {
             let r = field.getSelection();
-            this.qb.groupBy(`${r.joinedTableAlias}.${r.joinTableLabel}`);
+            this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
             this.joinRelated(field);
         }
 
@@ -541,15 +609,15 @@ class KdbQuery extends Query {
         if( relationName === 'Versione' )
         {
             let tableName = this.model.dbTableName || this.model.name;
-            let joinTable = 'ver_componente_progetto';
+            let foreignTableName = 'ver_componente_progetto';
             let r = {
-                joinedTableAlias: 'ver_componente_progetto',
+                foreignTableAlias: 'ver_componente_progetto',
                 sourceField: 'id',
-                joinTableId: 'id_componente'
+                foreignId: 'id_componente'
             }
-            this.qb.join(`${joinTable} as ${r.joinedTableAlias}`, 
+            this.qb.join(`${foreignTableName} as ${r.foreignTableAlias}`, 
                 `${tableName}.${r.sourceField}`, 
-                `${r.joinedTableAlias}.${r.joinTableId}`);
+                `${r.foreignTableAlias}.${r.foreignId}`);
         
         }
 

@@ -55,7 +55,7 @@ describe('Customer test', function() {
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.be.a('array');
-                res.body.length.should.equal(1); // should have 1 record
+                res.body.length.should.equal(12); // should have 1 record
                 res.body[0].should.have.property('id');
                 res.body[0].id.should.equals(1);
                 res.body[0].should.have.property('name');
@@ -74,7 +74,7 @@ describe('Customer test', function() {
                 res.body.should.be.a('array');
                 res.body.length.should.equal(1); // should have 1 record
                 res.body[0].should.have.property('COUNT');
-                res.body[0].count.should.equals('1000');
+                res.body[0].COUNT.should.equals('1000');
                 // res.body[0].should.have.property('name');
                 // res.body[0].name.should.equals('Wordpedia');
                 // res.body[0].should.have.property('address');

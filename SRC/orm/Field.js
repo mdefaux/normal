@@ -190,7 +190,8 @@ class NumberField extends Field
     }
 
     parseValue( value ) {
-        return parseFloat(value);
+        
+        return parseFloat(parseFloat(value).toFixed(2));
     }
 
     equalValues( valueA, valueB ) {
@@ -322,21 +323,24 @@ class ObjectLink extends Relation {
     getSelection()
     {
         // let joinField = this.sourceField;
-        let joinTable = this.factory[this.toEntityName].model.dbTableName;
-        let joinTableLabel = this.factory[this.toEntityName].model.labelField;
-        let joinTableId = this.factory[this.toEntityName].model.idField;
-        let joinedFieldsAlias = `_c_${this.name}`; // this.getAliasFieldName(this.name);
-        let joinedTableAlias = `_jt_${joinTable}`;
+        let foreignTableName = this.factory[this.toEntityName].metaData.model.dbTableName;
+        let foreignLabelName = this.factory[this.toEntityName].metaData.model.labelField;
+        let foreignLabelField = this.factory[this.toEntityName].metaData.model.fields[ foreignLabelName ];
+        let foreignTableLabel = foreignLabelField.sqlSource;
+        let foreignId = this.factory[this.toEntityName].model.idField;
+        let foreignFieldsAlias = `_c_${this.name}`; // this.getAliasFieldName(this.name);
+        let foreignTableAlias = `_jt_${foreignTableName}`;
 
         // potrebbe essere necessario in futuro aggiungere, all'interno del this.model della colonna in esame,
         // l'alias della tabella che viene utilizzato.
         // Potrebbe infatti essere necessario recuperare l'alias ad esempio in fase di sviluppo della where della query su campi dell'objectLink (applyFilter)
-        //this.model.columns[key].tableAlias = joinedTableAlias;
+        //this.model.columns[key].tableAlias = foreignTableAlias;
         return {
-            joinedTableAlias: joinedTableAlias,
-            joinTableId: joinTableId,
-            joinTableLabel: joinTableLabel,
-            joinedFieldsAlias: joinedFieldsAlias,
+            foreignTableAlias: foreignTableAlias,
+            foreignId: foreignId,
+            foreignTableLabel: foreignTableLabel,
+            foreignFieldsAlias: foreignFieldsAlias,
+            foreignLabelName: foreignLabelName,
             field: this,
             entity: this.factory[this.toEntityName]
         };

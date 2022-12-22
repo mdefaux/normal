@@ -13,7 +13,7 @@ class EntityBE {
      * @param {*} factory
      */
     constructor(name, model, factory, host) {
-        this.name = name;
+        // this.name = name;
         this.model = model;
         this.factory = factory;
         this.host = host;
@@ -34,7 +34,7 @@ class EntityBE {
                     get: function () {
                         return this.model.fields[field.name];
 
-                        //, this.alias || this.name );
+                        //, this.alias || this.metaData.name );
                     }
                 });
 
@@ -76,7 +76,7 @@ class EntityBE {
 
         
         if ( !this.metaData.relations[ relatedEntityName ] ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
         
         const queryFactory = this.metaData.relations[ relatedEntityName ].queryFactory;
@@ -85,7 +85,7 @@ class EntityBE {
         
         
         if ( !relationQuery ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
 
         return relationQuery;
@@ -95,23 +95,23 @@ class EntityBE {
 
         
         if ( !this.metaData.relations[ relatedEntityName ] ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
         
         const queryFactory = this.metaData.relations[ relatedEntityName ];
         
         if ( !queryFactory ) {
-            throw new Error( `'${relatedEntityName}' is not related with entity '${this.name}'.`)
+            throw new Error( `'${relatedEntityName}' is not related with entity '${this.metaData.name}'.`)
         }
         // if ( !queryFactory.select ) {
-        //     throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+        //     throw new Error( `Relation '${this.metaData.name}' - '${relatedEntityName}' has no selection query.`)
         // }
         let newRelation = new RelationEntity();
         let relationQuery = queryFactory( newRelation, this ); // .select();
         return newRelation;
 
         if ( !relationQuery ) {
-            throw new Error( `Relation '${this.name}' - '${relatedEntityName}' has no selection query.`)
+            throw new Error( `Relation '${this.metaData.name}' - '${relatedEntityName}' has no selection query.`)
         }
 
         return relationQuery;
@@ -138,14 +138,14 @@ class EntityBE {
 
         if ( typeof id === 'object' ) {
 
-            let rr = await this.select()
+            let rr = await this.select('*')
                 .modify( qb => qb.where( id ) )
                 .first();
             return rr;
         }
 
         return this.createQuery( this )
-            .fetch()
+            .select('*')
             .where( (qb) => (qb[ this.model.idField ].equals( id )) )
             // .where( this[ this.model.idField ].equals( newId ) )
             // .where( { [this.model.idField]: newId } )
@@ -155,20 +155,24 @@ class EntityBE {
     /**Insert a new record
      * 
      */
-    async insert( record ) {
+    async insert(record) {
         // saves temporary ids
         let tempId = record._id;
         delete record._id;
         // delete record[ this.model.idField ];
-//array.isArray per fare controllo se è un array
+        //array.isArray per fare controllo se è un array
 
         // creates the insert statement
-        let insert = this.host.createInsert( this );
-        let newId = await insert.value( record ).exec(); // executes the insert
+        let insert = this.host.createInsert(this);
+        let newId = await insert.value(record).exec(); // executes the insert
 
         // after getting the new id, queries the new record
-        let r = await this.getRecord( newId );
-        return { ...r, _id: tempId };
+        if (Array.isArray(record)) {
+            return newId;
+        }
+        return await this.getRecord(newId);
+        //  return { ...r, _id: tempId };
+        //   return newId;
     }
 
     /**Updates a record
@@ -185,10 +189,11 @@ class EntityBE {
 
         // for now, get the updated record data with a select.
         // if(!returning || returning.length === 0) 
-        let r = await this.getRecord( idFilter );
-        
+        if ( Array.isArray( id ) ) {
+            return idFilter;
+        }
 
-        return r;
+        return await this.getRecord( idFilter );
     }
 
     /**Updates a record
@@ -201,12 +206,12 @@ class EntityBE {
         // creates the delete statement
         let delStatement = this.host.createDelete( this );
 
-        if ( Array.isArray( id ) ) {
-            await delStatement.values( id ).exec(); // executes the delete
-        }
-        else {
-            await delStatement.value( id ).exec(); // executes the delete
-        }
+        //   if ( Array.isArray( id ) ) {
+        await delStatement.value(id).exec(); // executes the delete
+     //   }
+     //   else {
+        //    await delStatement.value( id ).exec(); // executes the delete
+       // }
     }
 
     parse( object, parserData ) {
@@ -230,7 +235,7 @@ class EntityBE {
                     parserData.unknownFields.push( { name: currentKey, value: currentValue } )
                 }
                 else if ( ! parserData?.ignoreUnknownField ) {
-                    throw new Error( `Unknown field '${currentKey}' value '${currentValue}', in entity '${this.name}'.`)
+                    throw new Error( `Unknown field '${currentKey}' value '${currentValue}', in entity '${this.metaData.name}'.`)
                 }
                 return prevValue;
             },
@@ -266,7 +271,7 @@ class EntityBE {
 
     actions( actionName ) {
         if ( !this.actionDictionary?.[ actionName ] ) {
-            throw new Error( `Action '${actionName}' not defined in entity '${this.name}' ` )
+            throw new Error( `Action '${actionName}' not defined in entity '${this.metaData.name}' ` )
         }
 
         return this.actionDictionary[ actionName ];
@@ -303,7 +308,8 @@ class EntityBE {
         let offsetend=0;
         let arraybend=0;
         let arrayaend=0;
-
+        let countarrayA=500;
+        let endfor=0;
 
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
@@ -312,12 +318,13 @@ class EntityBE {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
-                    console.log('righe AS400:' + pageA*500 , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
+                    console.log('righe AS400:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
                     arrayA = await source.exec();
                     if(arrayA.length===0){
                         arrayaend=1;
                     }
-
+                    countarrayA=countarrayA+arrayA.length;
+                    
                 }
                 
                 if(arrayB.length===ib && arraybend===0) {
@@ -325,7 +332,7 @@ class EntityBE {
                     pageB ++;
                     let offset=(pageB*pageSize)+1+offsetend;
                     destination.page(pageSize,offset);
-                    console.log('offset arrayb:' + offset);
+                   // console.log('offset arrayb:' + offset);
                     arrayB =   await destination.exec();
                     if(arrayB.length===0){
                         arraybend=1;
@@ -334,18 +341,29 @@ class EntityBE {
 
                 }
                 
-                if(ib >= arrayB.length && ia >= arrayA.length )
+             /*   if(ib >= arrayB.length && ia >= arrayA.length )
                 {
                 //    console.log('break');
                 //    console.log(ii);
                         break ;
+                }*/
+                if(arraybend === 1 && arrayaend===1 )
+                {
+                    //  console.log(arrayI);
+                   // console.log('faccio la insert pre break');
+                    this.insert(arrayI);
+                 //   console.log('faccio la delete');
+                    this.delete(arrayD);
+                   endfor=1;
+                        break ;
                 }
-
                 
                 // 
                 let sourceRecord = arrayA[ia];
-                if(parameters.columnMap) sourceRecord = parameters.columnMap(arrayA[ia]);
-                if(parameters.parseValue) {
+                if(parameters.columnMap && arrayaend != 1) {
+                    sourceRecord = parameters.columnMap(arrayA[ia]);
+                }
+                if(parameters.parseValue && arrayaend != 1) {
                     let keys = Object.keys(sourceRecord);
                     keys.forEach(key => {
                         sourceRecord[key] = parameters.parseValue(sourceRecord[key]);
@@ -368,11 +386,14 @@ class EntityBE {
 
                     //    if (parameters.parseValue) value = parameters.parseValue(fieldvalue);
 
-                        if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: fieldvalue, destValue: arrayB[ib][fieldName] }]
+                        if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: field.parseValue(fieldvalue), destValue: field.parseValue(arrayB[ib][fieldName]) }]
                         return accumulator;
                     }, []);
                     // this.update(arrayB[ib].id,arrayA[ia]);
                     if(shouldupdate.length > 0){
+
+                        let recordtoupdate=Object.fromEntries(shouldupdate.map(u=>([u.fieldName, u.srcValue])));
+                        //console.log(recordtoupdate + ': ' + arrayB[ib].id);
                         this.update(arrayB[ib].id,recordtoupdate); 
                         updatecount ++ ;
                     }
@@ -393,26 +414,42 @@ class EntityBE {
                     //  A>B oppure B è nulla: record da cancellare da B
                     //    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
                     //    arrayD.push(sourceRecord[this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
-                    arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                   // arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                   // let element ={id: arrayB[ib][this.metaData.model.idField]}
+                    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
                     deletecount ++;
                     ib ++;
                     }
+                if(arrayD.length>=50){
 
-                if(arrayI.length>=50){
-                console.log('faccio la insert');
+                    offsetend=offsetend-arrayD.length;
+                 //   console.log('faccio la delete');
+                    this.delete(arrayD);
+                    arrayD=[];
+                }       
+                if(arrayI.length>=500){
+               // console.log('faccio la insert da 500');
                 //  console.log(arrayI);
-                this.insert(arrayI);
                 offsetend=offsetend+arrayI.length;
+                this.insert(arrayI);
+                arrayI=[];
                 }         
                     
      
            
         }
-        console.log('faccio la insert');
-        //  console.log(arrayI);
-        this.insert(arrayI);
-        console.log('faccio la delete');
+        if(arrayI.length>=1 && endfor!=1)
+        {
+          //  console.log('faccio la insert');
+            //  console.log(arrayI);
+            this.insert(arrayI);
+        }
+        if(arrayD.length>=1 && endfor!=1)
+        {
+            // la delete di un array vuoto esplode
+      //  console.log('faccio la delete');
         this.delete(arrayD);
+        }
      return ;
      // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
     //fine funzione

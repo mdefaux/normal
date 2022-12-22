@@ -23,6 +23,15 @@ class FieldAggregationCount extends FieldAggregation {
 
 }
 
+class FieldAllMainTable extends FieldAggregation {
+    constructor() {
+        super(undefined);
+    }
+
+
+}
+
 exports.FieldAggregation = FieldAggregation;
 exports.FieldAggregationMax = FieldAggregationMax;
 exports.FieldAggregationCount = FieldAggregationCount;
+exports.FieldAllMainTable = FieldAllMainTable;

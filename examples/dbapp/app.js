@@ -4,6 +4,7 @@ const knex = require( './db/knex' );
 const {func} = require( 'normalize' );
 const cors=require ('cors')
 const ormRoute = require( './routes/orm' );
+const projectRoute = require( './routes/projectRoute' );
 const models = require('./models/index')
 
 app.use(cors());
@@ -13,6 +14,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/orm', ormRoute);
+app.use('/', projectRoute);
 
 /* app.get('/model/customer', (req, res) => { 
   
