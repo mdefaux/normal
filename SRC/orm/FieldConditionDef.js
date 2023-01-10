@@ -180,12 +180,12 @@ class FieldConditionDef {
         if(operator === 'in' || operator === 'not in') this.type = operator;
         this.value = arrayOrFunction;
 
-        if(operator === 'in') {
+        if(nullValue && operator === 'in') {
             // this.or. <field>.isNull() ?
             // will chain condition so better return now
             return this.or[this.columnName].isNull();
         }
-        if(operator === 'not in') {
+        if(nullValue && operator === 'not in') {
             // this
             // will chain condition so better return now
             return this.and[this.columnName].isNotNull();
