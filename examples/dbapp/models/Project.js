@@ -14,9 +14,11 @@ var Project = store.entity('Project', model => {
 
   model.string('name');         // specifies the name field (optional)
   model.string('description');  // description
-
+  
   model.objectLink(User)      // Links to User model
     .source('id_user');     // specifies the foreign key column on table project_t to user_t
+
+  model.date('start_date');  // description
 });
 
 module.exports = Project;

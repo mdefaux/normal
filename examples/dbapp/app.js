@@ -1,56 +1,19 @@
-const express = require('express')
-const app = express()
-const knex = require( './db/knex' );
-const {func} = require( 'normalize' );
-const cors=require ('cors')
+const express = require('express');
+const app = express();
+const cors=require ('cors');
 const ormRoute = require( './routes/orm' );
 const projectRoute = require( './routes/projectRoute' );
 const models = require('./models/index')
 
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-})
+// app.get('/', (req, res) => {
+//   res.send('Hello World!');
+// })
 
 app.use('/orm', ormRoute);
 app.use('/', projectRoute);
 
-/* app.get('/model/customer', (req, res) => { 
-  
-  let response = models.Customer.getModel().columns
-
-  return  res.send(response);
-}) */
-
-app.get('/model', (req, res) => {
-  func();
-  res.send('Library function called!');
-})
-
-app.get('/model', (req, res) => {
-  
-  let response = {
-    asset: true,
-    customer: true,
-    service: true,
-  }
-
-  res.send(response);
-})
-
-app.get('/model/asset', (req, res) => {
-  
-  let response = {
-    colums: true,
-    colums:{
-      part_number:true,
-      Vendor:true,
-    }
-  }
-
-  res.send(response);
-}) 
 
 app.get('/orm/asset/all', (req, res) => {
 

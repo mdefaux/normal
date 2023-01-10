@@ -1,6 +1,6 @@
 # Example application
 
-## TODO
+## Purpose
 Create a backend db application that expose some API. It uses a PG docker container and builds a model
 
 ## How to test library without publishing
@@ -14,6 +14,14 @@ Create a backend db application that expose some API. It uses a PG docker contai
 On Mac you should run `sudo npm link` command, then normal `npm link normaly`.
 
 Note: `npm link normaly` command must be run every time you launch npm ci on example app.
+
+# Testing
+
+        cd examples/dbapp/
+        npm test
+
+
+# Initial Setup
 
 ## DB on docker
 Use the command to create container pg-normaly-dbapp exposing port 5433 with "postgre" image.

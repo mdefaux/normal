@@ -11,6 +11,11 @@ exports.up = function(knex) {
         table.integer( 'id_user' ).unsigned()
             .references( "id" ).inTable( "user_t" )
             .onDelete( "SET NULL" ).onUpdate( "CASCADE" );
+        table.integer( 'id_customer' ).unsigned()
+            .references( "id" ).inTable( "customer" )
+            .onDelete( "SET NULL" ).onUpdate( "CASCADE" );
+        
+        table.date('start_date');  // description
     });
 };
 
