@@ -7,7 +7,7 @@ describe('Project test', function() {
                 res.should.have.status(200);
                 res.should.be.json; // should be json
                 res.body.should.be.a('array');
-                res.body.length.should.equal(4); // number of project
+                res.body.length.should.equal(5); // number of project
                 res.body[0].should.have.property('id');
                 res.body[0].should.have.property('name');
                 res.body[0].should.have.property('User');
@@ -21,7 +21,7 @@ describe('Project test', function() {
                 res.should.have.status(200);
                 res.should.be.json; // should be json
                 res.body.should.be.a('array');
-                res.body.length.should.equal(2); // number of project
+                res.body.length.should.equal(3); // number of project
                 res.body[0].should.have.property('id');
                 res.body[0].should.have.property('name');
                 res.body[0].should.have.property('User');
