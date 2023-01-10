@@ -19,6 +19,8 @@ var User = store.entity('User', (model) => {
         .source('domain_name');     // domain_name is the name of the column on the table
 
     model.string('name');          // name of user
+    model.string( 'email' );
+    model.string( 'telephone' );
 });
 
 module.exports = User;

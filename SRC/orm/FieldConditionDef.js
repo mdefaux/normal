@@ -77,7 +77,7 @@ class FieldConditionDef {
 
             this.field = query[ this.columnName ];
             if ( !this.field ) {
-                throw new Error( `Column '${this.columnName}' not present in query/entity '${query.name || query.entity.name}'.`)
+                throw new Error( `Column '${this.columnName}' not present in query/entity '${query.entity.metaData.name}'.`)
             }
         }
 
