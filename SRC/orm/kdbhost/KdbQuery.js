@@ -227,11 +227,12 @@ class KdbQuery extends Query {
                 //     .where('firstName', 'ilike', `%${q}%`)
                 //     .orWhere('lastName', 'ilike', `%${q}%`)
                 // )
+                let op = builtCondition.chainedCondition.op;
                 chain[ 0 ].chainedCondition = undefined;
                 
                 qb.andWhere( (qB) => {
                     chain.forEach( (c) => {
-                        this.applyWhereCondition( c, qB, 'or' );
+                        this.applyWhereCondition( c, qB, op );
                     })
                 })
                 return this;

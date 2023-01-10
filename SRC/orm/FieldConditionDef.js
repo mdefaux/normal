@@ -170,7 +170,7 @@ class FieldConditionDef {
         if (Array.isArray(arrayOrFunction)) {
             nullValue = arrayOrFunction.indexOf(null) >= 0;
 
-            if(nullValue) arrayOrFunction.splice(arrayOrFunction.indexOf(null, 1));
+            if(nullValue) arrayOrFunction.splice(arrayOrFunction.indexOf(null), 1);
 
             if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
                 arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
@@ -183,12 +183,12 @@ class FieldConditionDef {
         if(operator === 'in') {
             // this.or. <field>.isNull() ?
             // will chain condition so better return now
-            return this.or[this.name].isNull();
+            return this.or[this.columnName].isNull();
         }
         if(operator === 'not in') {
             // this
             // will chain condition so better return now
-            return this.and[this.name].isNotNull();
+            return this.and[this.columnName].isNotNull();
 
         }
 
@@ -211,24 +211,30 @@ class FieldConditionDef {
     }
 
     isNull() {
-        // TODO: implement
-       // assert ( false );
-        return new IsNullFieldConditionDef("is null", this.field, undefined);
+       let otherDef = new IsNullFieldConditionDef("is null", this.field, undefined);
+       otherDef.columnName = this.columnName;
+       otherDef.chainedCondition = this.chainedCondition;
+       return otherDef;
     }
     
 
     isNotNull() {
-        // TODO: implement
-        // assert ( false );
-        return new IsNotNullFieldConditionDef("is not null", this.field, undefined);
+        let otherDef = new IsNotNullFieldConditionDef("is not null", this.field, undefined);
+        otherDef.columnName = this.columnName;
+        otherDef.chainedCondition = this.chainedCondition;
+        return otherDef;
     }
 
     get or() {
 
+        // creates another generic condition def
         let chained = this.createChained();
+        // chains the new condition with this one
         chained.chainedCondition = {
-            op: 'or', next: this
+            op: 'or',           // chain operator: or
+            next: this
         }
+        // returns a proxy of the new generic condition
         return chained.createProxy();
     }
 
