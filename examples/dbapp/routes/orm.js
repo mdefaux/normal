@@ -130,6 +130,21 @@ ormGenericRoute.route("/model/:entity")
     return res.send(responseModel);
 });
 
+
+// /groupby/:columnName/:recordToExtract/:startingFromIndex
+ormGenericRoute.route("/models")
+    .get((req, res) => {
+
+        let responseModel = Object.fromEntries(
+            Object.entries(defs)
+                .map(([name, entity]) => (
+                    [name, entity.getModel()]
+                ))
+        )
+
+        return res.send(responseModel);
+    });
+
 /*
 // /groupby/:columnName/:recordToExtract/:startingFromIndex
 ormGenericRoute.route("/groupby/:entity/:columnName/:recordToExtract/:startingFromIndex")
