@@ -1,13 +1,16 @@
 
 class RelationEntity {
 
-    constructor( ) {
+    constructor( refEntity ) {
         this._metaData = {
-            refEntity: undefined
+            refEntity: refEntity
         }
     }
 
+    parse( rawObject, parserData ) {
 
+        return this._metaData.refEntity.parse( rawObject, parserData );
+    }
 
 }
 

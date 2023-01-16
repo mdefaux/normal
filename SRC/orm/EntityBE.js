@@ -106,7 +106,10 @@ class EntityBE {
         // if ( !queryFactory.select ) {
         //     throw new Error( `Relation '${this.metaData.name}' - '${relatedEntityName}' has no selection query.`)
         // }
-        let newRelation = new RelationEntity();
+        
+        // new Relation has reference to this entity
+        let newRelation = new RelationEntity( this );
+        // builds the relation calling the definition method defined by user
         let relationQuery = queryFactory( newRelation, this ); // .select();
         return newRelation;
 
