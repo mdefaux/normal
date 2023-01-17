@@ -91,7 +91,7 @@ class EntityBE {
         return relationQuery;
     }
 
-    getRelation( relatedEntityName ) {
+    getRelation( relatedEntityName, parameters ) {
 
         
         if ( !this.metaData.relations[ relatedEntityName ] ) {
@@ -111,6 +111,8 @@ class EntityBE {
         let newRelation = new RelationEntity( this );
         // builds the relation calling the definition method defined by user
         let relationQuery = queryFactory( newRelation, this ); // .select();
+        
+        newRelation.init?.( parameters );
         return newRelation;
 
         if ( !relationQuery ) {
