@@ -157,6 +157,26 @@ class Query extends Statement {
       return this.exec().then(callback);
   }
 
+  /**Gets a record
+   * 
+   * @param {*} id 
+   * @returns 
+   */
+  async byId( id ) {
+
+    if ( typeof id === 'object' ) {
+
+        let rr = await this.modify( qb => qb.where( id ) )
+            .first();
+        return rr;
+    }
+
+    return this.where( (qb) => (qb[ this.model.idField ].equals( id )) )
+        // .where( this[ this.model.idField ].equals( newId ) )
+        // .where( { [this.model.idField]: newId } )
+        .then( (r) => ( r[0] ));
+  }
+
   debug() {
 
     return this;
