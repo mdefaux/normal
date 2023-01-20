@@ -29,6 +29,39 @@ class Statement {
      */
     execute () {}
 
+    /**Tries to resolve promises to get value 
+     * (eg: object link lookups)
+     * 
+     */
+    async buildProcessedRecord() {
+        if ( !this.processedRecord ) {
+            return;
+        }
+        let cache = {};
+        if ( Array.isArray( this.processedRecord ) ) {
+            this.processedRecord = await Promise.all( 
+                this.processedRecord.map( (pr) => (
+                    this.resolveRecord( pr, cache )
+                ) ) 
+            );
+        }
+        else {
+            this.processedRecord = await this.resolveRecord( this.processedRecord, cache );
+        }
+    }
+
+    async resolveRecord( record, cache ) {
+        return Object.fromEntries( await Promise.all (
+            Object.entries( record ).map( async ([key,value]) => {
+
+                if ( typeof value === 'function' ) {
+                    value = await value( cache );
+                }
+                return [key,value];
+            } )
+        ) )
+    }
+
     // TODO: 'exec' should call 'execute'
     async exec(){
 
@@ -37,6 +70,9 @@ class Statement {
             await this.beforeExecCallback( this );
         }
         this.build();
+
+        // this step tries to resolve promises to get value (eg: object link lookups)
+        await this.buildProcessedRecord();
 
         // handle value to insert/update/delete if array
         // exceed the maximum number of element of the chunk

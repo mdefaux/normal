@@ -190,6 +190,13 @@ class NumberField extends Field
     }
 
     parseValue( value ) {
+        // nully value are valid (null, undefined)
+        if ( value === null || value === undefined ) {
+            return null;
+        }
+        if ( isNaN(value) ) {
+            throw new Error( `Value '${value}' is not a valid number for field '${this.name}'.`)
+        }
         
         return parseFloat(parseFloat(value).toFixed(2));
     }
@@ -206,6 +213,13 @@ class IntegerField extends Field
     }
 
     parseValue( value ) {
+        // nully value are valid (null, undefined)
+        if ( value === null || value === undefined ) {
+            return null;
+        }
+        if ( isNaN(value) ) {
+            throw new Error( `Value '${value}' is not an integer for field '${this.name}'.`)
+        }
         return parseInt(value);
     }
 
@@ -349,10 +363,14 @@ class ObjectLink extends Relation {
 
     processValue(obj)
     {
-        let entity = this.factory[this.toEntityName];
-        return obj[entity.model.idField];
+        // let entity = this.factory[this.toEntityName];
+        return obj[this.toModel.idField];
     }
     
+    get toModel() {
+        let entity = this.factory[this.toEntityName];
+        return entity.metaData.model;
+    }
 
     serialize() {
 
@@ -364,13 +382,50 @@ class ObjectLink extends Relation {
         }
     }
     
+    parseValue( value ) {
+        let idField = this.toModel.idField;
+        if ( !value || value[idField] === null ) {
+            return null;
+        }
+        // TODO: check id field
+        if ( value[idField] !== undefined ) {
+            // TODO: use the 'id' name
+            return {...value, [idField]: parseInt( value[idField] )};
+        }
+        else if (typeof value === 'string' && isNaN( value ) ) {
+            return value;
+        }
+        else {
+            if ( isNaN(value) ) {
+                throw new Error( `Value '${value}' is not a valid id for field '${this.name}'.`)
+            }
+            // assert( parseInt( value ) !== 'NaN');
+            return parseInt( value );
+        }
+    }
 
     toRaw( value ) {
 
+        let idField = this.toModel.idField;
         // TODO: check if value is an object
-        if ( value?.id !== undefined ) {
+        if ( value?.[idField] !== undefined ) {
             // TODO: use the 'id' name
-            return [ this.sqlSource, value.id ];
+            return [ this.sqlSource, value[idField] ];
+        }
+        else if (typeof value === 'string' && isNaN( value ) ) {
+            return [ this.sqlSource, async (cache)=>{
+                if ( cache && cache[ value ] ) {
+                    return cache[ value ];
+                }
+                let entity = this.factory[ this.toEntityName ];
+                let result = await entity
+                    .select( [entity[idField]] )
+                    .byLabel( value );
+                if ( cache ) {
+                    cache[ value ] = result[idField];
+                }
+                return result[idField];
+            } ];
         }
         else {
             return [ this.sqlSource, value ];

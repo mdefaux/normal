@@ -224,16 +224,13 @@ class EntityBE {
         return Object.entries(object).reduce( 
             ( prevValue, [currentKey, currentValue] ) => {
 
-                if ( this.model.fields[ currentKey ] ) {
-                    return { ...prevValue, [ currentKey ]: currentValue }
-                }
-
-                let field = Object.entries( this.model.fields )
+                let field = this.model.fields[ currentKey ]
+                    || Object.entries( this.model.fields )
                     .map( ([,f]) => f )
                     .find( f => (f.sourceField === currentKey) );
 
                 if ( field ) {
-                    return { ...prevValue, [ field.name ]: currentValue }
+                    return { ...prevValue, [ field.name ]: field.parseValue( currentValue )}
                 }
 
                 if ( parserData?.unknownFields ) {

@@ -177,6 +177,24 @@ class Query extends Statement {
         .then( (r) => ( r[0] ));
   }
 
+  async first() {
+      
+      let result = await this.exec();
+      return result[0];
+  }
+
+  /**Gets a record
+   * 
+   * @param {*} id 
+   * @returns 
+   */
+  async byLabel( value ) {
+
+    return await this//.where( (qb) => (qb[ this.model.labelField ].equals( value )) )
+      .where( this.entity[this.model.labelField].equals( value ) )
+      .first();
+  }
+
   debug() {
 
     return this;

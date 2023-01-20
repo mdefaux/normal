@@ -208,7 +208,7 @@ class ModelDef {
         fieldName = fieldName || entityName;
 
         this.model.fields[ fieldName ] = new fields.ObjectLink( entityName, this.factory, this.model );
-
+        this.model.fields[ fieldName ].name = fieldName;
         // returns the field definitor
         return new FieldDef( this.model.fields[ fieldName ] );
     }

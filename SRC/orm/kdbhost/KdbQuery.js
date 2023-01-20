@@ -632,12 +632,6 @@ class KdbQuery extends Query {
         return this;
     }
 
-    async first() {
-        
-        let result = await this.exec();
-        return result[0];
-    }
-
     build() {
 
         if ( !this.qb ) {
