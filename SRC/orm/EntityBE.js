@@ -224,10 +224,13 @@ class EntityBE {
         return Object.entries(object).reduce( 
             ( prevValue, [currentKey, currentValue] ) => {
 
+                // gets the field by its name
                 let field = this.model.fields[ currentKey ]
-                    || Object.entries( this.model.fields )
+                    // disabled: a field can be referenced by its source
+                    // TODO: put false in a constant configurable in store
+                    || (false && Object.entries( this.model.fields )
                     .map( ([,f]) => f )
-                    .find( f => (f.sourceField === currentKey) );
+                    .find( f => (f.sourceField === currentKey) ));
 
                 if ( field ) {
                     return { ...prevValue, [ field.name ]: field.parseValue( currentValue )}

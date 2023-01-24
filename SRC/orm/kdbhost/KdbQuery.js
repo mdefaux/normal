@@ -88,7 +88,14 @@ class KdbQuery extends Query {
                     [r.foreignLabelName]: record[fieldKey]
                 };
 
+                // removes from record the label column of the foreign table
                 delete record[fieldKey];
+                // removes source field from record 
+                // (for example removes 'id_version' and leave 'Version')
+                // TODO: configurable behaviour
+                if ( fieldName !== field.sourceField ) {
+                    delete record[ field.sourceField];
+                }
             });
 
         return Object.assign({}, record, related_object);
