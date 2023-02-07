@@ -25,7 +25,9 @@ class Model {
                 ))
             ),
             version: 2,
-            src: `${srcBase}/${this.name}`
+            src: `${srcBase}/${this.name}`,
+            idField: this.idField,
+            labelField: this.labelField
         }
     }
 }
