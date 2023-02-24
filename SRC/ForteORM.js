@@ -321,8 +321,8 @@ const defs = {
         return this;
     },
 
-    createHost( storeHost ) {
-        return this.hosts[ storeHost.id() || 'anonymous-host' ] = storeHost;
+    createHost( storeHost, id ) {
+        return this.hosts[ id ||  storeHost.id?.() || 'anonymous-host' ] = storeHost;
     },
 
     data( name, jsonData ) {
