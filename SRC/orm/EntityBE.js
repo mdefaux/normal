@@ -131,7 +131,7 @@ class EntityBE {
     // }
 
     select(field) {
-        return this.createQuery().fetch().select(field);
+        return this.createQuery()/*.fetch()*/.select(field);
     }
     
     /**Gets a record

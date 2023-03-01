@@ -127,58 +127,26 @@ class KdbQuery extends Query {
         return this;
     }
 
-    /**Joins with all the related objects
+
+    /**Builds in queryBuilder the join defined in abstract Query
      * 
-     * TODO: gets relation from relation set instead scanning 
-     * field looking for ObjectLinks. Relations can be different for example 1-n
-     */
-    joinAllRelated() {
-        // ciclo le columns per trovare eventuali objectLink per eseguire le join sulle tabelle target
-        Object.entries(this.model.fields)
-            .filter(([, field]) => (field instanceof ObjectLink))
-            .forEach(([, field]) => {
-
-                this.joinRelated(field);
-
-            });
-
-        return this;
-    }
-
-    /**Join a related object... actually identified by a field (to change)
-     * TODO: change argument to object related or a relation name instead a field
-     * 
-     * @param {*} field that identifies the relation (actually true only for ObjectLink)
      * @returns 
      */
-    joinRelated(field) {
+    buildJoinRelated() {
         let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
-        if( this.relateds && this.relateds[ field.name ] )
-            return this;
+        // for each join
+        Object.entries(this.relateds).forEach( ([ , field ]) => {
 
-        let foreignTableName = this.factory[field.toEntityName].metaData.model.dbTableName;
-        // let foreignTableLabel =  this.factory[field.toEntityName].model.labelField;
-        // let foreignId = this.factory[field.toEntityName].model.idField;
-        // let foreignFieldsAlias = this.getAliasFieldName(field.name);
-        // let foreignTableAlias = `${foreignTableName}${index}`;
-        // potrebbe essere necessario in futuro aggiungere, all'interno del this.model della colonna in esame,
-        // l'alias della tabella che viene utilizzato.
-        // Potrebbe infatti essere necessario recuperare l'alias ad esempio in fase di sviluppo della where della query su campi dell'objectLink (applyFilter)
-        //this.model.columns[key].tableAlias = foreignTableAlias;
-        let r = field.getSelection();
-
-        this.relateds = {
-            ...this.relateds || {},
-            [field.name]: field
-        };
-
-        // TODO: move following query building part to building phase, 
-        // leave here the definition of join only
-
-        // la select non viene fatta qui, ma solo alla fine se non sono state dichiarate altre select
-        // this.qb.select(`${foreignTableAlias}.${foreignTableLabel} as ${foreignFieldsAlias}.${foreignTableLabel}`);
-        this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.foreignTableAlias}.${r.foreignId}`);
+            // gets the name of the foreign table from the field
+            let foreignTableName = this.factory[field.toEntityName].metaData.model.dbTableName;
+            
+            // gets from field all alias needed for the join building
+            let r = field.getSelection();
+        
+            // la select non viene fatta qui, ma solo alla fine se non sono state dichiarate altre select
+            this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.foreignTableAlias}.${r.foreignId}`);
+        })
         
         return this;
     }
@@ -532,35 +500,25 @@ class KdbQuery extends Query {
         this.joinRelated(field);
     }
 
-    groupBy(column) {
-        if ( !column ) {
+    buildGroupBy() {
+
+        if (!this.groups) {
             return this;
         }
 
-        if (Array.isArray(column)) {
-            column.forEach(c => (this.groupBy(c)));
-            return this;
-        }
-
-        let field;
-
-        if (typeof column === 'string') {
-            field = this.model.fields[column];
-            if (!field)
-                throw new Error(`Unknown field '${column}' in entity '${this.model.name}'.`);
+        this.groups.forEach((field) => {
 
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
             // la groupBy non fa anche la select /*.select( field.source )*/
             this.qb.groupBy(`${tableName}.${field.sqlSource}`);
-        }
 
-        if (field instanceof ObjectLink) {
-            let r = field.getSelection();
-            this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
-            this.joinRelated(field);
-        }
+            if (field instanceof ObjectLink) {
+                let r = field.getSelection();
+                this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
+                this.joinRelated(field);
+            }
 
-        this.groups = [...this.groups || [], field];
+        })
 
         return this;
     }
@@ -654,15 +612,19 @@ class KdbQuery extends Query {
 
         // builds select clause
         this.buildSelect();
-
+        
+        // builds group by
+        this.buildGroupBy();
+        
         // builds sorting
         this.buildSorting();
-
-
+        
+        
+        
         let limit = parseInt(this.limit) >= 0 ? parseInt(this.limit) : 50;
         //  let offset = parseInt(this.pageNumber) > 1 ? (parseInt(limit) * (parseInt(this.pageNumber)-1)) +1 : 0;
         let offset = parseInt(this.offset) || 0;
-
+        
         if(limit !== 0 && offset !== -1) {
             this.qb.limit(limit).offset(offset);
         }
