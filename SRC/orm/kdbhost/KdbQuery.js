@@ -213,9 +213,16 @@ class KdbQuery extends Query {
                 return this;
             }
 
+            // extracts the value from the ondition
             builtCondition.apply( this );
-            let value = typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+            let value = builtCondition.value instanceof KdbQuery ?
+                // when value is a sub-query, builds it and returns the knex qb object
+                builtCondition.value.build().qb :
+                // when value is an expression or field
+                typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                // ...use the raw
                 this.knex.raw(builtCondition.sqlValue(this)) :
+                // else simply gets the plain value
                 builtCondition.sqlValue(this);
 
 
@@ -267,18 +274,14 @@ class KdbQuery extends Query {
                     qb.orWhere(
                         builtCondition.sqlField(this),
                         builtCondition.type,
-                        typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
-                            this.knex.raw(builtCondition.sqlValue(this)) :
-                            builtCondition.sqlValue(this)
+                        value
                     );
                 }
                 else {
                     qb.where(
                         builtCondition.sqlField(this),
                         builtCondition.type,
-                        typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
-                            this.knex.raw(builtCondition.sqlValue(this)) :
-                            builtCondition.sqlValue(this)
+                        value
                     );
                 }
             }
@@ -310,37 +313,7 @@ class KdbQuery extends Query {
     }
 
     andWhere(conditions) {
-        if (!conditions)
-            return this;
-
-        let builtCondition = this.buildCondition(conditions);
-        
-        if ( !this.qb ) {
-            let tableName = this.model.dbTableName || this.model.name;
-            this.qb = this.knex(tableName);
-        }
-
-        if (builtCondition instanceof FieldConditionDef) {
-            
-        // this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
-        // this.builtCondition = [... (this.builtCondition||[]),builtCondition];
-
-        // return this;
-            this.qb.andWhere(
-                builtCondition.sqlField(this),
-                builtCondition.type,
-                builtCondition.sqlValue(this)
-            );
-        }
-
-        else {
-            // this.builtCondition = [... (this.builtCondition||[]),builtCondition];
-            // return;
-    
-            this.qb.andWhere(builtCondition);
-        }
-
-        return this;
+        return this.where( conditions );
     }
 
     /**
@@ -666,6 +639,8 @@ class KdbQuery extends Query {
         if ( this.debugOn ) {
             this.qb.debug();
         }
+
+        return this;
     }
 
     async execute() {
