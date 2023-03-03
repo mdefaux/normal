@@ -663,11 +663,9 @@ class KdbQuery extends Query {
             this.qb.limit(limit).offset(offset);
         }
         
-        // this.qb.fetchPage({
-        //     pageSize: limit, // Defaults to 10 if not specified
-        //     page: page, // Defaults to 1 if not specified
-        //     // withRelated: ["Vendor", "Categoria"] // Passed to Model#fetchAll
-        //   })
+        if ( this.debugOn ) {
+            this.qb.debug();
+        }
     }
 
     async execute() {
@@ -686,12 +684,6 @@ class KdbQuery extends Query {
             
             return result.map((rec) => (this.readRecord(rec)));
         })
-    }
-
-    debug() {
-        this.qb.debug();
-
-        return this;
     }
 }
 

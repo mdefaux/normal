@@ -270,11 +270,6 @@ class Query extends Statement {
       .where(this.entity[this.model.labelField].equals(value))
       .first();
   }
-
-  debug() {
-
-    return this;
-  }
 }
 
 // module.exports = Query;
