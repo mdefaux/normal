@@ -285,7 +285,25 @@ class KdbQuery extends Query {
         }
 
         else {
-            qb.where(builtCondition);
+            if ( typeof builtCondition === 'function' ) {
+
+                let rebuilt = this.buildCondition(builtCondition(this));
+                
+                if (rebuilt instanceof FieldConditionDef) {
+                    qb.andWhere(
+                        rebuilt.sqlField(this),
+                        rebuilt.type,
+                        rebuilt.sqlValue(this)
+                    );
+                }
+
+                else {
+                    qb.andWhere(rebuilt);
+                }
+            }
+            else {
+                qb.where(builtCondition);
+            }
         }
 
         return this;
@@ -296,8 +314,18 @@ class KdbQuery extends Query {
             return this;
 
         let builtCondition = this.buildCondition(conditions);
+        
+        if ( !this.qb ) {
+            let tableName = this.model.dbTableName || this.model.name;
+            this.qb = this.knex(tableName);
+        }
 
         if (builtCondition instanceof FieldConditionDef) {
+            
+        // this.builtCondition = [... (this.builtCondition||[]), ...builtCondition];
+        // this.builtCondition = [... (this.builtCondition||[]),builtCondition];
+
+        // return this;
             this.qb.andWhere(
                 builtCondition.sqlField(this),
                 builtCondition.type,
@@ -306,6 +334,9 @@ class KdbQuery extends Query {
         }
 
         else {
+            // this.builtCondition = [... (this.builtCondition||[]),builtCondition];
+            // return;
+    
             this.qb.andWhere(builtCondition);
         }
 
@@ -331,6 +362,7 @@ class KdbQuery extends Query {
 
         if (typeof conditions === 'function') {
             return this.buildCondition(conditions(this));
+            return conditions; // this.buildCondition(conditions(this));
         }
         else if (typeof conditions === 'object') {
             if (conditions instanceof FieldConditionDef) {
@@ -343,7 +375,7 @@ class KdbQuery extends Query {
                     .map(([fieldName, value]) => {
                         let field = this.model.fields[fieldName];
 
-                        return [field.sqlSource, value];
+                        return [field?.sqlSource || fieldName, value];
                     })
             );
         }

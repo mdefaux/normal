@@ -144,15 +144,16 @@ class EntityBE {
         if ( typeof id === 'object' ) {
 
             let rr = await this.select('*')
-                .modify( qb => qb.where( id ) )
+                // .modify( qb => qb.where( id ) )
+                .where( id )
                 .first();
             return rr;
         }
 
         return this.createQuery( this )
             .select('*')
-            .where( (qb) => (qb[ this.model.idField ].equals( id )) )
-            // .where( this[ this.model.idField ].equals( newId ) )
+            // .where( (qb) => (qb[ this.model.idField ].equals( id )) )
+            .where( this[ this.model.idField ].equals( id ) )
             // .where( { [this.model.idField]: newId } )
             .then( (r) => ( r[0] ));
     }
