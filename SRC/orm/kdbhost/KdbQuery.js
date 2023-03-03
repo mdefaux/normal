@@ -612,6 +612,8 @@ class KdbQuery extends Query {
 
         // builds select clause
         this.buildSelect();
+
+        this.buildJoinRelated();
         
         // builds group by
         this.buildGroupBy();
