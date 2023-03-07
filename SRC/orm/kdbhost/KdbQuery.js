@@ -595,6 +595,7 @@ class KdbQuery extends Query {
         return this;
     }
 
+
     page(limit, offset) {
         this.limit = limit || 50;
         this.offset = parseInt(offset-1) || 0;
@@ -649,14 +650,14 @@ class KdbQuery extends Query {
             // ottenuto il risultato primario, esegue le query dipendenti
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
 
+            // qb reset; otherwise it will chain conditions on same qb if called later.
+            this.qb = null;
             if(this.limit == 0 && this.offset == -1) {
                 if ( result[0]?.COUNT !== undefined ) {
                     return result;
                 }
-
                 return [{COUNT: result.length}];
             }
-            
             return result.map((rec) => (this.readRecord(rec)));
         })
     }
