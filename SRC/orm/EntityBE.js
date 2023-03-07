@@ -296,13 +296,15 @@ class EntityBE {
         // 
         let pageA = 1;
         let pageB = 0;
-        //il primo array è as400
-        source.page(pageA);
+        let sourcePageSize = parameters.sourcePageSize || 500;
+        let insertSize = parameters.insertSize || 500;
+        let keyField = parameters.keyField || "id";
+        source.page(pageA, sourcePageSize);
         let arrayA = await source.exec();
         // console.log(arrayA);
         //il secondo array è locale
-        let pageSize = 500;
-        destination.page(pageSize);
+        let pageSize = parameters.destinationPageSize || 500;
+        destination.page(null, pageSize);
         let arrayB =   await destination.exec();
         //  console.log(arrayB);
         let arrayI=[];
@@ -314,7 +316,7 @@ class EntityBE {
         let offsetend=0;
         let arraybend=0;
         let arrayaend=0;
-        let countarrayA=500;
+        let countarrayA=sourcePageSize;
         let endfor=0;
 
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
@@ -324,7 +326,7 @@ class EntityBE {
                     ia = 0
                     pageA ++;
                     source.page(pageA);
-                    console.log('righe AS400:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
+                    console.log('righe source:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
                     arrayA = await source.exec();
                     if(arrayA.length===0){
                         arrayaend=1;
@@ -337,7 +339,7 @@ class EntityBE {
                     ib = 0
                     pageB ++;
                     let offset=(pageB*pageSize)+1+offsetend;
-                    destination.page(pageSize,offset);
+                    destination.page(null, pageSize,offset);
                    // console.log('offset arrayb:' + offset);
                     arrayB =   await destination.exec();
                     if(arrayB.length===0){
@@ -377,7 +379,7 @@ class EntityBE {
                 }
 
 
-                if(ia < arrayA.length && ib < arrayB.length && arrayA[ia].CHIAVE === arrayB[ib].CHIAVE) {
+                if(ia < arrayA.length && ib < arrayB.length && arrayA[ia][keyField] === arrayB[ib][keyField]) {
 
                 // let recordtoupdate=parameters.columnMap(arrayA[ia]);
 
@@ -407,7 +409,7 @@ class EntityBE {
                     ia ++;
                     ib++;
                 }
-                else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia].CHIAVE < arrayB[ib].CHIAVE ))  
+                else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia][keyField] < arrayB[ib][keyField] ))  
                 {
             
                     //  arrayB.splice(ib, 0, arrayA[ia]);
@@ -433,7 +435,7 @@ class EntityBE {
                     this.delete(arrayD);
                     arrayD=[];
                 }       
-                if(arrayI.length>=500){
+                if(arrayI.length>=insertSize){
                // console.log('faccio la insert da 500');
                 //  console.log(arrayI);
                 offsetend=offsetend+arrayI.length;
