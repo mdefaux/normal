@@ -596,9 +596,26 @@ class KdbQuery extends Query {
     }
 
 
-    page(limit, offset) {
-        this.limit = limit || 50;
-        this.offset = parseInt(offset-1) || 0;
+    /** Limits the resultSet to a specific page 
+     * 
+     * @param {int} page  number of page, 1+
+     * @param {int} limit number of records per page, same as pageSize.
+     * @param {int} offset starting record to return, 1+ 
+     * @returns 
+     * @example page(2, 100)   second page of 100 records, from record 101 to 200
+     * @example page(null, 100, 101)  100 records starting from record 101
+     */
+     page(page, limit, offset) {
+        if(page) {
+         this.limit = limit || this.limit || 50;
+         this.offset =  ((parseInt(page) -1)*this.limit);
+
+         return this;
+        }
+
+        this.limit = limit || this.limit ||  50;
+        this.offset = parseInt(offset-1) || this.offset ||  0;
+
 
         return this;
     }
