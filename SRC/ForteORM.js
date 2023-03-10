@@ -87,7 +87,9 @@ class ModelDef {
         this.factory = factory;
         this.entity = entity;
         this.model = entity.metaData.model;
-        this.id( "id" );    // sets default id column
+      //  this.id(  new fields.PrimaryKeyField( "id" ) );   
+        this.model.fields.id  = new fields.PrimaryKeyField( "id" );  // sets default id column
+        this.model.idField = "id";
         // this.fields = {};
     }
 
@@ -116,12 +118,16 @@ class ModelDef {
             return fieldName.map( (f) => this.model.fields[ f] );
         }
 
-        if( this.model.idField ) {
-            delete this.model.fields[ fieldName ];
+        if( this.model.idField && this.model.idField === 'id') {
+            delete this.model.fields[ "id" ];
         }
-        else {
+     /*    else {
             this.model.fields[ fieldName ] = new fields.PrimaryKeyField( fieldName );
+        } */
+        if(!this.model.fields[fieldName]) {
+            throw new Error(`'${fieldName}' not found in model fields.`);
         }
+
         this.model.idField = fieldName;
         return this.model.fields[ fieldName ];
     }

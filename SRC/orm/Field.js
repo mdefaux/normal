@@ -69,6 +69,10 @@ class Field {
         return new FieldConditionDef(">", this, objectOrFunction);
     }
 
+    greaterOrEqualThan(objectOrFunction) {
+        return new FieldConditionDef(">=", this, objectOrFunction);
+    }
+
     isNull() {
         return new IsNullFieldConditionDef("is null", this, undefined);
     }

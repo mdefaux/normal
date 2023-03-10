@@ -127,58 +127,26 @@ class KdbQuery extends Query {
         return this;
     }
 
-    /**Joins with all the related objects
+
+    /**Builds in queryBuilder the join defined in abstract Query
      * 
-     * TODO: gets relation from relation set instead scanning 
-     * field looking for ObjectLinks. Relations can be different for example 1-n
-     */
-    joinAllRelated() {
-        // ciclo le columns per trovare eventuali objectLink per eseguire le join sulle tabelle target
-        Object.entries(this.model.fields)
-            .filter(([, field]) => (field instanceof ObjectLink))
-            .forEach(([, field]) => {
-
-                this.joinRelated(field);
-
-            });
-
-        return this;
-    }
-
-    /**Join a related object... actually identified by a field (to change)
-     * TODO: change argument to object related or a relation name instead a field
-     * 
-     * @param {*} field that identifies the relation (actually true only for ObjectLink)
      * @returns 
      */
-    joinRelated(field) {
+    buildJoinRelated() {
         let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
-        if( this.relateds && this.relateds[ field.name ] )
-            return this;
+        // for each join
+        Object.entries(this.relateds).forEach( ([ , field ]) => {
 
-        let foreignTableName = this.factory[field.toEntityName].metaData.model.dbTableName;
-        // let foreignTableLabel =  this.factory[field.toEntityName].model.labelField;
-        // let foreignId = this.factory[field.toEntityName].model.idField;
-        // let foreignFieldsAlias = this.getAliasFieldName(field.name);
-        // let foreignTableAlias = `${foreignTableName}${index}`;
-        // potrebbe essere necessario in futuro aggiungere, all'interno del this.model della colonna in esame,
-        // l'alias della tabella che viene utilizzato.
-        // Potrebbe infatti essere necessario recuperare l'alias ad esempio in fase di sviluppo della where della query su campi dell'objectLink (applyFilter)
-        //this.model.columns[key].tableAlias = foreignTableAlias;
-        let r = field.getSelection();
-
-        this.relateds = {
-            ...this.relateds || {},
-            [field.name]: field
-        };
-
-        // TODO: move following query building part to building phase, 
-        // leave here the definition of join only
-
-        // la select non viene fatta qui, ma solo alla fine se non sono state dichiarate altre select
-        // this.qb.select(`${foreignTableAlias}.${foreignTableLabel} as ${foreignFieldsAlias}.${foreignTableLabel}`);
-        this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.foreignTableAlias}.${r.foreignId}`);
+            // gets the name of the foreign table from the field
+            let foreignTableName = this.factory[field.toEntityName].metaData.model.dbTableName;
+            
+            // gets from field all alias needed for the join building
+            let r = field.getSelection();
+        
+            // la select non viene fatta qui, ma solo alla fine se non sono state dichiarate altre select
+            this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.foreignTableAlias}.${r.foreignId}`);
+        })
         
         return this;
     }
@@ -245,9 +213,16 @@ class KdbQuery extends Query {
                 return this;
             }
 
+            // extracts the value from the ondition
             builtCondition.apply( this );
-            let value = typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+            let value = builtCondition.value instanceof KdbQuery ?
+                // when value is a sub-query, builds it and returns the knex qb object
+                builtCondition.value.build().qb :
+                // when value is an expression or field
+                typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                // ...use the raw
                 this.knex.raw(builtCondition.sqlValue(this)) :
+                // else simply gets the plain value
                 builtCondition.sqlValue(this);
 
 
@@ -299,49 +274,46 @@ class KdbQuery extends Query {
                     qb.orWhere(
                         builtCondition.sqlField(this),
                         builtCondition.type,
-                        typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
-                            this.knex.raw(builtCondition.sqlValue(this)) :
-                            builtCondition.sqlValue(this)
+                        value
                     );
                 }
                 else {
                     qb.where(
                         builtCondition.sqlField(this),
                         builtCondition.type,
-                        typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
-                            this.knex.raw(builtCondition.sqlValue(this)) :
-                            builtCondition.sqlValue(this)
+                        value
                     );
                 }
             }
         }
 
         else {
-            qb.where(builtCondition);
+            if ( typeof builtCondition === 'function' ) {
+
+                let rebuilt = this.buildCondition(builtCondition(this));
+                
+                if (rebuilt instanceof FieldConditionDef) {
+                    qb.andWhere(
+                        rebuilt.sqlField(this),
+                        rebuilt.type,
+                        rebuilt.sqlValue(this)
+                    );
+                }
+
+                else {
+                    qb.andWhere(rebuilt);
+                }
+            }
+            else {
+                qb.where(builtCondition);
+            }
         }
 
         return this;
     }
 
     andWhere(conditions) {
-        if (!conditions)
-            return this;
-
-        let builtCondition = this.buildCondition(conditions);
-
-        if (builtCondition instanceof FieldConditionDef) {
-            this.qb.andWhere(
-                builtCondition.sqlField(this),
-                builtCondition.type,
-                builtCondition.sqlValue(this)
-            );
-        }
-
-        else {
-            this.qb.andWhere(builtCondition);
-        }
-
-        return this;
+        return this.where( conditions );
     }
 
     /**
@@ -363,6 +335,7 @@ class KdbQuery extends Query {
 
         if (typeof conditions === 'function') {
             return this.buildCondition(conditions(this));
+            return conditions; // this.buildCondition(conditions(this));
         }
         else if (typeof conditions === 'object') {
             if (conditions instanceof FieldConditionDef) {
@@ -375,7 +348,7 @@ class KdbQuery extends Query {
                     .map(([fieldName, value]) => {
                         let field = this.model.fields[fieldName];
 
-                        return [field.sqlSource, value];
+                        return [field?.sqlSource || fieldName, value];
                     })
             );
         }
@@ -532,35 +505,25 @@ class KdbQuery extends Query {
         this.joinRelated(field);
     }
 
-    groupBy(column) {
-        if ( !column ) {
+    buildGroupBy() {
+
+        if (!this.groups) {
             return this;
         }
 
-        if (Array.isArray(column)) {
-            column.forEach(c => (this.groupBy(c)));
-            return this;
-        }
-
-        let field;
-
-        if (typeof column === 'string') {
-            field = this.model.fields[column];
-            if (!field)
-                throw new Error(`Unknown field '${column}' in entity '${this.model.name}'.`);
+        this.groups.forEach((field) => {
 
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
             // la groupBy non fa anche la select /*.select( field.source )*/
             this.qb.groupBy(`${tableName}.${field.sqlSource}`);
-        }
 
-        if (field instanceof ObjectLink) {
-            let r = field.getSelection();
-            this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
-            this.joinRelated(field);
-        }
+            if (field instanceof ObjectLink) {
+                let r = field.getSelection();
+                this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
+                this.joinRelated(field);
+            }
 
-        this.groups = [...this.groups || [], field];
+        })
 
         return this;
     }
@@ -568,7 +531,8 @@ class KdbQuery extends Query {
     orderBy(order) {
         // il secondo parametro della orderBy è l'ordinamento di default...sarebbe da inserire nel model
         // let order = utils.orderBy(this.req.query, "id");
-        this.qb.orderBy(order.field, order.order);
+        // this.qb.orderBy(order.field, order.order);
+        this.sortBy( order );
 
         return this;
     }
@@ -632,9 +596,27 @@ class KdbQuery extends Query {
         return this;
     }
 
-    page(limit, offset) {
-        this.limit = limit || 50;
-        this.offset = parseInt(offset-1) || 0;
+
+    /** Limits the resultSet to a specific page 
+     * 
+     * @param {int} page  number of page, 1+
+     * @param {int} limit number of records per page, same as pageSize.
+     * @param {int} offset starting record to return, 1+ 
+     * @returns 
+     * @example page(2, 100)   second page of 100 records, from record 101 to 200
+     * @example page(null, 100, 101)  100 records starting from record 101
+     */
+     page(page, limit, offset) {
+        if(page) {
+         this.limit = limit || this.limit || 50;
+         this.offset =  ((parseInt(page) -1)*this.limit);
+
+         return this;
+        }
+
+        this.limit = limit || this.limit ||  50;
+        this.offset = parseInt(offset-1) || this.offset ||  0;
+
 
         return this;
     }
@@ -655,23 +637,29 @@ class KdbQuery extends Query {
         // builds select clause
         this.buildSelect();
 
+        this.buildJoinRelated();
+        
+        // builds group by
+        this.buildGroupBy();
+        
         // builds sorting
         this.buildSorting();
-
-
+        
+        
+        
         let limit = parseInt(this.limit) >= 0 ? parseInt(this.limit) : 50;
         //  let offset = parseInt(this.pageNumber) > 1 ? (parseInt(limit) * (parseInt(this.pageNumber)-1)) +1 : 0;
         let offset = parseInt(this.offset) || 0;
-
+        
         if(limit !== 0 && offset !== -1) {
             this.qb.limit(limit).offset(offset);
         }
         
-        // this.qb.fetchPage({
-        //     pageSize: limit, // Defaults to 10 if not specified
-        //     page: page, // Defaults to 1 if not specified
-        //     // withRelated: ["Vendor", "Categoria"] // Passed to Model#fetchAll
-        //   })
+        if ( this.debugOn ) {
+            this.qb.debug();
+        }
+
+        return this;
     }
 
     async execute() {
@@ -680,22 +668,16 @@ class KdbQuery extends Query {
             // ottenuto il risultato primario, esegue le query dipendenti
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
 
+            // qb reset; otherwise it will chain conditions on same qb if called later.
+            this.qb = null;
             if(this.limit == 0 && this.offset == -1) {
                 if ( result[0]?.COUNT !== undefined ) {
                     return result;
                 }
-
                 return [{COUNT: result.length}];
             }
-            
             return result.map((rec) => (this.readRecord(rec)));
         })
-    }
-
-    debug() {
-        this.qb.debug();
-
-        return this;
     }
 }
 

@@ -1,4 +1,4 @@
-const { Query } = require("./Query");
+// const { Query } = require("./Query");
 // const { Field } = require("./Model");
 const assert = require('assert');
 
@@ -93,7 +93,7 @@ class FieldConditionDef {
 
     sqlValue(query) {
         if (typeof this.value === 'object') {
-            if (this.value instanceof Query) {
+            if (this.value.constructor?.name === 'KdbQuery' ) { //this.value instanceof Query) {
                 this.value.build();
                 // console.log( this.value.qb )
                 return this.value.qb;
