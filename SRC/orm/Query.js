@@ -186,6 +186,15 @@ class Query extends Statement {
     return this;
   }
 
+  orderBy(order) {
+    // il secondo parametro della orderBy è l'ordinamento di default...sarebbe da inserire nel model
+    // let order = utils.orderBy(this.req.query, "id");
+    // this.qb.orderBy(order.field, order.order);
+    this.sortBy( order );
+
+    return this;
+  }
+
   beforeExec(callback) {
     this.beforeExecCallback = callback;
     return this;
