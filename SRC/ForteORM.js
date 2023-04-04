@@ -98,9 +98,14 @@ class ModelDef {
         this.model.dbTableName = sourceName;
     }
 
+    /**Binds the entity to a specific host
+     * 
+     * @param {StoreHost} storeHost 
+     */
     host( storeHost ) {
-        
+        // TODO: remove reference to host, keeps reference in metadata
         this.entity.host = storeHost;
+        this.entity.metaData.host = storeHost;
     }
 
     useClass( clazz )
