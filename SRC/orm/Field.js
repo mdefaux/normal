@@ -17,6 +17,7 @@ class Field {
     constructor(name, type) {
         this.name = name;
         this.type = type;
+        this.label = name.toUpperCase();
     }
 
     // TODO: checks if used and alter entity model
