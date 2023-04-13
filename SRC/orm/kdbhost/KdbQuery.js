@@ -418,7 +418,8 @@ class KdbQuery extends Query {
         }
 
         // handle FieldAggregationCounts
-        if ( fields.find( (c) => ( c instanceof FieldAggregationCount || c === 'COUNT' ) ) ) {
+        if ( fields.find( (c) => ( c instanceof FieldAggregationCount || c === 'COUNT' ) ) || 
+        (this.limit == 0 && this.offset == -1 ) ) {
 
             this.qb.count('*', {as: 'COUNT'});
             return this;
