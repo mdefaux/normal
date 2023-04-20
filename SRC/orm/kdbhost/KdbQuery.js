@@ -672,7 +672,7 @@ class KdbQuery extends Query {
             this.qb = null;
             if(this.limit == 0 && this.offset == -1) {
                 if ( result[0]?.COUNT !== undefined ) {
-                    return result;
+                    return [{ ...result[0], COUNT: parseInt( result[0].COUNT ) }];
                 }
                 return [{COUNT: result.length}];
             }
