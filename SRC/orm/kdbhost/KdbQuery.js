@@ -653,6 +653,11 @@ class KdbQuery extends Query {
         let offset = parseInt(this.offset) || 0;
         
         if(limit !== 0 && offset !== -1) {
+            // TODO: ensures that Order By is used: 
+            // OrderBy is mandatory in pagination for certain DB
+            // https://dba.stackexchange.com/questions/167562/how-to-solve-invalid-usage-of-the-option-next-in-the-fetch-statement
+            // https://github.com/adonisjs/lucid/issues/386
+            // 
             this.qb.limit(limit).offset(offset);
         }
         
