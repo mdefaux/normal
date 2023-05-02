@@ -98,6 +98,9 @@ class KdbQuery extends Query {
                 }
             });
 
+        let result = Object.assign({}, record, related_object);
+        return this.translateRecord ? this.translateRecord( result ) : result;
+
         return Object.assign({}, record, related_object);
     }
 
@@ -357,6 +360,11 @@ class KdbQuery extends Query {
     }
 
     select(column) {
+        if ( typeof column === 'function' ) {
+            this.translateRecord = column;
+            return this;
+        }
+
         if ( column === false ) {
             return this;
         }
