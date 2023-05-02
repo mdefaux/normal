@@ -68,6 +68,14 @@ class Field {
         return new FieldConditionDef("=", this, objectOrFunction);
     }
 
+    like(objectOrFunction) {
+        return new FieldConditionDef("like", this, objectOrFunction);
+    }
+
+    notEquals(objectOrFunction) {
+        return new FieldConditionDef("<>", this, objectOrFunction);
+    }
+
     greaterThan(objectOrFunction) {
         return new FieldConditionDef(">", this, objectOrFunction);
     }
