@@ -289,7 +289,9 @@ class EntityBE {
             throw new Error( `source parameter is mandatory for allign function` );
         }
         let source = parameters.source;
-        let destination = parameters.destination || this.select().pageSize( 5);
+        let destination = parameters.destination || this.select()
+            .pageSize( 500 )
+            .orderBy({ columnName: parameters.keyField, order: "asc" });
         // console.log('sono nella allign');
         // TODO: alligment procedure
         // ...
