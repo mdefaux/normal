@@ -290,7 +290,7 @@ class EntityBE {
         }
         let source = parameters.source;
         let destination = parameters.destination || this.select().pageSize( 5);
-        console.log('sono nella allign');
+        // console.log('sono nella allign');
         // TODO: alligment procedure
         // ...
         // 
@@ -355,15 +355,18 @@ class EntityBE {
                 //    console.log(ii);
                         break ;
                 }*/
-                if(arraybend === 1 && arrayaend===1 )
-                {
+                if (arraybend === 1 && arrayaend === 1) {
                     //  console.log(arrayI);
-                   // console.log('faccio la insert pre break');
-                    this.insert(arrayI);
-                 //   console.log('faccio la delete');
-                    this.delete(arrayD);
-                   endfor=1;
-                        break ;
+                    // console.log('faccio la insert pre break');
+                    if (!parameters.noInsert) {
+                        this.insert(arrayI);
+                    }
+                    //   console.log('faccio la delete');
+                    if (!parameters.noDelete) {
+                        this.delete(arrayD);
+                    }
+                    endfor = 1;
+                    break;
                 }
                 
                 // 
@@ -402,7 +405,7 @@ class EntityBE {
 
                         let recordtoupdate=Object.fromEntries(shouldupdate.map(u=>([u.fieldName, u.srcValue])));
                         //console.log(recordtoupdate + ': ' + arrayB[ib].id);
-                        this.update(arrayB[ib].id,recordtoupdate); 
+                        this.update(arrayB[ib][this.metaData.model.idField],recordtoupdate); 
                         updatecount ++ ;
                     }
                     
@@ -430,37 +433,36 @@ class EntityBE {
                     }
                 if(arrayD.length>=50){
 
-                    offsetend=offsetend-arrayD.length;
-                 //   console.log('faccio la delete');
-                    this.delete(arrayD);
-                    arrayD=[];
+                    offsetend = offsetend - arrayD.length;
+                    //   console.log('faccio la delete');
+                    if (!parameters.noDelete) {
+                        this.delete(arrayD);
+                    }
+                    arrayD = [];
                 }       
-                if(arrayI.length>=insertSize){
-               // console.log('faccio la insert da 500');
-                //  console.log(arrayI);
-                offsetend=offsetend+arrayI.length;
-                this.insert(arrayI);
-                arrayI=[];
+                if (arrayI.length >= insertSize) {
+                    // console.log('faccio la insert da 500');
+                    //  console.log(arrayI);
+                    offsetend = offsetend + arrayI.length;
+                    if (!parameters.noInsert) {
+                        this.insert(arrayI);
+                    }
+                    arrayI = [];
                 }         
                     
      
            
         }
-        if(arrayI.length>=1 && endfor!=1)
-        {
-          //  console.log('faccio la insert');
-            //  console.log(arrayI);
+        if (arrayI.length >= 1 && endfor != 1 && !parameters.noInsert) {
             this.insert(arrayI);
         }
-        if(arrayD.length>=1 && endfor!=1)
-        {
+        if (arrayD.length >= 1 && endfor != 1 && !parameters.noDelete) {
             // la delete di un array vuoto esplode
-      //  console.log('faccio la delete');
-        this.delete(arrayD);
+            this.delete(arrayD);
         }
-     return ;
-     // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
-    //fine funzione
+        return;
+        // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
+        //fine funzione
     }
 
 }
