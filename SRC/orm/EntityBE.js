@@ -320,6 +320,7 @@ class EntityBE {
         let arrayaend=0;
         let countarrayA=sourcePageSize;
         let endfor=0;
+        let alreadyMatched= false;
 
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {
@@ -383,36 +384,53 @@ class EntityBE {
                     })
                 }
 
-
-                if(ia < arrayA.length && ib < arrayB.length && arrayA[ia][keyField] === arrayB[ib][keyField]) {
+                // it finds a match between the 2 key fields
+                if(ia < arrayA.length && ib < arrayB.length 
+                    && arrayA[ia][keyField] === arrayB[ib][keyField]) {
 
                 // let recordtoupdate=parameters.columnMap(arrayA[ia]);
 
 
-                // let arrayupdate=Object.entries(recordtoupdate);
-                    let arrayupdate=Object.entries(sourceRecord);
-                // let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
-                    let shouldupdate= arrayupdate.reduce((accumulator, [fieldName,fieldvalue]) => {
+                    // let arrayupdate=Object.entries(recordtoupdate);
+                    let arrayupdate = Object.entries(sourceRecord);
+                    // let shouldupdate= arrayupdate.some(([fieldName,fieldvalue]) => fieldvalue !== arrayB[ib][fieldName]);
+                    let shouldupdate = arrayupdate.reduce((accumulator, [fieldName, fieldvalue]) => {
                         let field = this.model.fields[fieldName];
 
-                    //   let value = fieldvalue;
+                        //   let value = fieldvalue;
 
-                    //    if (parameters.parseValue) value = parameters.parseValue(fieldvalue);
+                        //    if (parameters.parseValue) value = parameters.parseValue(fieldvalue);
 
-                        if( !field.equalValues(fieldvalue, arrayB[ib][fieldName])  ) return [...accumulator, {fieldName: fieldName, srcValue: field.parseValue(fieldvalue), destValue: field.parseValue(arrayB[ib][fieldName]) }]
+                        if (!field.equalValues(fieldvalue, arrayB[ib][fieldName])) { 
+                            return [...accumulator, { 
+                                fieldName: fieldName, 
+                                srcValue: field.parseValue(fieldvalue), 
+                                destValue: field.parseValue(arrayB[ib][fieldName]) 
+                            }] 
+                        }
                         return accumulator;
                     }, []);
                     // this.update(arrayB[ib].id,arrayA[ia]);
-                    if(shouldupdate.length > 0){
+                    if (shouldupdate.length > 0) {
 
-                        let recordtoupdate=Object.fromEntries(shouldupdate.map(u=>([u.fieldName, u.srcValue])));
+                        let recordtoupdate = Object.fromEntries(shouldupdate.map(u => ([u.fieldName, u.srcValue])));
                         //console.log(recordtoupdate + ': ' + arrayB[ib].id);
-                        this.update(arrayB[ib][this.metaData.model.idField],recordtoupdate); 
-                        updatecount ++ ;
+                        this.update(arrayB[ib][this.metaData.model.idField], recordtoupdate);
+                        updatecount++;
                     }
-                    
-                    ia ++;
-                    ib++;
+
+                    if (!parameters.destHasDuplicateKeys) { // sourceHasDuplicateKeys) {
+                        ia++;
+                    }
+                    else {
+                        alreadyMatched = arrayA[ia][keyField];
+                    }
+                    if (!parameters.sourceHasDuplicateKeys) {
+                        ib++;
+                    }
+                    else {
+                        alreadyMatched = arrayB[ib][keyField];
+                    }
                 }
                 else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia][keyField] < arrayB[ib][keyField] ))  
                 {
@@ -423,16 +441,18 @@ class EntityBE {
                     insertcount ++;
                     ia ++; //verificare se non va aumentato anche ia
                 }
-                else { 
+                else {
                     //  A>B oppure B è nulla: record da cancellare da B
                     //    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
                     //    arrayD.push(sourceRecord[this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
-                   // arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
-                   // let element ={id: arrayB[ib][this.metaData.model.idField]}
-                    arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
-                    deletecount ++;
-                    ib ++;
+                    // arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
+                    // let element ={id: arrayB[ib][this.metaData.model.idField]}
+                    if (arrayB[ib][keyField]!==alreadyMatched) {
+                        arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
+                        deletecount++;
                     }
+                    ib++;
+                }
                 if(arrayD.length>=50){
 
                     offsetend = offsetend - arrayD.length;
