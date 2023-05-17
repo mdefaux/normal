@@ -1,6 +1,6 @@
 {
   "name": "normaly",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Network distributed Object Relation Model",
   "main": "src/index.js",
   "scripts": {
