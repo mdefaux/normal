@@ -349,8 +349,7 @@ class ObjectLink extends Relation {
         return this;
     }
 
-    getSelection()
-    {
+    getSelection() {
         // let joinField = this.sourceField;
         let foreignTableName = this.factory[this.toEntityName].metaData.model.dbTableName;
         let foreignLabelName = this.factory[this.toEntityName].metaData.model.labelField;
@@ -358,7 +357,7 @@ class ObjectLink extends Relation {
         let foreignTableLabel = foreignLabelField.sqlSource;
         let foreignId = this.factory[this.toEntityName].model.idField;
         let foreignFieldsAlias = `_c_${this.name}`; // this.getAliasFieldName(this.name);
-        let foreignTableAlias = `_jt_${foreignTableName}`;
+        let foreignTableAlias = `_jt_${foreignTableName.toUpperCase()}_${this.name}`;
 
         // potrebbe essere necessario in futuro aggiungere, all'interno del this.model della colonna in esame,
         // l'alias della tabella che viene utilizzato.
