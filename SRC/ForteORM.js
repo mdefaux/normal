@@ -56,8 +56,14 @@ class FieldDef {
     }
 
     rename(name) {
+        this.targetField.tableModel.fields[ name ] = this.targetField;
+        delete this.targetField.tableModel.fields[ this.targetField.name ];
         this.targetField.name = name;
         return this;
+    }
+
+    renameAsSource() {
+        return this.rename( this.targetField.sourceField );
     }
 
     defaultColumnWidth( defaultColumnWidthValue ) {
