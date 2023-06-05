@@ -145,13 +145,13 @@ class ModelDef {
 
     label( fieldName ) {
 
-        if ( !this.model.fields[ fieldName ] ) {
-            this.string( fieldName );
-        }
+        // if ( !this.model.fields[ fieldName ] ) {
+        //     this.string( fieldName );
+        // }
 
         this.model.labelField = fieldName;
 
-        return new FieldDef( this.model.fields[ fieldName ] );
+        // return new FieldDef( this.model.fields[ fieldName ] );
     }
 
     string( fieldName )
