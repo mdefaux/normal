@@ -76,8 +76,7 @@ class KdbQuery extends Query {
                 let fieldName = field.name;
                 let r = field.getSelection();
 
-               // let fieldKey = `${r.foreignFieldsAlias}.${r.foreignTableLabel}`;
-                let fieldKey = `${r.foreignTableAlias}.${r.foreignFieldsAlias}`;
+                let fieldKey = `${r.foreignFieldsAlias}`;
 
                 // checks if field was already processed... (column was probabily selected twice)
                 if (!record[fieldKey] && related_object[fieldName])
@@ -509,8 +508,7 @@ class KdbQuery extends Query {
 
     selectRelatedDetails(field) {
         let r = field.getSelection();
-        //this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}.${r.foreignTableLabel}`);
-        this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignTableAlias}.${r.foreignFieldsAlias}`);
+        this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}`);
         this.joinRelated(field);
     }
 
