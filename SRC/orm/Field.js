@@ -292,7 +292,7 @@ class Relation extends Field {
             type:  this.type,
             // ...this.label !== undefined && {label: this.label},
             // disabled if we don't want that FE knows about db source name
-            ...this.sourceField !== undefined && {sourceField: this.sourceField},
+            // ...this.sourceField !== undefined && {sourceField: this.sourceField},
             // ...this.visibile !== undefined && {visible: this.visible},
             // ...this.defaultColumnWidth !== undefined && {defaultColumnWidth: this.defaultColumnWidth},
         }
@@ -392,7 +392,7 @@ class ObjectLink extends Relation {
             ...super.serialize(),
             table: this.toEntityName,
             // to disable if we don't want that FE knows about db source name
-            ...this.sourceField !== undefined && {sourceField: this.sourceField},
+            // ...this.sourceField !== undefined && {sourceField: this.sourceField},
         }
     }
     
