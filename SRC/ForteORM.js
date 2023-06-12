@@ -303,6 +303,9 @@ class ModelDef {
         this.entity.metaData.createSelectCallback = createSelectCallback;
     }
 
+    paged( isPaged = true ) {
+        this.entity.metaData.model.paged = isPaged;
+    }
 }
 
 class EntityProxy extends EntityBE
