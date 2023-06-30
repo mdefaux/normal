@@ -91,6 +91,20 @@ class FieldConditionDef {
 
     }
 
+    sqlStringField(query, qt="\`" ) {
+        if ( this.field.field?.getSelection()?.foreignTableLabel ) {
+            let r = this.field.field.getSelection();
+            return `${qt}${r.foreignTableAlias}${qt}.${qt}${r.foreignTableLabel}${qt}`
+        }
+
+        return `${qt}${this.field.sourceAlias}${qt}.${qt}${this.field.sourceField || this.field.name}${qt}`
+
+        // if( query?.tableAlias || this.tableAlias )
+        //     return `${query?.tableAlias || this.tableAlias}.${this.field.sqlSource}`;
+        return `${this.field.sqlSource}`;
+
+    }
+
     sqlValue(query) {
         if (typeof this.value === 'object') {
             if (this.value.constructor?.name === 'KdbQuery' ) { //this.value instanceof Query) {
