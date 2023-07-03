@@ -241,10 +241,11 @@ class KdbQuery extends Query {
 
                 let viewAlias = builtCondition.field.sourceAlias;
 
-                if( JSON.stringify( this.qb.client.driver ).indexOf( 'PG_DEPENDENCIES' ) > -1 ) {
+                if( false && JSON.stringify( this.qb.client.driver ).indexOf( 'PG_DEPENDENCIES' ) > -1 ) {
                     // 
                     qb.where(
-                        builtCondition.sqlField(this),
+                        // builtCondition.sqlField(this),
+                        builtCondition.sqlStringField( this ),
                         'ILIKE',
                         typeof value === 'string' ? value.toUpperCase() :
                             this.knex.raw( `UPPER( ${value} )` )
@@ -253,7 +254,8 @@ class KdbQuery extends Query {
                 else if ( this.qb.client.config.client === 'mysql' ) {
                     // 
                     qb.where(
-                        this.knex.raw( `UPPER( \`${viewAlias}\`.\`${builtCondition.field.name}\` )` ),
+                        this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\`" ) } )` ),
+                        // this.knex.raw( `UPPER( \`${viewAlias}\`.\`${builtCondition.field.name}\` )` ),
                         // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                         builtCondition.type,
                         typeof value === 'string' ? value.toUpperCase() :
@@ -263,7 +265,8 @@ class KdbQuery extends Query {
                 else {
                     // 
                     qb.where(
-                        this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
+                        this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\"" ) } )` ),
+                        // this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
                         // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                         builtCondition.type,
                         typeof value === 'string' ? value.toUpperCase() :
@@ -272,6 +275,8 @@ class KdbQuery extends Query {
                 }
             }
             else {
+                // TODO: use sqlStringField 
+                // TODO: dynamic change the method called qb[ whereFunction ]( ... )
                 if ( whereOp === 'or' ) {
                     qb.orWhere(
                         builtCondition.sqlField(this),
