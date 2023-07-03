@@ -291,7 +291,7 @@ class EntityBE {
         let source = parameters.source;
         let destination = parameters.destination || this.select()
             .pageSize( 500 )
-            .orderBy({ columnName: parameters.keyField, order: "asc" });
+            .orderBy({ columnName: parameters.keyFieldD, order: "asc" });
         // console.log('sono nella allign');
         // TODO: alligment procedure
         // ...
@@ -300,7 +300,8 @@ class EntityBE {
         let pageB = 0;
         let sourcePageSize = parameters.sourcePageSize || 500;
         let insertSize = parameters.insertSize || 500;
-        let keyField = parameters.keyField || "id";
+        let keyFieldS = parameters.keyFieldS || "id";
+        let keyFieldD = parameters.keyFieldD || "id";
         source.page(pageA, sourcePageSize);
         let arrayA = await source.exec();
         // console.log(arrayA);
@@ -312,6 +313,7 @@ class EntityBE {
         let arrayI=[];
         // var arrayI = new Array();
         let arrayD=[];
+        let arrayUD=[];
         let insertcount=0;
         let updatecount=0;
         let deletecount=0;
@@ -323,7 +325,8 @@ class EntityBE {
         let alreadyMatched= false;
 
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
-        {
+        {                  //  console.log('righe AAAAA source:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
+
                 if( arrayA.length===ia && arrayaend===0) {
 
                     ia = 0
@@ -343,12 +346,12 @@ class EntityBE {
                     pageB ++;
                     let offset=(pageB*pageSize)+1+offsetend;
                     destination.page(null, pageSize,offset);
-                   // console.log('offset arrayb:' + offset);
+                    //console.log('offset arrayb:' + offset + " offsetend " + offsetend + " pageSize " +  pageSize + " pageB " + pageB);
                     arrayB =   await destination.exec();
                     if(arrayB.length===0){
                         arraybend=1;
                     }
-                    
+                     
 
                 }
                 
@@ -366,7 +369,7 @@ class EntityBE {
                     }
                     //   console.log('faccio la delete');
                     if (!parameters.noDelete) {
-                        this.delete(arrayD);
+                       // this.delete(arrayD);
                     }
                     endfor = 1;
                     break;
@@ -386,8 +389,8 @@ class EntityBE {
 
                 // it finds a match between the 2 key fields
                 if(ia < arrayA.length && ib < arrayB.length 
-                    && arrayA[ia][keyField] === arrayB[ib][keyField]) {
-
+                    && arrayA[ia][keyFieldS] === arrayB[ib][keyFieldD]) {
+//console.log(arrayA[ia][keyFieldS] +'='+arrayB[ib][keyFieldD] );
                 // let recordtoupdate=parameters.columnMap(arrayA[ia]);
 
 
@@ -415,7 +418,7 @@ class EntityBE {
 
                         let recordtoupdate = Object.fromEntries(shouldupdate.map(u => ([u.fieldName, u.srcValue])));
                         //console.log(recordtoupdate + ': ' + arrayB[ib].id);
-                        this.update(arrayB[ib][this.metaData.model.idField], recordtoupdate);
+                        await     this.update(arrayB[ib][this.metaData.model.idField], recordtoupdate);
                         updatecount++;
                     }
 
@@ -423,16 +426,16 @@ class EntityBE {
                         ia++;
                     }
                     else {
-                        alreadyMatched = arrayA[ia][keyField];
+                        alreadyMatched = arrayA[ia][keyFieldS];
                     }
                     if (!parameters.sourceHasDuplicateKeys) {
                         ib++;
                     }
                     else {
-                        alreadyMatched = arrayB[ib][keyField];
+                        alreadyMatched = arrayB[ib][keyFieldD];
                     }
                 }
-                else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia][keyField] < arrayB[ib][keyField] ))  
+                else if(ib >= arrayB.length || (ia < arrayA.length && arrayA[ia][keyFieldS] < arrayB[ib][keyFieldD] ))  
                 {
             
                     //  arrayB.splice(ib, 0, arrayA[ia]);
@@ -447,7 +450,8 @@ class EntityBE {
                     //    arrayD.push(sourceRecord[this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
                     // arrayD.push(arrayB[ib][this.metaData.model.idField]); //inserisco nell'arrayD gli elementi da eliminare 
                     // let element ={id: arrayB[ib][this.metaData.model.idField]}
-                    if (arrayB[ib][keyField]!==alreadyMatched) {
+                    if (arrayB[ib][keyFieldD]!==alreadyMatched) {
+                       // console.log(arrayA[ia][keyFieldS] +'='+arrayB[ib][keyFieldD] );
                         arrayD.push(arrayB[ib]); //inserisco nell'arrayD gli elementi da eliminare 
                         deletecount++;
                     }
@@ -455,19 +459,28 @@ class EntityBE {
                 }
                 if(arrayD.length>=50){
 
-                    offsetend = offsetend - arrayD.length;
                     //   console.log('faccio la delete');
                     if (!parameters.noDelete) {
-                        this.delete(arrayD);
+                        if(parameters.removed != 'undefined'){
+                        //aspetta che tutti gli update siano stati fatti effettivamente
+                       await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
+
+                        }
+                        else{
+                            await this.delete(arrayD);
                     }
+                    
+                    offsetend = offsetend - arrayD.length;
+                    }
+
                     arrayD = [];
                 }       
                 if (arrayI.length >= insertSize) {
                     // console.log('faccio la insert da 500');
                     //  console.log(arrayI);
-                    offsetend = offsetend + arrayI.length;
                     if (!parameters.noInsert) {
-                        this.insert(arrayI);
+                        await   this.insert(arrayI);
+                        offsetend = offsetend + arrayI.length;
                     }
                     arrayI = [];
                 }         
@@ -476,11 +489,11 @@ class EntityBE {
            
         }
         if (arrayI.length >= 1 && endfor != 1 && !parameters.noInsert) {
-            this.insert(arrayI);
+            await   this.insert(arrayI);
         }
         if (arrayD.length >= 1 && endfor != 1 && !parameters.noDelete) {
             // la delete di un array vuoto esplode
-            this.delete(arrayD);
+            await   this.delete(arrayD);
         }
         return;
         // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
