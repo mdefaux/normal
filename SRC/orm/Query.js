@@ -251,7 +251,7 @@ class Query extends Statement {
 
     if (typeof id === 'object') {
 
-      let rr = await this.modify(qb => qb.where(id))
+      let rr = await this.where( id ) // modify(qb => qb.where(id))
         .first();
       return rr;
     }
