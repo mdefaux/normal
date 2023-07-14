@@ -435,6 +435,9 @@ class ObjectLink extends Relation {
                 let result = await entity
                     .select( [entity[idField]] )
                     .byLabel( value );
+                    if(!result){
+                        throw new Error (`result is null, value: '${value}' not found for '${this.toModel.name}' in table '${this.toEntityName}'` )
+                    }
                 if ( cache ) {
                     cache[ value ] = result[idField];
                 }
