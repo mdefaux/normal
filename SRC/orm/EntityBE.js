@@ -2,7 +2,7 @@
  * with other entities.
  * 
  */
-
+const { Utility } = require("../utils/Utility");
 const { RelationEntity } = require("./RelationEntity");
 
 class EntityBE {
@@ -241,7 +241,12 @@ class EntityBE {
                     parserData.unknownFields.push( { name: currentKey, value: currentValue } )
                 }
                 else if ( ! parserData?.ignoreUnknownField ) {
-                    throw new Error( `Unknown field '${currentKey}' value '${currentValue}', in entity '${this.metaData.name}'.`)
+                    let candidates = Utility.top3Similar( currentKey, Object.keys( this.metaData.model.fields ) );
+
+                    let msg = `NORMALY-0001 Unknown field '${currentKey}' value '${currentValue}', in entity '${this.metaData.name}'.`
+                        + (candidates.length > 0 ? ` Did you mean ${candidates
+                        .join( ', ' )}?` : '');
+                    throw new Error( msg )
                 }
                 return prevValue;
             },
