@@ -418,7 +418,7 @@ class ObjectLink extends Relation {
         }
     }
 
-    toRaw( value ) {
+    toRaw( value, statement ) {
 
         let idField = this.toModel.idField;
         // TODO: check if value is an object
@@ -436,7 +436,10 @@ class ObjectLink extends Relation {
                     .select( [entity[idField]] )
                     .byLabel( value );
                     if(!result){
-                        throw new Error (`result is null, value: '${value}' not found for '${this.toModel.name}' in table '${this.toEntityName}'` )
+                        if ( ! statement?.autoInsertNewObjectLookupValues ) {
+                            throw new Error (`NORMALY-0002 Value: '${value}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
+                        }
+
                     }
                 if ( cache ) {
                     cache[ value ] = result[idField];

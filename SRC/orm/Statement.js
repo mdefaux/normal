@@ -55,7 +55,7 @@ class Statement {
             Object.entries( record ).map( async ([key,value]) => {
 
                 if ( typeof value === 'function' ) {
-                    value = await value( cache );
+                    value = await value( cache, this );
                 }
                 return [key,value];
             } )

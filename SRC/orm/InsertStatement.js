@@ -21,6 +21,10 @@ class InsertStatement extends Statement {
     //     this.processedRecord = record;
     //     return this;
     // }
+
+    autoInsertNewObjectLookupValues( value=true ){
+        this.autoInsertNewObjectLookupValuesEnabled = value;
+    }
 }
 
 exports.InsertStatement = InsertStatement;
