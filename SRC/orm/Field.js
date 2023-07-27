@@ -441,7 +441,7 @@ class ObjectLink extends Relation {
                     .byLabel( value );
                 if(!result){
                     // throws exception is auto insert is not enabled
-                    if ( ! statement?.autoInsertNewObjectLookupValues ) {
+                    if ( false && ! statement?.autoInsertNewObjectLookupValues ) {
                         throw new Error (`NORMALY-0002 Value: '${value}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
                     }
                     // inserts new value in loked table
