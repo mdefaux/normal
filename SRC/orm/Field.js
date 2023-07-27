@@ -381,6 +381,10 @@ class ObjectLink extends Relation {
         return obj[this.toModel.idField];
     }
     
+    get toEntity() {
+        return this.factory[this.toEntityName];
+    }
+    
     get toModel() {
         let entity = this.factory[this.toEntityName];
         return entity.metaData.model;
@@ -435,12 +439,14 @@ class ObjectLink extends Relation {
                 let result = await entity
                     .select( [entity[idField]] )
                     .byLabel( value );
-                    if(!result){
-                        if ( ! statement?.autoInsertNewObjectLookupValues ) {
-                            throw new Error (`NORMALY-0002 Value: '${value}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
-                        }
-
+                if(!result){
+                    // throws exception is auto insert is not enabled
+                    if ( ! statement?.autoInsertNewObjectLookupValues ) {
+                        throw new Error (`NORMALY-0002 Value: '${value}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
                     }
+                    // inserts new value in loked table
+                    result = await this.toEntity.insert( { [this.toModel.labelField]: value } )
+                }
                 if ( cache ) {
                     cache[ value ] = result[idField];
                 }
