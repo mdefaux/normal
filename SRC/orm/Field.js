@@ -354,6 +354,12 @@ class ObjectLink extends Relation {
         let foreignTableName = this.factory[this.toEntityName].metaData.model.dbTableName;
         let foreignLabelName = this.factory[this.toEntityName].metaData.model.labelField;
         let foreignLabelField = this.factory[this.toEntityName].metaData.model.fields[ foreignLabelName ];
+        if (!foreignLabelName) {
+            throw new Error (`NORMALY-0003 Table '${this.toEntityName}' missing label definition.` );
+        }
+        if (!foreignLabelField) {
+            throw new Error (`NORMALY-0004 Table '${this.toEntityName}' wrong label definition, column with name '${foreignLabelName}'  dosen't exist.` );
+        }
         let foreignTableLabel = foreignLabelField.sqlSource;
         let foreignId = this.factory[this.toEntityName].model.idField;
         let foreignFieldsAlias = `_c_${this.name}`; // this.getAliasFieldName(this.name);
