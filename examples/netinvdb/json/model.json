@@ -1,0 +1,28 @@
+[
+    {
+      "id": 1,
+      "name": "PN001",
+      "vendor_id": 1
+    },
+    {
+      "id": 2,
+      "name": "PN002",
+      "vendor_id": 2
+    },
+    {
+      "id": 3,
+      "name": "PN003",
+      "vendor_id": 1
+    },
+    {
+      "id": 4,
+      "name": "PN004",
+      "vendor_id": 3
+    },
+    {
+      "id": 5,
+      "name": "PN005",
+      "vendor_id": 2
+    }
+  ]
+  

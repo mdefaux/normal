@@ -23,7 +23,7 @@
         {
           "type": "node",
           "request": "launch",
-          "name": "Debug Mocha Tests",
+          "name": "Debug Example Tests",
           "skipFiles": ["<node_internals>/**"],
           "program": "${workspaceFolder}/examples/dbapp/node_modules/mocha/bin/_mocha",
           "args": [
@@ -31,6 +31,21 @@
             "999999",
             // "${workspaceFolder}/test"
             "${fileDirname}/_test-setup.js",
+            // "--exit",
+            "${file}"
+          ]
+        },
+        {
+          "type": "node",
+          "request": "launch",
+          "name": "Debug Mocha Tests",
+          "skipFiles": ["<node_internals>/**"],
+          "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+          "args": [
+            "--timeout",
+            "999999",
+            // "${workspaceFolder}/test"
+            // "${fileDirname}/_test-setup.js",
             // "--exit",
             "${file}"
           ]

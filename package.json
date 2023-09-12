@@ -4,7 +4,7 @@
   "description": "Network distributed Object Relation Model",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha",
     "start": "node src/test.js"
   },
   "engines": {
@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/mdefaux/normal/issues"
   },
-  "homepage": "https://github.com/mdefaux/normal#readme"
+  "homepage": "https://github.com/mdefaux/normal#readme",
+  "devDependencies": {
+    "mocha": "^10.2.0"
+  }
 }

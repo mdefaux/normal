@@ -1,0 +1,23 @@
+[
+    {
+      "id": 10001,
+      "name": "Site 1 for Project 1",
+      "project_id": 1001
+    },
+    {
+      "id": 10002,
+      "name": "Site 2 for Project 1",
+      "project_id": 1001
+    },
+    {
+      "id": 10003,
+      "name": "Site 1 for Project 1",
+      "project_id": 1002
+    },
+    {
+      "id": 10004,
+      "name": "Site 1 for Project 1",
+      "project_id": 1003
+    }
+  ]
+  
