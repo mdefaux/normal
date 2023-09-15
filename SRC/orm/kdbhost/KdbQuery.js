@@ -95,6 +95,20 @@ class KdbQuery extends Query {
                 if ( fieldName !== field.sourceField ) {
                     delete record[ field.sourceField];
                 }
+
+                // builds the object related
+                const tableModel = field.toEntity.metaData.model;
+                // for each field moves the value from the record to the related object
+                Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
+                    if( name === tableModel.idField || name === tableModel.labelField ) {
+                        return;
+                    }
+                    // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+                    // gets the value from the record
+                    related_object[fieldName][name] = record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
+                    // removes the value from the record
+                    delete record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
+                });
             });
 
         let result = Object.assign({}, record, related_object);
@@ -363,32 +377,6 @@ class KdbQuery extends Query {
         return conditions;
     }
 
-    select(column) {
-        if ( typeof column === 'function' ) {
-            this.translateRecord = column;
-            return this;
-        }
-
-        if ( column === false ) {
-            return this;
-        }
-
-        if ( column === '*' || column === undefined ) {
-            this.columns = [...this.columns || [], new FieldAllMainTable()];
-            return this;
-        }
-
-        if (Array.isArray(column)) {
-            // column.forEach(c => (this.select(c)));
-
-            this.columns = [...this.columns || [], ...column];
-            return this;
-        }
-
-        this.columns = [...this.columns || [], column];
-
-        return this;
-    }
 
     buildSelect(fieldsList) {
 
@@ -512,9 +500,21 @@ class KdbQuery extends Query {
     }
 
     selectRelatedDetails(field) {
+        // ensure the foreign table is related. 
+        // If already present in relateds map, does nothing
+        this.joinRelated(field);
+        // adds the label field
         let r = field.getSelection();
         this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}`);
-        this.joinRelated(field);
+
+        const tableModel = field.toEntity.metaData.model;
+        // select all other fields 
+        Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
+            if( name === tableModel.idField || name === tableModel.labelField ) {
+                return;
+            }
+            this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+        });
     }
 
     buildGroupBy() {

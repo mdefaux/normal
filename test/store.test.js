@@ -27,7 +27,7 @@ describe( "Store", function () {
             model.string( 'reference' );
             model.number( 'telephone' );
         
-            model.storageData( dataStorage );
+            // model.storageData( dataStorage );
         } );
         it( "has an Entity", function () {
             assert( Customer.metaData.name === 'Customer' );

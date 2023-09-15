@@ -1,8 +1,9 @@
-// var = require('../../db/knex');
-// const { ObjectLink, FieldConditionDef, Field, FieldAggregation } = require("../ForteORM");
-
+/* Query.js file defines Query class
+ *
+ */
 const { ObjectLink } = require("./Field");
 const { Statement } = require("./Statement");
+const { FieldAggregation, FieldAggregationCount, FieldAllMainTable } = require('./FieldAggregation');
 
 
 /**Oggetto per creare una query ed ottenere un recordset.
@@ -23,7 +24,6 @@ class Query extends Statement {
 
   constructor(entity) {
     super(entity);
-    // this.entity = entity;
     this.model = entity.model;
     this.factory = entity.factory;
 
@@ -51,12 +51,87 @@ class Query extends Statement {
   }
 
 
-  select(columns) {
-    if (!columns) {
-      return this;
+  // select(columns) {
+  //   if (!columns) {
+  //     return this;
+  //   }
+  //   return this;
+  // }
+  
+  select(column) {
+    // if ( typeof column === 'function' ) {
+    //     this.translateRecord = column;
+    //     return this;
+    // }
+
+    if ( column === false ) {
+        return this;
     }
+
+    // if ( column === '*' || column === undefined ) {
+    //     this.columns = [...this.columns || [], new FieldAllMainTable()];
+    //     return this;
+    // }
+
+    if (Array.isArray(column)) {
+        // column.forEach(c => (this.select(c)));
+
+        this.columns = [...this.columns || [], ...column.map( ((c)=>(this.selectColumn(c))))];
+        return this;
+    }
+
+    this.columns = [...this.columns || [], this.selectColumn(column)];
+
     return this;
+}
+
+selectColumn( column ) {
+  if ( typeof column === 'function' ) {
+      this.translateRecord = column;
+      return this.translateRecord;
   }
+
+  if ( column === false ) {
+      return false;
+  }
+
+  if ( column === '*' || column === undefined ) {
+      return new FieldAllMainTable();
+  }
+
+  if ( this.model.fields[ column ] ) {
+    
+    return this.chainSelectedColum( [column] );
+  }
+  else if ( typeof column === 'string' && column.split('.').length > 1 ) {
+
+    let columnSeq = column.split('.');
+    return this.chainSelectedColum( columnSeq );
+  }
+
+  return column;
+}
+
+chainSelectedColum( columnSeq, entity ) {
+  // if there are no more entries in column array, stops recursion
+  if( columnSeq.length === 0 ) {
+    return false;
+  }
+  // process the first entry of columnSeq
+  const columnName = columnSeq.shift();
+
+  // gets the fields
+  let field = entity ? entity.metaData.model.fields[ columnName ] 
+    : this.model.fields[ columnName ];
+
+  if ( field instanceof ObjectLink ) {
+    this.joinRelated(field, entity);
+  }
+
+  // field.relateds = this.chainSelectedColum( columnSeq, field.toEntity );
+
+  return field;
+}
 
 
   /**Joins with all the related objects
