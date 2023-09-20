@@ -104,6 +104,14 @@ class ModelDef {
         this.model.dbTableName = sourceName;
     }
 
+    onInsert(callback) {
+        this.model.onInsert = callback;
+    }
+
+    onUpdate(callback) {
+        this.model.onUpdate = callback;
+    }
+
     /**Binds the entity to a specific host
      * 
      * @param {StoreHost} storeHost 
@@ -419,6 +427,12 @@ const defs = {
 
     today() {
         return (new Date()).getDate();
+    },
+     
+    getEntity(entityName) {
+        if(!entityName || !this.entities[entityName] ) return null;
+
+        return this.entities[entityName];
     }
 }
 
