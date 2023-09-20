@@ -9,6 +9,7 @@ Create a backend db application that expose some API. It uses a PG docker contai
         npm link
 
         cd ./examples/dbapp
+        npm ci
         npm link normaly
 
 On Mac you should run `sudo npm link` command, then normal `npm link normaly`.
