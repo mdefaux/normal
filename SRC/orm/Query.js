@@ -112,7 +112,7 @@ selectColumn( column ) {
   return column;
 }
 
-chainSelectedColum( columnSeq, entity ) {
+chainSelectedColum( columnSeq, entity, leftTableAlias ) {
   // if there are no more entries in column array, stops recursion
   if( columnSeq.length === 0 ) {
     return false;
@@ -125,10 +125,11 @@ chainSelectedColum( columnSeq, entity ) {
     : this.model.fields[ columnName ];
 
   if ( field instanceof ObjectLink ) {
-    this.joinRelated(field, entity);
-  }
+    this.joinRelated(field, entity, entity&& leftTableAlias );
 
-  // field.relateds = this.chainSelectedColum( columnSeq, field.toEntity );
+    
+    field.relateds = this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias );
+  }
 
   return field;
 }
@@ -158,7 +159,7 @@ chainSelectedColum( columnSeq, entity ) {
    * @param {*} field that identifies the relation (actually true only for ObjectLink)
    * @returns 
    */
-  joinRelated(field) {
+  joinRelated(field, leftEntity, leftTableAlias) {
     // let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
     if ( !field ) {
@@ -177,7 +178,10 @@ chainSelectedColum( columnSeq, entity ) {
 
     this.relateds = {
       ...this.relateds || {},
-      [field.name]: field
+      [field.name]: {
+        field: field,
+        leftAlias: leftTableAlias // && '_jt_PARTNUMBER_Partnumber'
+      }
     };
 
     // TODO: move following query building part to building phase, 

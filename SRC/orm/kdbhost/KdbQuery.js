@@ -82,39 +82,84 @@ class KdbQuery extends Query {
                 if (!record[fieldKey] && related_object[fieldName])
                     return;
 
-                related_object[fieldName] = {
-                    [r.foreignId]: record[field.sqlSource],
-                    [r.foreignLabelName]: record[fieldKey]
-                };
+                related_object[fieldName] = this.readRelated( record, field );
 
-                // removes from record the label column of the foreign table
-                delete record[fieldKey];
-                // removes source field from record 
-                // (for example removes 'id_version' and leave 'Version')
-                // TODO: configurable behaviour
-                if ( fieldName !== field.sourceField ) {
-                    delete record[ field.sourceField];
-                }
+                return;
+                // related_object[fieldName] = {
+                //     [r.foreignId]: record[field.sqlSource],
+                //     [r.foreignLabelName]: record[fieldKey]
+                // };
 
-                // builds the object related
-                const tableModel = field.toEntity.metaData.model;
-                // for each field moves the value from the record to the related object
-                Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
-                    if( name === tableModel.idField || name === tableModel.labelField ) {
-                        return;
-                    }
-                    // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
-                    // gets the value from the record
-                    related_object[fieldName][name] = record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
-                    // removes the value from the record
-                    delete record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
-                });
+                // // removes from record the label column of the foreign table
+                // delete record[fieldKey];
+                // // removes source field from record 
+                // // (for example removes 'id_version' and leave 'Version')
+                // // TODO: configurable behaviour
+                // if ( fieldName !== field.sourceField ) {
+                //     delete record[ field.sourceField];
+                // }
+
+                // // builds the object related
+                // const tableModel = field.toEntity.metaData.model;
+                // // for each field moves the value from the record to the related object
+                // Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
+                //     if( name === tableModel.idField || name === tableModel.labelField ) {
+                //         return;
+                //     }
+                //     // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+                //     // gets the value from the record
+                //     related_object[fieldName][name] = record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
+                //     // removes the value from the record
+                //     delete record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
+                // });
             });
 
         let result = Object.assign({}, record, related_object);
         return this.translateRecord ? this.translateRecord( result ) : result;
 
         return Object.assign({}, record, related_object);
+    }
+
+    readRelated( record, field ) {
+        let related_object = {};
+        let fieldName = field.name;
+        let r = field.getSelection();
+
+        let fieldKey = `${r.foreignFieldsAlias}`;
+
+        // // checks if field was already processed... (column was probabily selected twice)
+        // if (!record[fieldKey] && related_object[fieldName])
+        //     return;
+
+        related_object = {
+            [r.foreignId]: record[field.sqlSource],
+            [r.foreignLabelName]: record[fieldKey]
+        };
+
+        // removes from record the label column of the foreign table
+        delete record[fieldKey];
+        // removes source field from record 
+        // (for example removes 'id_version' and leave 'Version')
+        // TODO: configurable behaviour
+        if ( fieldName !== field.sourceField ) {
+            delete record[ field.sourceField];
+        }
+
+        // builds the object related
+        const tableModel = field.toEntity.metaData.model;
+        // for each field moves the value from the record to the related object
+        Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
+            if( name === tableModel.idField || name === tableModel.labelField ) {
+                return;
+            }
+            // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+            // gets the value from the record
+            related_object[name] = record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
+            // removes the value from the record
+            delete record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
+        });
+
+        return related_object;
     }
 
     /**TODO: remove metod
@@ -152,8 +197,9 @@ class KdbQuery extends Query {
         let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
 
         // for each join
-        Object.entries(this.relateds).forEach( ([ , field ]) => {
+        Object.entries(this.relateds).forEach( ([ , join ]) => {
 
+            const field = join.field;
             // gets the name of the foreign table from the field
             let foreignTableName = this.factory[field.toEntityName].metaData.model.dbTableName;
             
@@ -161,7 +207,9 @@ class KdbQuery extends Query {
             let r = field.getSelection();
         
             // la select non viene fatta qui, ma solo alla fine se non sono state dichiarate altre select
-            this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, `${tableName}.${field.sqlSource}`, `${r.foreignTableAlias}.${r.foreignId}`);
+            this.qb.leftOuterJoin(`${foreignTableName} as ${r.foreignTableAlias}`, 
+                `${join.leftAlias || tableName}.${field.sqlSource}`, 
+                `${r.foreignTableAlias}.${r.foreignId}`);
         })
         
         return this;
@@ -471,6 +519,7 @@ class KdbQuery extends Query {
             }
     
             // TODO: change relateds keys to entity name
+            // .............................................
             if (f instanceof ObjectLink && this.relateds[f.name] ) {
                 this.selectRelatedDetails(f);
             }
@@ -502,7 +551,8 @@ class KdbQuery extends Query {
     selectRelatedDetails(field) {
         // ensure the foreign table is related. 
         // If already present in relateds map, does nothing
-        this.joinRelated(field);
+        // this.joinRelated(field);
+
         // adds the label field
         let r = field.getSelection();
         this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}`);
@@ -515,6 +565,11 @@ class KdbQuery extends Query {
             }
             this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
         });
+        
+
+        if ( field.relateds ) {
+            this.selectRelatedDetails( field.relateds );
+        }
     }
 
     buildGroupBy() {
