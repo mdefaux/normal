@@ -76,6 +76,14 @@ class Field {
         return new FieldConditionDef("<>", this, objectOrFunction);
     }
 
+    lessThan(objectOrFunction) {
+        return new FieldConditionDef("<", this, objectOrFunction);
+    }
+
+    lessOrEqualThan(objectOrFunction) {
+        return new FieldConditionDef("<=", this, objectOrFunction);
+    }
+
     greaterThan(objectOrFunction) {
         return new FieldConditionDef(">", this, objectOrFunction);
     }

@@ -161,7 +161,7 @@ class EntityBE {
     /**Insert a new record
      * 
      */
-    async insert(record) {
+    async insert(record, params) {
         // saves temporary ids
         let tempId = record._id;
         delete record._id;
@@ -176,7 +176,13 @@ class EntityBE {
         if (Array.isArray(record)) {
             return newId;
         }
-        return await this.getRecord(newId);
+        let response = await this.getRecord(newId);
+
+        if(this.metaData.model?.onInsert) {
+            await this.metaData.model.onInsert(response, params);
+        }
+
+        return response;
         //  return { ...r, _id: tempId };
         //   return newId;
     }
@@ -186,7 +192,7 @@ class EntityBE {
      * @param {*} record 
      * @returns 
      */
-    async update( id, record /*, returning */ ) {
+    async update( id, record, params /*, returning */ ) {
       //  let idFilter = record[ this.model.idField ];
         let idFilter = id;
         // creates the update statement
@@ -199,7 +205,13 @@ class EntityBE {
             return idFilter;
         }
 
-        return await this.getRecord( idFilter );
+        let response = await this.getRecord( idFilter )
+
+        if(this.metaData.model?.onUpdate) {
+            await this.metaData.model.onUpdate(response, record,  params);
+        }
+
+        return response;
     }
 
     /**Updates a record
