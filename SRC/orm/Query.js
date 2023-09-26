@@ -103,6 +103,10 @@ selectColumn( column ) {
     
     return this.chainSelectedColum( [column] );
   }
+  if ( column instanceof ObjectLink ) {
+    
+    return this.chainSelectedColum( [column] );
+  }
   else if ( typeof column === 'string' && column.split('.').length > 1 ) {
 
     let columnSeq = column.split('.');
@@ -112,6 +116,13 @@ selectColumn( column ) {
   return column;
 }
 
+/**
+ * 
+ * @param {*} columnSeq - array of column names
+ * @param {*} entity 
+ * @param {*} leftTableAlias 
+ * @returns 
+ */
 chainSelectedColum( columnSeq, entity, leftTableAlias ) {
   // if there are no more entries in column array, stops recursion
   if( columnSeq.length === 0 ) {
@@ -121,17 +132,28 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
   const columnName = columnSeq.shift();
 
   // gets the fields
-  let field = entity ? entity.metaData.model.fields[ columnName ] 
+  let field = columnName instanceof ObjectLink ? columnName
+    : entity ? entity.metaData.model.fields[ columnName ] 
     : this.model.fields[ columnName ];
 
+  let columnSelection = {
+    field: field,
+    leftTableAlias: leftTableAlias
+  }
   if ( field instanceof ObjectLink ) {
     this.joinRelated(field, entity, entity&& leftTableAlias );
 
     
-    field.relateds = this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias );
+    // field.relateds = this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias );
+    columnSelection = { ...columnSelection,
+      relateds: this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias ),
+      foreignTableAlias: field.getSelection().foreignTableAlias,
+      idFieldKey: leftTableAlias ? `${leftTableAlias}.${field.sqlSource}` : field.sqlSource,
+      requireObjectRead: field.name
+    }
   }
 
-  return field;
+  return columnSelection;
 }
 
 
@@ -146,7 +168,8 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       .filter(([, field]) => (field instanceof ObjectLink))
       .forEach(([, field]) => {
 
-        this.joinRelated(field);
+        // this.joinRelated(field);
+        this.select( field );
 
       });
 
@@ -180,7 +203,9 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       ...this.relateds || {},
       [field.name]: {
         field: field,
-        leftAlias: leftTableAlias // && '_jt_PARTNUMBER_Partnumber'
+        leftAlias: leftTableAlias, // && '_jt_PARTNUMBER_Partnumber'
+        idFieldKey: leftTableAlias ? `${leftTableAlias}.${field.sqlSource}` : field.sqlSource,
+        requireObjectRead: field.name
       }
     };
 
