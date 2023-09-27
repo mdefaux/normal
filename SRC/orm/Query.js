@@ -146,6 +146,10 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     : entity ? entity/*.metaData.model.fields*/[ columnName ] 
     : this[ columnName ]; // this.model.fields[ columnName ];
 
+  if ( !fieldWrapper ) {
+    throw new Error( `Unknown column '${columnName}' in Entity '${entity?entity.metaData.name:this.model.name}'.`)
+  }
+
   // gets the fields
   let field = fieldWrapper.field;
   // let field = columnName.field instanceof ObjectLink ? columnName.field

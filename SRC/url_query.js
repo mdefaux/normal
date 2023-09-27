@@ -58,9 +58,9 @@ const URLquery = {
             if ( reqField.startsWith( "xcount" ) ) {
                 newColumnSelected = new FieldAggregationCount();
             }
-            // else if ( reqField.startsWith( "xsel" ) ) {
-            //     newColumnSelected = new FieldCondition.textMatch();
-            // }
+            else if ( reqField.startsWith( "xsel" ) ) {
+                return [...selectedColumns, '*', ...reqValue ];
+            }
 /*             else if (reqField.startsWith( "xgb" ) ) {
                 groupBySelect.push(reqValue);
                 return selectedColumns;
