@@ -84,35 +84,6 @@ class KdbQuery extends Query {
                     return;
 
                 related_object[fieldName] = this.readRelated( record, related );
-
-                return;
-                // related_object[fieldName] = {
-                //     [r.foreignId]: record[field.sqlSource],
-                //     [r.foreignLabelName]: record[fieldKey]
-                // };
-
-                // // removes from record the label column of the foreign table
-                // delete record[fieldKey];
-                // // removes source field from record 
-                // // (for example removes 'id_version' and leave 'Version')
-                // // TODO: configurable behaviour
-                // if ( fieldName !== field.sourceField ) {
-                //     delete record[ field.sourceField];
-                // }
-
-                // // builds the object related
-                // const tableModel = field.toEntity.metaData.model;
-                // // for each field moves the value from the record to the related object
-                // Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
-                //     if( name === tableModel.idField || name === tableModel.labelField ) {
-                //         return;
-                //     }
-                //     // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
-                //     // gets the value from the record
-                //     related_object[fieldName][name] = record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
-                //     // removes the value from the record
-                //     delete record[`${r.foreignTableAlias}.${relatedField.sqlSource}`];
-                // });
             });
 
         let result = Object.assign({}, record, related_object);
@@ -158,8 +129,8 @@ class KdbQuery extends Query {
                 return;
             }
             // 
-            if( relatedField instanceof ObjectLink && related.relateds ) {
-                related_object[name] = this.readRelated( record, related.relateds );
+            if( relatedField instanceof ObjectLink && related.nested ) {
+                related_object[name] = this.readRelated( record, related.nested );
                 return;
             }
             // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
@@ -293,7 +264,7 @@ class KdbQuery extends Query {
                 // when value is a sub-query, builds it and returns the knex qb object
                 builtCondition.value.build().qb :
                 // when value is an expression or field
-                typeof builtCondition.value === 'object' && builtCondition.value instanceof Field ?
+                typeof builtCondition.value === 'object' && builtCondition.value.field instanceof Field ?
                 // ...use the raw
                 this.knex.raw(builtCondition.sqlValue(this)) :
                 // else simply gets the plain value
@@ -418,6 +389,16 @@ class KdbQuery extends Query {
         }
         else if (typeof conditions === 'object') {
             if (conditions instanceof FieldConditionDef) {
+                if ( conditions.field && !conditions.field.sourceAlias ) {
+                    if ( this.entity && conditions.field.sourceEntity === this.entity ){
+                        conditions.field.sourceAlias = this.tableAlias || this.model.dbTableName || this.model.name;
+                    }
+                    else if ( this.related[ conditions.field./*sourceEntity?.metaData?.model?.*/name ] ) {
+                        // loooks for alias in related table
+                        let alias = this.related[ conditions.field./*sourceEntity.metaData.model.*/name ]?.joinedTableAlias;
+                        conditions.field.sourceAlias = alias;
+                    }
+                }
                 return conditions;
             }
 
@@ -577,9 +558,9 @@ class KdbQuery extends Query {
             this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
         });
         
-
-        if ( related.relateds ) {
-            this.selectRelatedDetails( related.relateds );
+        // TODO: handle nested as array
+        if ( related.nested ) {
+            this.selectRelatedDetails( related.nested );
         }
     }
 
@@ -589,16 +570,16 @@ class KdbQuery extends Query {
             return this;
         }
 
-        this.groups.forEach((field) => {
+        this.groups.forEach((wrap) => {
 
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
             // la groupBy non fa anche la select /*.select( field.source )*/
-            this.qb.groupBy(`${tableName}.${field.sqlSource}`);
+            this.qb.groupBy(`${tableName}.${wrap.field.sqlSource}`);
 
-            if (field instanceof ObjectLink) {
-                let r = field.getSelection();
+            if (wrap.field instanceof ObjectLink) {
+                let r = wrap.field.getSelection();
                 this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
-                this.joinRelated(field);
+                this.joinRelated(wrap);
             }
 
         })

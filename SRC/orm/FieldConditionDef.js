@@ -1,6 +1,7 @@
 // const { Query } = require("./Query");
 // const { Field } = require("./Model");
 const assert = require('assert');
+const { FieldAggregationMax } = require("./FieldAggregation");
 
 
 class FieldQueryItem {
@@ -40,8 +41,36 @@ class FieldQueryItem {
         return new FieldConditionDef("=", this, objectOrFunction);
     }
 
+    like(objectOrFunction) {
+        // newCondition = new FieldCondition.textMatch();
+        // newCondition.setup( this, objectOrFunction );
+        return new FieldConditionDef("like", this, objectOrFunction);
+    }
+
+
+    lessThan(objectOrFunction) {
+        return new FieldConditionDef("<", this, objectOrFunction);
+    }
+
+    lessOrEqualThan(objectOrFunction) {
+        return new FieldConditionDef("<=", this, objectOrFunction);
+    }
+
+    greaterThan(objectOrFunction) {
+        return new FieldConditionDef(">", this, objectOrFunction);
+    }
+
+    greaterOrEqualThan(objectOrFunction) {
+        return new FieldConditionDef(">=", this, objectOrFunction);
+    }
+
     isNull() {
-        return new IsNullFieldConditionDef("is null", this, objectOrFunction);
+        return new IsNullFieldConditionDef("is null", this, undefined);
+    }
+    
+
+    isNotNull() {
+        return new IsNotNullFieldConditionDef("is not null", this, undefined);
     }
 
     max() {
@@ -92,7 +121,7 @@ class FieldConditionDef {
     }
 
     sqlStringField(query, qt="\`" ) {
-        if ( this.field.field?.getSelection()?.foreignTableLabel ) {
+        if ( this.field.field?.getSelection?.()?.foreignTableLabel ) {
             let r = this.field.field.getSelection();
             return `${qt}${r.foreignTableAlias}${qt}.${qt}${r.foreignTableLabel}${qt}`
         }

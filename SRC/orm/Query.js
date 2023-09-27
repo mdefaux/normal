@@ -1,9 +1,10 @@
 /* Query.js file defines Query class
  *
  */
-const { ObjectLink } = require("./Field");
+const { ObjectLink, Field } = require("./Field");
 const { Statement } = require("./Statement");
 const { FieldAggregation, FieldAggregationCount, FieldAllMainTable } = require('./FieldAggregation');
+const { FieldQueryItem } = require("./FieldConditionDef");
 
 
 /**Oggetto per creare una query ed ottenere un recordset.
@@ -103,8 +104,12 @@ selectColumn( column ) {
     
     return this.chainSelectedColum( [column] );
   }
-  if ( column instanceof ObjectLink ) {
+  if ( /*column instanceof FieldQueryItem && */ column.field instanceof ObjectLink ) {
     
+    return this.chainSelectedColum( [column] );
+  }
+  if ( column instanceof ObjectLink ) {
+    assert( false );
     return this.chainSelectedColum( [column] );
   }
   else if ( typeof column === 'string' && column.split('.').length > 1 ) {
@@ -131,22 +136,34 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
   // process the first entry of columnSeq
   const columnName = columnSeq.shift();
 
+  if ( !columnName ) {
+    return false;
+  }
+
   // gets the fields
-  let field = columnName instanceof ObjectLink ? columnName
-    : entity ? entity.metaData.model.fields[ columnName ] 
-    : this.model.fields[ columnName ];
+  let fieldWrapper = columnName.field instanceof ObjectLink ? columnName
+    // : columnName instanceof ObjectLink ? columnName
+    : entity ? entity/*.metaData.model.fields*/[ columnName ] 
+    : this[ columnName ]; // this.model.fields[ columnName ];
+
+  // gets the fields
+  let field = fieldWrapper.field;
+  // let field = columnName.field instanceof ObjectLink ? columnName.field
+  //   : columnName instanceof ObjectLink ? columnName
+  //   : entity ? entity/*.metaData.model.fields*/[ columnName ] 
+  //   : this[ columnName ]; // this.model.fields[ columnName ];
 
   let columnSelection = {
     field: field,
     leftTableAlias: leftTableAlias
   }
   if ( field instanceof ObjectLink ) {
-    this.joinRelated(field, entity, entity&& leftTableAlias );
+    this.joinRelated(fieldWrapper, entity, entity&& leftTableAlias );
 
     
     // field.relateds = this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias );
     columnSelection = { ...columnSelection,
-      relateds: this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias ),
+      nested: this.chainSelectedColum( columnSeq, field.toEntity, field.getSelection().foreignTableAlias ),
       foreignTableAlias: field.getSelection().foreignTableAlias,
       idFieldKey: leftTableAlias ? `${leftTableAlias}.${field.sqlSource}` : field.sqlSource,
       requireObjectRead: field.name
@@ -169,7 +186,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       .forEach(([, field]) => {
 
         // this.joinRelated(field);
-        this.select( field );
+        this.select( this.entity[ field.name ] );
 
       });
 
@@ -182,8 +199,12 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
    * @param {*} field that identifies the relation (actually true only for ObjectLink)
    * @returns 
    */
-  joinRelated(field, leftEntity, leftTableAlias) {
+  joinRelated(fieldWrapper, leftEntity, leftTableAlias) {
+    if ( !fieldWrapper ) {
+      throw new Error( `ObjectLink field should not be null.` );
+    }
     // let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+    let field = fieldWrapper.field;
 
     if ( !field ) {
       throw new Error( `ObjectLink field should not be null.` );
@@ -199,13 +220,28 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       return this;
     }
 
+    let foreignTableName = field.factory[field.toEntityName].metaData.model.dbTableName;
+    let foreignLabelName = field.factory[field.toEntityName].metaData.model.labelField;
+    let foreignLabelField = field.factory[field.toEntityName].metaData.model.fields[ foreignLabelName ];
+    if (!foreignLabelName) {
+        throw new Error (`NORMALY-0003 Table '${field.toEntityName}' missing label definition.` );
+    }
+    if (!foreignLabelField) {
+        throw new Error (`NORMALY-0004 Table '${field.toEntityName}' wrong label definition, column with name '${foreignLabelName}'  dosen't exist.` );
+    }
+    // let foreignTableLabel = foreignLabelField.sqlSource;
+    // let foreignId = this.factory[field.toEntityName].model.idField;
+    // let foreignFieldsAlias = `_c_${this.name}`; // this.getAliasFieldName(this.name);
+    let foreignTableAlias = `_jt_${foreignTableName.toUpperCase()}_${field.name}`;
+
     this.relateds = {
       ...this.relateds || {},
       [field.name]: {
         field: field,
         leftAlias: leftTableAlias, // && '_jt_PARTNUMBER_Partnumber'
         idFieldKey: leftTableAlias ? `${leftTableAlias}.${field.sqlSource}` : field.sqlSource,
-        requireObjectRead: field.name
+        requireObjectRead: field.name,
+        joinedTableAlias: foreignTableAlias
       }
     };
 
@@ -259,12 +295,16 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     let field;
 
     if (typeof column === 'string') {
-      field = this.model.fields[column];
+      // field = this.model.fields[column];
+      field = this[column]; // TODO: use of getColumnRef ?
       if (!field) {
         throw new Error(`Unknown field '${column}' in entity '${this.model.name}'.`);
       }
     }
     else if (column instanceof Field) {
+      field = column.copy();
+    }
+    else if (column instanceof FieldQueryItem) {
       field = column;
     }
     else {

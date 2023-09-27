@@ -39,7 +39,8 @@ class Field {
     }
 
     copy() {
-        let c = new Field();
+        // let c = new Field();
+        let c = new FieldQueryItem( this );
         c.name = this.name;
         // c.toEntityName = this.toEntityName;
         // c.factory = this.factory;

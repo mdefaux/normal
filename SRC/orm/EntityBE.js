@@ -32,7 +32,11 @@ class EntityBE {
             .forEach(([key, field]) => {
                 Object.defineProperty(this, field.name, {
                     get: function () {
-                        return this.model.fields[field.name];
+                        // return this.model.fields[field.name];
+                        
+                        let copy = this.metaData.model.fields[field.name].copy();
+                        copy.sourceEntity = this; //.tableAlias || this.metaData.model.dbTableName || this.metaData.model.name;
+                        return copy;
 
                         //, this.alias || this.metaData.name );
                     }
