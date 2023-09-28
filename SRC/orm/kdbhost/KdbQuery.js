@@ -116,7 +116,7 @@ class KdbQuery extends Query {
             return { ...related_object, ...nested };
         }
         related_object = {
-            [r.foreignId]: record[fieldIdName] || processedRecord[fieldName],
+            [r.foreignId]: record[fieldIdName] || processedRecord[fieldName] || null,
             [r.foreignLabelName]: record[fieldKey],
             ...nested,
         };
@@ -138,11 +138,11 @@ class KdbQuery extends Query {
                 return;
             }
             // // 
-            if( relatedField === fieldRef.nested.field ) {
+            if( relatedField === fieldRef.nested?.field ) {
                 // related_object[name] = this.readRelated( record, fieldRef.nested );
                 return;
             }
-            if( name === fieldRef.nested.requireObjectRead ) {
+            if( name === fieldRef.nested?.requireObjectRead ) {
                 // related_object[name] = this.readRelated( record, fieldRef.nested );
                 return;
             }
