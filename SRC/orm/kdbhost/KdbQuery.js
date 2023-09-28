@@ -65,7 +65,7 @@ class KdbQuery extends Query {
         // definizione oggetto vuoto per ogni ObjectLink
         let related_object = {};
         // let columns = this.columns || Object.entries(this.model.fields).map(([, f]) => (f));
-        let columns = this.columns?.length > 0 ? this.columns : Object.entries(this.model.fields).map(([, f]) => (f));
+        let columns = this.columns?.length > 0 ? this.columns : []; // Object.entries(this.model.fields).map(([, f]) => (f));
 
         // Object.entries(this.model.fields)
         columns
@@ -567,15 +567,15 @@ class KdbQuery extends Query {
         this.qb.orderBy( this[ this.orderedColumns[0].columnName ].sqlSource, this.orderedColumns[0].order );
     }
 
-    selectAllRelated() {
-        if (!this.relateds)
-            return;
+    // selectAllRelated() {
+    //     if (!this.relateds)
+    //         return;
 
-        Object.entries(this.relateds).forEach(([, field]) => {
-            this.columns = [...this.columns || [], field];
-            this.selectRelatedDetails(field);
-        });
-    }
+    //     Object.entries(this.relateds).forEach(([, field]) => {
+    //         this.columns = [...this.columns || [], field];
+    //         this.selectRelatedDetails(field);
+    //     });
+    // }
 
     selectRelatedDetails(related) {
         // ensure the foreign table is related. 
