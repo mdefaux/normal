@@ -70,20 +70,20 @@ class KdbQuery extends Query {
         // Object.entries(this.model.fields)
         columns
             .filter(related => (related.requireObjectRead || related instanceof ObjectLink))
-            .forEach((related) => {
+            .forEach((fieldRef) => {
                 // popola oggetto con tutti i campi di quell'objectLink + li cancella dal record
                 // attualmente gestisce solo i campi idAttribute e labelAttribute della tabella target
-                let field = related instanceof Field ? related : related.field;
-                let fieldName = related.requireObjectRead || field.name;
-                let r = field.getSelection();
+                let field = fieldRef instanceof Field ? fieldRef : fieldRef.field;
+                let fieldName = fieldRef.requireObjectRead || field.name;
+                // let r = field.getSelection();
 
-                let fieldKey = `${r.foreignFieldsAlias}`;
+                // let fieldKey = `${r.foreignFieldsAlias}`;
 
-                // checks if field was already processed... (column was probabily selected twice)
-                if (!record[fieldKey] && related_object[fieldName])
-                    return;
+                // // checks if field was already processed... (column was probabily selected twice)
+                // if (!record[fieldKey] && related_object[fieldName])
+                //     return;
 
-                related_object[fieldName] = this.readRelated( record, related );
+                related_object[fieldName] = this.readRelated( record, fieldRef, related_object );
             });
 
         let result = Object.assign({}, record, related_object);
@@ -92,24 +92,33 @@ class KdbQuery extends Query {
         return Object.assign({}, record, related_object);
     }
 
-    readRelated( record, related ) {
-        let related_object = {};
-        let field = related instanceof Field ? related : related.field;
+    readRelated( record, fieldRef, processedRecord ) {
+        let field = fieldRef instanceof Field ? fieldRef : fieldRef.field;
         let fieldName = field.name;
+        let related_object = processedRecord[fieldName];
+
         let r = field.getSelection();
 
-        let fieldIdName = related.leftTableAlias ? 
-            `${related.leftTableAlias}.${field.sqlSource}` : field.sqlSource;
+        let fieldIdName = fieldRef.leftTableAlias ? 
+            `${fieldRef.leftTableAlias}.${field.sqlSource}` : field.sqlSource;
         let fieldKey = `${r.foreignFieldsAlias}`;
 
         // // checks if field was already processed... (column was probabily selected twice)
         // if (!record[fieldKey] && related_object[fieldName])
         //     return;
+        let nested = {};
 
+        if (fieldRef.nested) {
+            nested[fieldRef.nested.requireObjectRead] = this.readRelated(record, fieldRef.nested, related_object || {});
+        }
 
+        if (related_object && Object.keys(related_object).length > 0) {
+            return { ...related_object, ...nested };
+        }
         related_object = {
-            [r.foreignId]: record[fieldIdName],
-            [r.foreignLabelName]: record[fieldKey]
+            [r.foreignId]: record[fieldIdName] || processedRecord[fieldName],
+            [r.foreignLabelName]: record[fieldKey],
+            ...nested,
         };
 
         // removes from record the label column of the foreign table
@@ -117,8 +126,8 @@ class KdbQuery extends Query {
         // removes source field from record 
         // (for example removes 'id_version' and leave 'Version')
         // TODO: configurable behaviour
-        if ( fieldName !== field.sourceField ) {
-            delete record[ field.sourceField];
+        if (fieldName !== field.sourceField) {
+            delete record[field.sourceField];
         }
 
         // builds the object related
@@ -128,9 +137,13 @@ class KdbQuery extends Query {
             if( name === tableModel.idField || name === tableModel.labelField ) {
                 return;
             }
-            // 
-            if( relatedField instanceof ObjectLink && related.nested ) {
-                related_object[name] = this.readRelated( record, related.nested );
+            // // 
+            if( relatedField === fieldRef.nested.field ) {
+                // related_object[name] = this.readRelated( record, fieldRef.nested );
+                return;
+            }
+            if( name === fieldRef.nested.requireObjectRead ) {
+                // related_object[name] = this.readRelated( record, fieldRef.nested );
                 return;
             }
             // this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
