@@ -90,7 +90,7 @@ describe( "Join related", function () {
         // assert( rs.relateds.Vendor === rs.columns[1] );
         let rs = await query.exec();
         assert( rs.length > 0 );
-        assert( rs[0].Vendor.name === 'VendorX' );
+        assert( rs[0].Vendor === undefined );
 
         assert( rs.length > 0 );
         assert( rs[0].Partnumber );
@@ -146,7 +146,7 @@ describe( "Join related", function () {
         assert( rs[0].Vendor.name === 'VendorX' );
     });
     it( "query '*' and all objectLookup (Vendor)", async function () {
-        // record set
+        // query
         let query = Partnumber.select('*')
             .joinAllRelated()
             .where( Partnumber.id.equals( 1 ) );
@@ -166,12 +166,15 @@ describe( "Join related", function () {
         assert( rs[0].Vendor.name === 'VendorX' );
     });
     it( "query Device getting Partnumber description", async function () {
-        
-        let rs = await Device.select('*')
+        // query
+        let query = Device.select('*')
             .select( 'Partnumber' )
             .where( Partnumber.id.equals( 1 ) )
-            // .debug()
-            .exec();
+            // .debug();
+        
+        assert( query.relateds );
+
+        let rs = await query.exec();
         assert( rs.length > 0 );
         assert( rs[0].Partnumber );
         assert( rs[0].Partnumber.description );

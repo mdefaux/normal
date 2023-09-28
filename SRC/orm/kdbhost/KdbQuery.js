@@ -401,14 +401,39 @@ class KdbQuery extends Query {
             return conditions; // this.buildCondition(conditions(this));
         }
         else if (typeof conditions === 'object') {
+
+            // handles case of normaly defined conditions
+            // TODO: extract to method
             if (conditions instanceof FieldConditionDef) {
+
+                // checks for column alias. This is important to avoids column ambiguity
+                // for e.g.: .where( Partnumber.id ) if translated into `where id=?` 
                 if ( conditions.field && !conditions.field.sourceAlias ) {
+                    // if the condition refers to a column of main query entity
                     if ( this.entity && conditions.field.sourceEntity === this.entity ){
                         conditions.field.sourceAlias = this.tableAlias || this.model.dbTableName || this.model.name;
+                        
+                        return conditions;
                     }
-                    else if ( this.related[ conditions.field./*sourceEntity?.metaData?.model?.*/name ] ) {
+                    // now the condition refers to another entity... looks if the other entity is joined in the query
+                    // if no joins defined... throws exception
+                    if ( !this.relateds || Object.keys(this.relateds).length === 0 ) {
+                        throw new Error( `The query has no joins.`);
+                    }
+                    // finds a joined related table with the source entity of the condition
+                    let related = Object.entries(this.relateds).find( ([,r]) => r.field.toEntity === conditions.field.sourceEntity)
+
+                    // TODO: handle the case in which more related matches....... and throws an exception
+
+                    // TODO: useful?
+                    if ( this.relateds[ conditions.field./*sourceEntity?.metaData?.model?.*/name ] ) {
                         // loooks for alias in related table
                         let alias = this.related[ conditions.field./*sourceEntity.metaData.model.*/name ]?.joinedTableAlias;
+                        conditions.field.sourceAlias = alias;
+                    }
+                    else if ( related ) {
+                        // loooks for alias in related table
+                        let alias = related[1].joinedTableAlias;
                         conditions.field.sourceAlias = alias;
                     }
                 }
