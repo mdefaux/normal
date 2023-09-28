@@ -18,13 +18,23 @@ Note: `npm link normaly` command must be run every time you launch npm ci on exa
 
 # Testing
 
-        cd examples/dbapp/
+        cd ./examples/dbapp/
         npm test
+
+## Testing trouble shooting
+
+### Error: connect ECONNREFUSED 127.0.0.1:5433
+"before all" hook in "{root}":
+     Error: connect ECONNREFUSED 127.0.0.1:5433
+
+The pg db container was not started.
+Note: if you don't have a container named `pg-normalize-dbapp` read [Create DB on docker](#create-db-on-docker)
 
 
 # Initial Setup
+HOW THE DBAPP EXAMPLE WAS INITIALIZED
 
-## DB on docker
+## Create DB on docker
 Use the command to create container pg-normaly-dbapp exposing port 5433 with "postgre" image.
 
         docker run --name pg-normaly-dbapp \
@@ -39,7 +49,6 @@ Use the command to create container pg-normaly-dbapp exposing port 5433 with "po
         npm ci
 
 ## Knex
-
 
         knex init
 
