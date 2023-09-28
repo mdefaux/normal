@@ -189,7 +189,28 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       .filter(([, field]) => (field instanceof ObjectLink))
       .forEach(([, field]) => {
 
-        // this.joinRelated(field);
+        this.joinRelated( this.entity[ field.name ] );
+        // this.select( this.entity[ field.name ] );
+
+      });
+
+    return this;
+  }
+  /**Joins with all the related objects
+   * 
+   * TODO: gets relation from relation set instead scanning 
+   * field looking for ObjectLinks. Relations can be different for example 1-n
+   */
+  selectAllRelated( condition ) {
+    if ( condition === false ) {
+      return this;
+    }
+    // ciclo le columns per trovare eventuali objectLink per eseguire le join sulle tabelle target
+    Object.entries(this.model.fields)
+      .filter(([, field]) => (field instanceof ObjectLink))
+      .forEach(([, field]) => {
+
+        // this.joinRelated( this.entity[ field.name ] );
         this.select( this.entity[ field.name ] );
 
       });
