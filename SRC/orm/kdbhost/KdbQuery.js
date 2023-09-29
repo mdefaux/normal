@@ -134,9 +134,9 @@ class KdbQuery extends Query {
         const tableModel = field.toEntity.metaData.model;
         // for each field moves the value from the record to the related object
         Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
-            if( name === tableModel.idField || name === tableModel.labelField ) {
-                return;
-            }
+            // if( name === tableModel.idField /*|| name === tableModel.labelField*/ ) {
+            //     return;
+            // }
             // // 
             if( relatedField === fieldRef.nested?.field ) {
                 // related_object[name] = this.readRelated( record, fieldRef.nested );
@@ -475,7 +475,7 @@ class KdbQuery extends Query {
 
       
         // handle groupBy
-        if (this.groups && (!fieldsList || fieldsList.length === 0)) {
+        if (this.groups && (!fields || fields.length === 0)) {
             this.groups.forEach(e => {
                 if (e instanceof ObjectLink) {
                     this.selectRelatedDetails(e);
@@ -546,6 +546,15 @@ class KdbQuery extends Query {
                 field = f.field;
                 return this;
             }
+            
+            if (typeof f === 'object' && f.field instanceof Field
+                // TODO: checks if instanceof FieldQueryItem
+                // && !(f instanceof FieldAggregationCount) 
+                // && !(f instanceof FieldAllMainTable) 
+            ) {
+                // adds column to select clause
+                this.qb.select(`${tableName}.${f.field.sqlSource}`);
+            }
     
             // TODO: change relateds keys to entity name
             // .............................................
@@ -585,15 +594,25 @@ class KdbQuery extends Query {
 
         // adds the label field
         let r = field.getSelection();
-        this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}`);
+        // this.qb.select(`${r.foreignTableAlias}.${r.foreignTableLabel} as ${r.foreignFieldsAlias}`);
+
+        // if( this.groups?.length > 0 ) {
+        //     this.groups = [...this.groups, field ];
+        // }
 
         const tableModel = field.toEntity.metaData.model;
         // select all other fields 
         Object.entries( tableModel.fields ).forEach( ([name, relatedField])=>{
-            if( name === tableModel.idField || name === tableModel.labelField ) {
-                return;
-            }
+            // if( name === tableModel.idField /*|| name === tableModel.labelField*/ ) {
+            //     return;
+            // }
             this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+            
+            if( this.groups?.length > 0 ) {
+                let wrap = field.toEntity[name];
+                wrap.sourceField =  `${r.foreignTableAlias}.${relatedField.sqlSource}`;
+                this.groups = [...this.groups, wrap ];
+            }
         });
         
         // TODO: handle nested as array
@@ -611,14 +630,15 @@ class KdbQuery extends Query {
         this.groups.forEach((wrap) => {
 
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+            let sourceSql = wrap.sourceField || `${tableName}.${wrap.field.sqlSource}`;
             // la groupBy non fa anche la select /*.select( field.source )*/
-            this.qb.groupBy(`${tableName}.${wrap.field.sqlSource}`);
+            this.qb.groupBy(sourceSql);
 
-            if (wrap.field instanceof ObjectLink) {
-                let r = wrap.field.getSelection();
-                this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
-                this.joinRelated(wrap);
-            }
+            // if (wrap.field instanceof ObjectLink) {
+            //     let r = wrap.field.getSelection();
+            //     this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
+            //     this.joinRelated(wrap);
+            // }
 
         })
 
