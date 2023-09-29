@@ -146,18 +146,20 @@ class EntityBE {
     async getRecord( id ) {
 
         if ( typeof id === 'object' ) {
-
+            // console.log( `typeof id === 'object' => '${id}'.`);
             let rr = await this.select('*')
                 // .modify( qb => qb.where( id ) )
                 .where( id )
                 .first();
             return rr;
         }
-
+        // console.log( `this.metaData.model.name = '${this.metaData.model.name}'.`);
+        // console.log( `this.metaData.model.idField = '${this.metaData.model.idField}'.`);
+        // console.log( `this[ this.metaData.model.idField ] = '${this[ this.metaData.model.idField ]?.name}'.`);
         return this.createQuery( this )
             .select('*')
             // .where( (qb) => (qb[ this.model.idField ].equals( id )) )
-            .where( this[ this.model.idField ].equals( id ) )
+            .where( this[ this.metaData.model.idField ].equals( id ) )
             // .where( { [this.model.idField]: newId } )
             .then( (r) => ( r[0] ));
     }
@@ -175,9 +177,10 @@ class EntityBE {
         // creates the insert statement
         let insert = this.host.createInsert(this);
         let newId = await insert.value(record).exec(); // executes the insert
-
+        // console.log( `newId= '${newId}'.`);
         // after getting the new id, queries the new record
-        if (Array.isArray(record)) {
+        if (Array.isArray(record) || newId === 0) {
+            // console.log( `returning ...`);
             return newId;
         }
         let response = await this.getRecord(newId);
