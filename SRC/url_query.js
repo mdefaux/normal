@@ -96,12 +96,19 @@ const URLquery = {
 
         }, [] ); */
 
-        let groupedFields = [];
-        Object.entries(req).forEach( ([reqField, reqValue]) => {
+        // let groupedFields = [];
+        // Object.entries(req).forEach( ([reqField, reqValue]) => {
+        //     if ( reqField.startsWith( "xgb" ) ) {
+        //         groupedFields.push(reqValue);
+        //     }
+        // });
+        let groupedFields = Object.entries(req).reduce( (acc, [reqField, reqValue]) => {
+
             if ( reqField.startsWith( "xgb" ) ) {
-                groupedFields.push(reqValue);
+                return [...acc, ...reqValue ];
             }
-        });
+            return acc;
+        }, [] );
 
         if(groupedFields.length > 0) return groupedFields;
 
