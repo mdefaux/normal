@@ -117,7 +117,7 @@ class KdbQuery extends Query {
         }
         related_object = {
             [r.foreignId]: record[fieldIdName] || processedRecord[fieldName] || null,
-            [r.foreignLabelName]: record[fieldKey],
+            // [r.foreignLabelName]: record[fieldKey],
             ...nested,
         };
 
@@ -128,6 +128,10 @@ class KdbQuery extends Query {
         // TODO: configurable behaviour
         if (fieldName !== field.sourceField) {
             delete record[field.sourceField];
+        }
+
+        if ( !fieldRef.requireObjectRead ) {
+            return related_object;
         }
 
         // builds the object related
