@@ -179,7 +179,7 @@ class ModelDef {
     timestamp( fieldName )
     {
         let field = this.date( fieldName );
-        field.timeEnabled = true;
+        field.targetField.timeEnabled = true;
 
         return field;
     }
