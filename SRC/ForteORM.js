@@ -176,6 +176,14 @@ class ModelDef {
         return new FieldDef( this.model.fields[ fieldName ] );
     }
 
+    timestamp( fieldName )
+    {
+        let field = this.date( fieldName );
+        field.timeEnabled = true;
+
+        return field;
+    }
+
     number( fieldName )
     {
         this.model.fields[ fieldName ] = new fields.NumberField( fieldName );
