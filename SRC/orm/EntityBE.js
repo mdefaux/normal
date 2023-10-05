@@ -395,6 +395,14 @@ class EntityBE {
                     if (!parameters.noDelete && arrayD.length != 0) {
                        // this.delete(arrayD);
                     }
+                    if (parameters.noDelete && arrayD.length != 0) {
+                        if(parameters.removed != 'undefined')
+                        {
+                            //aspetta che tutti gli update siano stati fatti effettivamente
+                           await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
+    
+                            }      
+         }
                     endfor = 1;
                     break;
                 }
@@ -519,6 +527,7 @@ class EntityBE {
             // la delete di un array vuoto esplode
             await   this.delete(arrayD);
         }
+
         return;
         // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
         //fine funzione
