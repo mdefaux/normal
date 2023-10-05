@@ -388,11 +388,11 @@ class EntityBE {
                 if (arraybend === 1 && arrayaend === 1) {
                     //  console.log(arrayI);
                     // console.log('faccio la insert pre break');
-                    if (!parameters.noInsert) {
+                    if (!parameters.noInsert && arrayI.length != 0) {
                         this.insert(arrayI);
                     }
                     //   console.log('faccio la delete');
-                    if (!parameters.noDelete) {
+                    if (!parameters.noDelete && arrayD.length != 0) {
                        // this.delete(arrayD);
                     }
                     endfor = 1;
