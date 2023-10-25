@@ -12,6 +12,7 @@ const CompareHelper = {
         let sourcePageSize = parameters.sourcePageSize || 500;
         let keyFieldSource = parameters.keyFieldS || "id";
         let keyFieldDest = parameters.keyFieldD || "id";
+        let destEntity = destQuery.entity;
 
         // sets the chunk dimension to the query
         sourceQuery.page( chunk+1, sourcePageSize );
@@ -26,7 +27,6 @@ const CompareHelper = {
         let destMatchQuery = destQuery.clone();
         destMatchQuery.page(null, sourcePageSize*2);
         // finds all destination records which have the key field
-        let destEntity = destMatchQuery.entity;
         let destRs = await destMatchQuery.where( destEntity[keyFieldDest].in( keyToFind ) ).exec();
 
         if ( destRs.length > sourceRsChunk.length ) {
@@ -62,6 +62,16 @@ const CompareHelper = {
         notInDest = sourceRsChunkNotInDest.length > 0 ? Object.fromEntries( 
             sourceRsChunkNotInDest.map( (rec) => ([ rec[keyFieldDest], rec ]) ) ) : {};
 
+        // tries to find 
+        let destToDeleteQuery = destQuery.clone();
+        destToDeleteQuery.page(null, sourcePageSize*2);
+        // finds all destination records which have the key field
+        let destToDeleteRs = await destToDeleteQuery
+            .where( destEntity[keyFieldDest].greaterThan( keyToFind[0] ) )
+            .where( destEntity[keyFieldDest].lessThan( keyToFind[keyToFind.length-1] ) )
+            // .where( destEntity[keyFieldDest].notIn( keyToFind ) )
+            .exec();
+    
 
 
         return {
