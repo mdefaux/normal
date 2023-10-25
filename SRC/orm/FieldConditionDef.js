@@ -37,6 +37,16 @@ class FieldQueryItem {
         return new FieldConditionDef("in", this, arrayOrFunction);
     }
 
+    notIn(arrayOrFunction) {
+        if (Array.isArray(arrayOrFunction)) {
+            if (arrayOrFunction.length > 0 && typeof arrayOrFunction[0] === 'object') {
+                arrayOrFunction = arrayOrFunction.map((o) => (this.processValue(o)));
+            }
+        }
+
+        return new FieldConditionDef("not in", this, arrayOrFunction);
+    }
+
     equals(objectOrFunction) {
         return new FieldConditionDef("=", this, objectOrFunction);
     }
