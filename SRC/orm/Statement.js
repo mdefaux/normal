@@ -19,6 +19,15 @@ class Statement {
         
     }
 
+    clone( ref ) {
+      let cloned = ref;
+  
+      cloned.entity = this.entity;
+      cloned.debugOn = this.debugOn;
+  
+      return cloned;
+    }
+
     /**Method to override for specific build
      * 
      */

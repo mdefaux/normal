@@ -40,6 +40,23 @@ class Query extends Statement {
 
   }
 
+  clone( ref ) {
+    let cloned = super.clone( ref || new Query( {} ) );
+
+    
+    cloned.model = this.model;
+    cloned.factory = this.factory;
+
+    cloned.columns = this.columns;
+    cloned.relateds = this.relateds;
+    cloned.joins = this.joins;
+    cloned.groups = this.groups;
+    cloned.orderedColumns = this.orderedColumns;
+    cloned.range = this.range;
+
+    return cloned;
+  }
+
   fetch() {
     return this;
   }

@@ -55,6 +55,14 @@ class KdbQuery extends Query {
         });
     }
 
+    clone( ref ) {
+        let cloned = super.clone( ref || new KdbQuery( this.entity, this.knex ) );
+        
+        cloned.builtCondition = this.builtCondition;
+
+        return cloned;
+    }
+
     /**Composes the record adding the related objects
      * TODO: move to abstract Query
      * 
