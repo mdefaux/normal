@@ -2,6 +2,22 @@
 
 const CompareHelper = {
 
+    /**
+     * 
+     * @param {*} sourceRec 
+     * @param {*} destRec 
+     * @returns 
+     */
+    compareColumns( sourceRec, destRec ) {
+        // TODO
+        let differentColmns = [];
+
+        return differentColmns.length === 0 ? false : {
+            id: undefined,
+            newValues: {},
+            oldValues: {}
+        }
+    },
     
 
     async compareChunk( accumulator, sourceQuery, destQuery, parameters, chunk = 0 ) {
@@ -16,8 +32,10 @@ const CompareHelper = {
 
         // sets the chunk dimension to the query
         sourceQuery.page( chunk+1, sourcePageSize );
+        // queries the source
         let sourceRsChunk = await sourceQuery.exec();
 
+        // extracts keys from result
         let keyToFind = sourceRsChunk
             .map( (rec) => rec[keyFieldSource] )
             .sort();
@@ -36,27 +54,30 @@ const CompareHelper = {
             // destRs.sort( (a,b)=>a[keyFieldDest]<b[keyFieldDest] )
         }
 
-        // adds destination records that match in 'matches' key/value map
-        let result = destRs.reduce( ( acc, rec ) => {
+        // adds destination records that match in 'match' key/value map
+        let result = destRs.reduce( ( acc, destRec ) => {
 
             // checks if already present in match map
-            if ( acc.matches[ rec[keyFieldDest] ] ) {
+            if ( acc.match[ destRec[keyFieldDest] ] ) {
                 // adds record to "duplicate keys" array
                 return { 
-                    matches: acc.matches, 
-                    duplicateKeys: [...acc.duplicateKeys, rec[keyFieldDest] ] 
+                    match: acc.match, 
+                    duplicateKeys: [...acc.duplicateKeys, destRec[keyFieldDest] ] 
                 }
             }
-            // adds record to 'matches' key/value map
+            // TODO: compares two mathing record with same key
+            let columnDiff = this.compareColumns( sourceRec, destRec );
+            // adds record to 'match' key/value map
             return { 
-                matches: {...acc.matches, [rec[keyFieldDest]]: rec }, 
+                diff: columnDiff ? {...acc.diff, [destRec[keyFieldDest]]: columnDiff } : acc.diff,
+                match: {...acc.match, [destRec[keyFieldDest]]: destRec }, 
                 duplicateKeys: acc.duplicateKeys 
             }
-        }, { matches: accumulator.matches || {}, duplicateKeys: accumulator.duplicateKeys || [] } );
+        }, { match: accumulator.match || {}, duplicateKeys: accumulator.duplicateKeys || [] } );
 
         // builds a map with the result
 
-        match = result.matches;
+        match = result.match;
         
         // match = Object.fromEntries(destRs.map( (rec) => ([ rec[keyFieldSource], rec ]) ));
 
@@ -70,7 +91,7 @@ const CompareHelper = {
 
 
         return {
-            notInSource: {...accumulator.notInSource, ...notInSource},
+            // notInSource: {...accumulator.notInSource, ...notInSource},
             notInDest: {...accumulator.notInDest, ...notInDest},
             ...result,
             sourceEnd: sourceRsChunk.length < sourcePageSize
@@ -99,11 +120,16 @@ const CompareHelper = {
         let destToDeleteRs = await destToDeleteQuery
             // .where( destToDeleteQuery[keyFieldDest].greaterThan( keyToFind[0] ) )
             // .andWhere( destToDeleteQuery[keyFieldDest].lessThan( keyToFind[keyToFind.length-1] ) )
-            .andWhere( destToDeleteQuery[keyFieldDest].notIn( Object.keys( result.matches ) ) )
+            .andWhere( destToDeleteQuery[keyFieldDest].notIn( Object.keys( result.match ) ) )
             .exec();
         notInSource = destToDeleteRs.length > 0 ? Object.fromEntries( 
             destToDeleteRs.map( (rec) => ([ rec[keyFieldDest], rec ]) ) ) : {};
 
+        result.notInSource = notInSource;
+
+        result.matchCount = Object.keys( result.match ).length;
+        result.notInDestCount = Object.keys( result.notInDest ).length;
+        result.notInSourceCount = destToDeleteRs.length;
         
         if ( result.duplicateKeys.length > 0 ) {
             console.warn( `Destination keys duplicates: (${result.duplicateKeys.length})` );
