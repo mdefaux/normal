@@ -66,7 +66,7 @@ const CompareHelper = {
                 }
             }
             // TODO: compares two mathing record with same key
-            let columnDiff = this.compareColumns( sourceRec, destRec );
+            let columnDiff = false; // this.compareColumns( sourceRec, destRec );
             // adds record to 'match' key/value map
             return { 
                 diff: columnDiff ? {...acc.diff, [destRec[keyFieldDest]]: columnDiff } : acc.diff,
