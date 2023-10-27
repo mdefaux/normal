@@ -8,15 +8,44 @@ const CompareHelper = {
      * @param {*} destRec 
      * @returns 
      */
-    compareColumns( sourceRec, destRec ) {
+    compareColumns( sourceRec, destRec, parameters, entityDest ) {
         // TODO
-        let differentColmns = [];
+       // let differentColmns = [];
 
-        return differentColmns.length === 0 ? false : {
-            id: undefined,
+        let modSourceRec = sourceRec;
+
+        // translate sourceRec for later comparison
+        if(parameters.columnMap) modSourceRec = parameters.columnMap(sourceRec)
+        
+
+        // compare values for every column
+        let response = Object.entries(modSourceRec).reduce((accumulator, [colName, value]) => {
+            let destValue = destRec[colName];
+            // let eq = value === destValue;
+             let eq = entityDest.metaData.model.fields[colName].equalValues(value, destValue);
+
+            if(!eq) {
+                return {
+                    id: destRec.id,
+                    //...accumulator, 
+                    newValues: {...accumulator.newValues, [colName]: value},
+                    oldValues: {...accumulator.oldValues, [colName]: destValue},
+                    differentColmns: [...accumulator.differentColmns, colName]
+                }
+            }   
+
+            return accumulator
+         
+        }, {id: null,  newValues: {}, oldValues: {}, differentColmns: []  });
+
+
+       // return differentColmns.length === 0 ? false : {
+        return response.differentColmns.length === 0 ? false : response;
+         /* {
+            id: sourceRec.id,
             newValues: {},
             oldValues: {}
-        }
+        } */
     },
     
 
@@ -39,6 +68,9 @@ const CompareHelper = {
         let keyToFind = sourceRsChunk
             .map( (rec) => rec[keyFieldSource] )
             .sort();
+
+        // fromEntries per creare un oggetto chiave (id), valore (record)
+        let recordToFind = Object.fromEntries(sourceRsChunk.map( (rec) => ([ rec[keyFieldSource], rec ])));
 
         // 
         // let pageSize = parameters.destinationPageSize || 500;
@@ -66,7 +98,9 @@ const CompareHelper = {
                 }
             }
             // TODO: compares two mathing record with same key
-            let columnDiff = false; // this.compareColumns( sourceRec, destRec );
+           // let columnDiff = false; // this.compareColumns( sourceRec, destRec, parameters );
+            let columnDiff = this.compareColumns( recordToFind[destRec[keyFieldDest]], destRec, parameters, destEntity );
+           // let columnDiff = this.compareColumns( sourceRec, destRec, parameters );
             // adds record to 'match' key/value map
             return { 
                 diff: columnDiff ? {...acc.diff, [destRec[keyFieldDest]]: columnDiff } : acc.diff,
