@@ -87,10 +87,12 @@ const CompareHelper = {
         // 
         let sourceRsChunkNotInDest = sourceRsChunk.filter( (rec) => !match[ rec[keyFieldSource] ] );
         notInDest = sourceRsChunkNotInDest.length > 0 ? Object.fromEntries( 
-            sourceRsChunkNotInDest.map( (rec) => ([ rec[keyFieldDest], rec ]) ) ) : {};
+            sourceRsChunkNotInDest.map( (rec) => ([ rec[keyFieldDest], 
+            parameters.columnMap(rec) ]) ) ) : {};
 
 
         return {
+            ...accumulator,
             // notInSource: {...accumulator.notInSource, ...notInSource},
             notInDest: {...accumulator.notInDest, ...notInDest},
             ...result,
@@ -99,18 +101,31 @@ const CompareHelper = {
     },
 
     
-    async compare( sourceQuery, destQuery, parameters, chunkLimit = 1 ) {
+    async compare( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
         let result = { 
             notInSource: {},
             notInDest: {},
             match: {},
+            diff: {},
+            duplicateKeys: [],
+            destEntity: destQuery.entity,
             sourceEnd: false
         }
         let keyFieldDest = parameters.keyFieldD || "id";
 
-        for( let chunk = 0; chunk < chunkLimit && !result.sourceEnd; chunk++ ) {
+        for( let chunk = 0; chunk < (chunkLimit||10000) && !result.sourceEnd; chunk++ ) {
             result = await this.compareChunk( 
                 result, sourceQuery, destQuery, parameters, chunk );
+            
+            // performs a specific action for records not present in destination
+            if ( actions?.handleNotInDestination ) {
+                result = await actions.handleNotInDestination( result );
+            }
+            // performs a specific action for records which have same key 
+            // but column value different
+            if ( actions?.handleValueDifferent ) {
+                result = await actions.handleValueDifferent( result );
+            }
         }
 
         // tries to find records in destination but not in source
@@ -121,11 +136,18 @@ const CompareHelper = {
             // .where( destToDeleteQuery[keyFieldDest].greaterThan( keyToFind[0] ) )
             // .andWhere( destToDeleteQuery[keyFieldDest].lessThan( keyToFind[keyToFind.length-1] ) )
             .andWhere( destToDeleteQuery[keyFieldDest].notIn( Object.keys( result.match ) ) )
+            .andWhere( result.insertedKeys?.length > 0 && destToDeleteQuery[keyFieldDest].notIn( result.insertedKeys ) )
+            .debug()
             .exec();
         notInSource = destToDeleteRs.length > 0 ? Object.fromEntries( 
             destToDeleteRs.map( (rec) => ([ rec[keyFieldDest], rec ]) ) ) : {};
 
         result.notInSource = notInSource;
+
+        // performs a specific action for records not presentin source
+        if ( actions?.handleNotInSource ) {
+            result = await actions?.handleNotInSource( result );
+        }
 
         result.matchCount = Object.keys( result.match ).length;
         result.notInDestCount = Object.keys( result.notInDest ).length;
@@ -143,7 +165,59 @@ const CompareHelper = {
         let comparison = this.compare( sourceRs, destRs, parameters, chunk );
 
         return comparison;
+    },
+
+    async insertInDestination( result ) {
+        let toInsert = Object.entries( result.notInDest )
+            .map( ([,rec]) => (rec) );
+
+        if ( toInsert.length === 0 ) {
+            return result;
+        }
+
+        await result.destEntity.insert( toInsert );
+
+        return {
+            ...result,
+            insertedKeys: [...insertedKeys || [], ...Object.keys( result.notInDest )],
+            inserted: (result.inserted || 0) + toInsert.length,
+            notInDest: {}
+        };
+    },
+
+    async removeFromDestination( result ) {
+
+        let toDelete = Object.entries( result.notInSource )
+            .map( ([,rec]) => (rec) );
+
+        if ( toDelete.length === 0 ) {
+            return result;
+        }
+
+        await result.destEntity.delete( toDelete );
+
+        return {
+            ...result,
+            deletedKeys: Object.keys( result.notInSource ),
+            deleted: (result.deleted || 0) + toDelete.length,
+            notInSource: {}
+        };
+    },
+
+    async updateDestination( result ) {
+
+        return result;
+    },
+
+    async align( sourceQuery, destQuery, parameters ) {
+
+        return await this.compare( sourceQuery, destQuery, parameters, false, {
+            handleNotInDestination: CompareHelper.insertInDestination,
+            handleNotInSource: CompareHelper.removeFromDestination,
+            handleValueDifferent: CompareHelper.updateDestination,
+        } );
     }
+
 }
 
 exports.CompareHelper = CompareHelper;

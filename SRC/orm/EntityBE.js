@@ -313,6 +313,10 @@ class EntityBE {
         return CompareHelper.compare( sourceQuery, destQuery, parameters, chunkLimit );
     }
 
+    async  alignNew( sourceQuery, destQuery, parameters ) {
+        return CompareHelper.align( sourceQuery, destQuery, parameters );
+    }
+
     async  allign( parameters ) {
         
         if ( !parameters.source ) {
