@@ -171,7 +171,7 @@ const CompareHelper = {
             // .andWhere( destToDeleteQuery[keyFieldDest].lessThan( keyToFind[keyToFind.length-1] ) )
             .andWhere( destToDeleteQuery[keyFieldDest].notIn( Object.keys( result.match ) ) )
             .andWhere( result.insertedKeys?.length > 0 && destToDeleteQuery[keyFieldDest].notIn( result.insertedKeys ) )
-            .debug()
+            // .debug()
             .exec();
         notInSource = destToDeleteRs.length > 0 ? Object.fromEntries( 
             destToDeleteRs.map( (rec) => ([ rec[keyFieldDest], rec ]) ) ) : {};
@@ -192,6 +192,7 @@ const CompareHelper = {
             console.warn( result.duplicateKeys );
         }
 
+        delete result.destEntity;
         return result;
     },
 
@@ -213,7 +214,7 @@ const CompareHelper = {
 
         return {
             ...result,
-            insertedKeys: [...insertedKeys || [], ...Object.keys( result.notInDest )],
+            insertedKeys: [...result.insertedKeys || [], ...Object.keys( result.notInDest )],
             inserted: (result.inserted || 0) + toInsert.length,
             notInDest: {}
         };
@@ -240,7 +241,24 @@ const CompareHelper = {
 
     async updateDestination( result ) {
 
-        return result;
+        let toUpdate = Object.entries( result.diff || {} )
+            .map( ([,e]) => (e) );
+
+        if ( toUpdate.length === 0 ) {
+            return result;
+        }
+
+        for ( let entryToUpdate of toUpdate ){
+            await result.destEntity.update( entryToUpdate.id, entryToUpdate.newValues );
+        }
+
+        return {
+            ...result,
+            updatedKeys: [...result.updatedKeys || [], ...Object.keys( result.diff )],
+            updated: (result.updated || 0) + toUpdate.length,
+            wasDiff: {...result.wasDiff||{}, ...result.diff },
+            diff: {}
+        };
     },
 
     async align( sourceQuery, destQuery, parameters ) {

@@ -427,6 +427,7 @@ class ObjectLink extends Relation {
         }
         else if (typeof value === 'string' && isNaN( value ) ) {
             return value;
+            // return { [this.toModel.labelField]: value };
         }
         else {
             if ( isNaN(value) ) {
@@ -435,6 +436,32 @@ class ObjectLink extends Relation {
             // assert( parseInt( value ) !== 'NaN');
             return parseInt( value );
         }
+    }
+
+    equalValues( valueA, valueB ) {
+        let parsedA = this.parseValue( valueA );
+        let parsedB = this.parseValue( valueB );
+        let idField = this.toModel.idField;
+        let labelField = this.toModel.labelField;
+
+        if ( typeof parsedA === 'string' ) {
+            parsedA = { [labelField]: parsedA }
+        }
+        if ( typeof parsedB === 'string' ) {
+            parsedB = { [labelField]: parsedB }
+        }
+
+        if ( parsedA === null || parsedB === null ) {
+            return parsedA === parsedB;
+        }
+        if ( parsedA[idField] !== undefined && parsedB[idField] !== undefined ) {
+            return parsedA[idField] === parsedB[idField];
+        }
+        if ( parsedA[labelField] !== undefined && parsedB[labelField] !== undefined ) {
+            return parsedA[labelField] === parsedB[labelField];
+        }
+
+        return false;
     }
 
     toRaw( value, statement ) {
