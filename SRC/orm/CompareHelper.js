@@ -9,8 +9,6 @@ const CompareHelper = {
      * @returns 
      */
     compareColumns( sourceRec, destRec, parameters, entityDest ) {
-        // TODO
-       // let differentColmns = [];
 
         let modSourceRec = sourceRec;
 
@@ -41,16 +39,10 @@ const CompareHelper = {
 
        // return differentColmns.length === 0 ? false : {
         return response.differentColmns.length === 0 ? false : response;
-         /* {
-            id: sourceRec.id,
-            newValues: {},
-            oldValues: {}
-        } */
     },
     
 
     async compareChunk( accumulator, sourceQuery, destQuery, parameters, chunk = 0 ) {
-        let notInSource = {};
         let notInDest = {};
         let match = {};
 
@@ -72,17 +64,14 @@ const CompareHelper = {
         // fromEntries per creare un oggetto chiave (id), valore (record)
         let recordToFind = Object.fromEntries(sourceRsChunk.map( (rec) => ([ rec[keyFieldSource], rec ])));
 
-        // 
-        // let pageSize = parameters.destinationPageSize || 500;
-        // destQuery.page(null, sourcePageSize*2);
-
         let destMatchQuery = destQuery.clone();
-        destMatchQuery.page(null, sourcePageSize*2);
-        // finds all destination records which have the key field
+        destMatchQuery.page(null, 10000);
+        // finds all destination records that match with source
         let destRs = await destMatchQuery.where( destEntity[keyFieldDest].in( keyToFind ) ).exec();
 
         if ( destRs.length > sourceRsChunk.length ) {
-            console.warn( `Destination records (${destRs.length}) greater than source records (${sourceRsChunk.length})` );
+            // TODO: handle this case
+            // console.warn( `Destination records (${destRs.length}) greater than source records (${sourceRsChunk.length})` );
             // destRs.sort( (a,b)=>a[keyFieldDest]<b[keyFieldDest] )
         }
 
@@ -97,10 +86,9 @@ const CompareHelper = {
                     duplicateKeys: [...acc.duplicateKeys, destRec[keyFieldDest] ] 
                 }
             }
-            // TODO: compares two mathing record with same key
-           // let columnDiff = false; // this.compareColumns( sourceRec, destRec, parameters );
+            // compares two mathing record with same key
             let columnDiff = this.compareColumns( recordToFind[destRec[keyFieldDest]], destRec, parameters, destEntity );
-           // let columnDiff = this.compareColumns( sourceRec, destRec, parameters );
+
             // adds record to 'match' key/value map
             return { 
                 diff: columnDiff ? {...acc.diff, [destRec[keyFieldDest]]: columnDiff } : acc.diff,
@@ -124,7 +112,7 @@ const CompareHelper = {
             sourceRsChunkNotInDest.map( (rec) => ([ rec[keyFieldDest], 
             parameters.columnMap(rec) ]) ) ) : {};
 
-
+        // returns new accumulator with result for this chunk
         return {
             ...accumulator,
             // notInSource: {...accumulator.notInSource, ...notInSource},
@@ -187,12 +175,17 @@ const CompareHelper = {
         result.notInDestCount = Object.keys( result.notInDest ).length;
         result.notInSourceCount = destToDeleteRs.length;
         
-        if ( result.duplicateKeys.length > 0 ) {
-            console.warn( `Destination keys duplicates: (${result.duplicateKeys.length})` );
-            console.warn( result.duplicateKeys );
+        if ( typeof parameters.log === 'function' ) {
+            parameters.log( `Updated: ${result.updated||0}, Inserted: ${result.inserted||0}, Deleted: ${result.deleted||0}, Duplicated: ${result.duplicateKeys.length}` );
+
+            if ( result.duplicateKeys.length > 0 ) {
+                parameters.log( `Destination keys duplicates: (${result.duplicateKeys.length})` );
+                parameters.log( result.duplicateKeys );
+            }
         }
 
         delete result.destEntity;
+    
         return result;
     },
 
