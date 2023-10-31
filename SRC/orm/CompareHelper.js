@@ -168,7 +168,7 @@ const CompareHelper = {
 
         // performs a specific action for records not presentin source
         if ( actions?.handleNotInSource ) {
-            result = await actions?.handleNotInSource( result );
+            result = await actions?.handleNotInSource( result, parameters );
         }
 
         result.matchCount = Object.keys( result.match ).length;
@@ -213,7 +213,7 @@ const CompareHelper = {
         };
     },
 
-    async removeFromDestination( result ) {
+    async removeFromDestination( result, parameters ) {
 
         let toDelete = Object.entries( result.notInSource )
             .map( ([,rec]) => (rec) );
@@ -222,7 +222,14 @@ const CompareHelper = {
             return result;
         }
 
-        await result.destEntity.delete( toDelete );
+        if(parameters.removed != 'undefined')
+        {
+            //aspetta che tutti gli update siano stati fatti effettivamente
+           await Promise.all(toDelete.map(r=> result.destEntity.update(r[result.destEntity.metaData.model.idField], parameters.removed)));
+
+        }  
+
+        if(!parameters.noDelete) await result.destEntity.delete( toDelete );
 
         return {
             ...result,
