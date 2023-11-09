@@ -222,11 +222,15 @@ class NumberField extends Field
             throw new Error( `Value '${value}' is not a valid number for field '${this.name}'.`)
         }
         
-        return parseFloat(parseFloat(value).toFixed(2));
+        return parseFloat(value);
+    }
+
+    truncate( value, decimals = 2 ) {
+        return parseFloat(parseFloat(value).toFixed(decimals));
     }
 
     equalValues( valueA, valueB ) {
-        return this.parseValue( valueA ) === this.parseValue( valueB );
+        return this.truncate( valueA ) === this.truncate( valueB );
     }
 }
 class IntegerField extends Field
