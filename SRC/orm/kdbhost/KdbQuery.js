@@ -59,6 +59,7 @@ class KdbQuery extends Query {
         let cloned = super.clone( ref || new KdbQuery( this.entity, this.knex ) );
         
         cloned.builtCondition = this.builtCondition;
+        cloned.customQB=this.customQB;
 
         return cloned;
     }
@@ -751,7 +752,9 @@ class KdbQuery extends Query {
     }
 
     build() {
-
+if(this.customQB){
+    this.qb=this.customQB;
+}
         if ( !this.qb ) {
             let tableName = this.model.dbTableName || this.model.name;
             this.qb = this.knex(tableName);

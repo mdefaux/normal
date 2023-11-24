@@ -13,7 +13,7 @@ const CompareHelper = {
         let modSourceRec = sourceRec;
 
         // translate sourceRec for later comparison
-        if(parameters.columnMap) modSourceRec = parameters.columnMap(sourceRec)
+        if(parameters.columnMap) modSourceRec = parameters.columnMap(sourceRec,destRec)
         
 
         // compare values for every column
@@ -53,6 +53,7 @@ const CompareHelper = {
 
         // sets the chunk dimension to the query
         sourceQuery.page( chunk+1, sourcePageSize );
+       // sourceQuery.debug();
         // queries the source
         let sourceRsChunk = await sourceQuery.exec();
 
@@ -110,7 +111,7 @@ const CompareHelper = {
         let sourceRsChunkNotInDest = sourceRsChunk.filter( (rec) => !match[ rec[keyFieldSource] ] );
         notInDest = sourceRsChunkNotInDest.length > 0 ? Object.fromEntries( 
             sourceRsChunkNotInDest.map( (rec) => ([ rec[keyFieldDest], 
-            parameters.columnMap(rec) ]) ) ) : {};
+            parameters.columnMap(rec,match[ rec[keyFieldDest] ]) ]) ) ) : {}; // I call the columnMap because for Backlog it expects dest but in this case you don't need to pass it to it.
 
         // returns new accumulator with result for this chunk
         return {
