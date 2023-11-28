@@ -421,6 +421,7 @@ class ObjectLink extends Relation {
     
     parseValue( value ) {
         let idField = this.toModel.idField;
+        let labelField = this.toModel.labelField;
         if ( !value || value[idField] === null ) {
             return null;
         }
@@ -428,6 +429,9 @@ class ObjectLink extends Relation {
         if ( value[idField] !== undefined ) {
             // TODO: use the 'id' name
             return {...value, [idField]: parseInt( value[idField] )};
+        }
+        else if ( value[labelField] !== undefined) {
+            return {...value, [labelField]: value[labelField]};
         }
         else if (typeof value === 'string' && isNaN( value ) ) {
             return value;
@@ -471,30 +475,33 @@ class ObjectLink extends Relation {
     toRaw( value, statement ) {
 
         let idField = this.toModel.idField;
+        let labelField = this.toModel.labelField;
         // TODO: check if value is an object
         if ( value?.[idField] !== undefined ) {
             // TODO: use the 'id' name
             return [ this.sqlSource, value[idField] ];
         }
-        else if (typeof value === 'string' && isNaN( value ) ) {
+        else if ((typeof value === 'string' && isNaN( value )) || (typeof value === 'object' && value[labelField] !== undefined && value[idField] === undefined  )  ) {
+            let checkValue = value;
+            if(typeof value === 'object' && value[labelField] !== undefined && value[idField] === undefined  ) checkValue = value[labelField];
             return [ this.sqlSource, async (cache)=>{
-                if ( cache && cache[ value ] ) {
-                    return cache[ value ];
+                if ( cache && cache[ checkValue ] ) {
+                    return cache[ checkValue ];
                 }
                 let entity = this.factory[ this.toEntityName ];
                 let result = await entity
                     .select( [entity[idField]] )
-                    .byLabel( value );
+                    .byLabel( checkValue );
                 if(!result){
                     // throws exception is auto insert is not enabled
                     if ( false && ! statement?.autoInsertNewObjectLookupValues ) {
-                        throw new Error (`NORMALY-0002 Value: '${value}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
+                        throw new Error (`NORMALY-0002 Value: '${checkValue}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
                     }
                     // inserts new value in loked table
-                    result = await this.toEntity.insert( { [this.toModel.labelField]: value } )
+                    result = await this.toEntity.insert( { [this.toModel.labelField]: checkValue } )
                 }
                 if ( cache ) {
-                    cache[ value ] = result[idField];
+                    cache[ checkValue ] = result[idField];
                 }
                 return result[idField];
             } ];
