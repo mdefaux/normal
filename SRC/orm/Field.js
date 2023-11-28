@@ -481,7 +481,7 @@ class ObjectLink extends Relation {
             // TODO: use the 'id' name
             return [ this.sqlSource, value[idField] ];
         }
-        else if ((typeof value === 'string' && isNaN( value )) || (typeof value === 'object' && value[labelField] !== undefined && value[idField] === undefined  )  ) {
+        else if ((typeof value === 'string' && isNaN( value )) || (typeof value === 'object' && value?.[labelField] !== undefined && value?.[idField] === undefined  )  ) {
             let checkValue = value;
             if(typeof value === 'object' && value[labelField] !== undefined && value[idField] === undefined  ) checkValue = value[labelField];
             return [ this.sqlSource, async (cache)=>{
