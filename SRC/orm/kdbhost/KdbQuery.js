@@ -586,7 +586,23 @@ class KdbQuery extends Query {
         }
         // this.qb.orderBy( this.orderedColumns[0].columnName, this.orderedColumns[0].order );
         // TODO: use model instead query fields
-        this.qb.orderBy( this[ this.orderedColumns[0].columnName ].sqlSource, this.orderedColumns[0].order );
+        this.orderedColumns.forEach( (column) => {
+
+            let relatedColumn = this.columns.find( (c) => c.field?.name === column.columnName );
+
+            if ( relatedColumn ) {
+
+                let r = relatedColumn.field.getSelection();
+                // builds the object related
+                const tableModel = relatedColumn.field.toEntity.metaData.model;
+                const labelField = tableModel.fields[ tableModel.labelField ];
+
+                this.qb.orderBy( `${r.foreignTableAlias}.${labelField.sqlSource}`, column.order );
+
+            } else if ( column.columnName ){
+                this.qb.orderBy( this[ column.columnName ].sqlSource, column.order );
+            }
+        })
     }
 
     // selectAllRelated() {
