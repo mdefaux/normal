@@ -483,6 +483,7 @@ class ObjectLink extends Relation {
         }
         else if ((typeof value === 'string' && isNaN( value )) || (typeof value === 'object' && value?.[labelField] !== undefined && value?.[idField] === undefined  )  ) {
             let checkValue = value;
+            // value can now be an object with labelfield and other data.s
             if(typeof value === 'object' && value[labelField] !== undefined && value[idField] === undefined  ) checkValue = value[labelField];
             return [ this.sqlSource, async (cache)=>{
                 if ( cache && cache[ checkValue ] ) {
@@ -498,7 +499,9 @@ class ObjectLink extends Relation {
                         throw new Error (`NORMALY-0002 Value: '${checkValue}' for column '${this.name}' not found in table '${this.toModel.name}'.` );
                     }
                     // inserts new value in loked table
-                    result = await this.toEntity.insert( { [this.toModel.labelField]: checkValue } )
+                    // if the value passed is an object, add the values to the base object to insert in db (labelField only).
+                    let toInsert = typeof value === 'object' ? {...value, [this.toModel.labelField]: checkValue } : { [this.toModel.labelField]: checkValue };
+                    result = await this.toEntity.insert( toInsert )
                 }
                 if ( cache ) {
                     cache[ checkValue ] = result[idField];
