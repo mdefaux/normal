@@ -145,6 +145,12 @@ const URLquery = {
         let groupedFields = this.parseGroup(params, responseModel, relation);
         let sortingFields = this.parseSort(params, responseModel, relation);
 
+        if ( sortingFields?.[0]?.columnName 
+            && responseModel.metaData.model.fields[ sortingFields[0].columnName ].type === 'ObjectLink' ) 
+        {
+
+        }
+
         return {filters, selectedFields, groupedFields, sortingFields};
     }
 };
