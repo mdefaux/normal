@@ -20,13 +20,24 @@ const CompareHelper = {
         let response = Object.entries(modSourceRec).reduce((accumulator, [colName, value]) => {
             let destValue = destRec[colName];
             // let eq = value === destValue;
-             let eq = entityDest.metaData.model.fields[colName].equalValues(value, destValue);
+            let destField = entityDest.metaData.model.fields[colName];
+            let eq = false;
+            let newValue = value
+
+            // columnMap could pass a function in a field. This function should already compare the two records.
+            // the result includes the equals result (true/false) and the new value
+            if(typeof value === 'function') {
+                let columnFunctionResult = value(sourceRec, destRec);
+                eq = columnFunctionResult.eq;
+                if(!eq) newValue = columnFunctionResult.value;
+            }
+            else eq = destField.equalValues(value, destValue);
 
             if(!eq) {
                 return {
                     id: destRec.id,
                     //...accumulator, 
-                    newValues: {...accumulator.newValues, [colName]: value},
+                    newValues: {...accumulator.newValues, [colName]: newValue},
                     oldValues: {...accumulator.oldValues, [colName]: destValue},
                     differentColmns: [...accumulator.differentColmns, colName]
                 }
