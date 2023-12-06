@@ -15,11 +15,24 @@ class FieldQueryItem {
         this.sourceField = field.sourceField;
     }
 
+    /**Gets the sql string to use in a query
+     * TODO: rename into toQuery( Statement )
+     * 
+     */
     get sqlSource() {
         if (this.sourceAlias) {
             return `${this.sourceAlias}.${this.sourceField || this.name}`;
         }
         return this.sourceField || this.name;
+    }
+
+    /**TODO: Applies to statement
+     * 
+     * @param {*} statement 
+     * @returns 
+     */
+    toQuery( statement ) {
+        return undefined;
     }
     
 

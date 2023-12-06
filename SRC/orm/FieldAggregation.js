@@ -1,6 +1,28 @@
+
+
 class FieldAggregation {
-    constructor(field) {
+
+    /**
+     * 
+     * @param {FieldQueryItem} field to aggregate
+     * @param {String} type of aggreagtion
+     */
+    constructor(field, type) {
         this.field = field;
+        this.type = type;
+
+        /**TODO: call Host specific composeAggregation
+         * 
+         */
+        /* ... compose( type ) */
+
+
+        if ( this.type === 'sum' ) {
+            this.sqlSource = () => {
+                return `sum( ${field.sqlSource} )`;
+            }
+        }
+
     }
 }
 

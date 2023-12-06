@@ -4,6 +4,7 @@ const { KdbInsert } = require('./KdbInsert');
 const { KdbQuery } = require('./KdbQuery');
 const { KdbUpdate } = require('./KdbUpdate');
 const { KdbDelete } = require('./KdbDelete');
+const { KdbExpression } = require('./KdbExpression');
 
 class KdbStoreHost extends StoreHost 
 {
@@ -29,6 +30,14 @@ class KdbStoreHost extends StoreHost
         return new KdbDelete( entity, this.knex );
     }
 
+    /**Composes an aggregation expression
+     * 
+     * @param {fieldAggregation} the aggreagtion on column to compose 
+     * @returns FieldAggregation
+     */
+     composeAggregation( fieldAggregation ) {
+        return KdbExpression.composeAggregation( fieldAggregation );
+    }
 }
 
 exports.KdbStoreHost = KdbStoreHost;
