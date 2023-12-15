@@ -15,6 +15,11 @@ class FieldAggregation {
          * 
          */
         /* ... compose( type ) */
+        
+        let host = field?.sourceEntity?.metaData?.host;
+        if(host) host.composeAggregation(this);
+
+
 
 
         if ( this.type === 'sum' ) {

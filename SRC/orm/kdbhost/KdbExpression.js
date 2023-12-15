@@ -9,7 +9,8 @@ const KdbExpression = {
         
         if ( fieldAggregation.type === 'sum' ) {
             fieldAggregation.toQuery = (kdbQuery) => {
-                kdbQuery.qb.sum( fieldAggregation.field.sqlSource );
+                //kdbQuery.qb.sum( fieldAggregation.field.sqlSource );
+                kdbQuery.qb.sum({[`sum(${fieldAggregation.field.sqlSource})`]: fieldAggregation.field.sqlSource });
             }
         }
 

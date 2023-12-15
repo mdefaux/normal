@@ -6,6 +6,7 @@
  * 
  * 
  */
+const FieldAggregation = require("./FieldAggregation")
 const { FieldAggregationMax } = require("./FieldAggregation");
 const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef, FieldQueryItem } = require("./FieldConditionDef");
 
@@ -104,6 +105,10 @@ class Field {
 
     max() {
         return new FieldAggregationMax(this);
+    }
+
+    sum() {
+        return new FieldAggregation(this, "sum");
     }
 
     serialize() {

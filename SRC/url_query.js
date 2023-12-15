@@ -1,4 +1,4 @@
-const { FieldAggregationCount, /* FieldAggregationGroupBy */ } = require("./orm/FieldAggregation");
+const { FieldAggregationCount, FieldAggregation, /* FieldAggregationGroupBy */ } = require("./orm/FieldAggregation");
 const FieldCondition = require("./orm/FieldCondition");
 
 const URLquery = {
@@ -136,6 +136,37 @@ const URLquery = {
 
     },
 
+    parseSum( req, responseModel, relation ) {
+
+        let sumFields = Object.entries(req).reduce( (acc, [reqField, reqValue]) => {
+     
+                 if ( reqField.startsWith( "xsum" ) ) {
+                    return [...acc, ...reqValue ];
+                 }
+                 return acc;
+             }, [] );
+     
+        if(sumFields.length > 0) {
+            let sumFieldAggregations = sumFields.reduce((acc, e) => {
+                let field = responseModel[e];
+
+                if(field) {
+                    let fieldAggregation = new FieldAggregation(field, "sum");
+
+                    return [...acc, fieldAggregation]
+                }
+
+                return acc;
+            }, []);
+
+        //return sumFields;
+            if(sumFieldAggregations.length > 0) return sumFieldAggregations
+        }
+     
+        return false;
+     
+    },
+
     parse( req, responseModel, relation ) {
 
         let params = req; // .params;
@@ -144,6 +175,7 @@ const URLquery = {
         let selectedFields = URLquery.parseSelect( params, responseModel, relation );
         let groupedFields = this.parseGroup(params, responseModel, relation);
         let sortingFields = this.parseSort(params, responseModel, relation);
+        let sumFields = this.parseSum( params, responseModel, relation);
 
         if ( sortingFields?.[0]?.columnName 
             && responseModel.metaData.model.fields[ sortingFields[0].columnName ].type === 'ObjectLink' ) 
@@ -151,7 +183,9 @@ const URLquery = {
 
         }
 
-        return {filters, selectedFields, groupedFields, sortingFields};
+        if(sumFields.length > 0 ) selectedFields = [...selectedFields, ...sumFields]
+
+        return {filters, selectedFields, groupedFields, sortingFields, sumFields};
     }
 };
 
