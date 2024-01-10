@@ -406,7 +406,7 @@ class EntityBE {
                        // this.delete(arrayD);
                     }
                     if (parameters.noDelete && arrayD.length != 0) {
-                        if(parameters.removed != 'undefined')
+                        if(parameters.removed !== undefined)
                         {
                             //aspetta che tutti gli update siano stati fatti effettivamente
                            await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
@@ -503,7 +503,7 @@ class EntityBE {
 
                     //   console.log('faccio la delete');
                     if (!parameters.noDelete) {
-                        if(parameters.removed != 'undefined'){
+                        if(parameters.removed !== undefined){
                         //aspetta che tutti gli update siano stati fatti effettivamente
                        await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
 
