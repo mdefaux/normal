@@ -85,6 +85,11 @@ class FieldDef {
         this.targetField.save = value;
         return this;
     }
+
+    calc(expression) {
+        this.targetField.calc = expression;
+        return this;
+    }
 }
 
 class ModelDef {
@@ -160,6 +165,10 @@ class ModelDef {
         this.model.labelField = fieldName;
 
         // return new FieldDef( this.model.fields[ fieldName ] );
+    }
+
+    calc(expression) {
+        this.calc = expression;
     }
 
     string( fieldName )

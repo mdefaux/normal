@@ -310,6 +310,9 @@ class KdbQuery extends Query {
 
                 let viewAlias = builtCondition.field.sourceAlias;
 
+                // base value for psql database
+                let whereField = `UPPER( ${builtCondition.sqlStringField( this, "\"" ) } )`;
+
                 if( false && JSON.stringify( this.qb.client.driver ).indexOf( 'PG_DEPENDENCIES' ) > -1 ) {
                     // 
                     qb.where(
@@ -320,28 +323,57 @@ class KdbQuery extends Query {
                             this.knex.raw( `UPPER( ${value} )` )
                     );
                 }
+
+                // overwrite for mysql database
                 else if ( this.qb.client.config.client === 'mysql' ) {
+                    whereField = `UPPER( ${builtCondition.sqlStringField( this, "\`" ) } )`;
                     // 
-                    qb.where(
-                        this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\`" ) } )` ),
+    /*                 qb.where(
+                        whereField,
+                        //this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\`" ) } )` ),
                         // this.knex.raw( `UPPER( \`${viewAlias}\`.\`${builtCondition.field.name}\` )` ),
                         // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                         builtCondition.type,
                         typeof value === 'string' ? value.toUpperCase() :
                             this.knex.raw( `UPPER( ${value} )` )
-                    );
+                    ); */
                 }
-                else {
+
+                // Overwrite the field with the calculated one for calc Fields.
+                if (builtCondition?.field?.calc ||  builtCondition?.field?.field?.calc) {
+                    let calcFunction = builtCondition.field.calc ||   builtCondition.field.field?.calc;
+                    let tableName = this.entity.model.dbTableName;
+                    let type = 'CHAR'
+
+                    if(JSON.stringify( this.qb.client.driver ).indexOf( 'PG_DEPENDENCIES' ) > -1 ) type = 'VARCHAR'
+
+
+
+                    whereField = ` CAST(${calcFunction(tableName)} AS ${type}) `;
+                    //whereField = this.knex.raw(calcField);
+
+                }
+
+         
+                qb.where(
+                    this.knex.raw(whereField),
+                    builtCondition.type,
+                    typeof value === 'string' ? value.toUpperCase() :
+                    this.knex.raw( `UPPER( ${value} )` )
+                );
+/*                 else {
+                    whereField = this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\"" ) } )` );
                     // 
                     qb.where(
-                        this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\"" ) } )` ),
+                        whereField,
+                        //this.knex.raw( `UPPER( ${builtCondition.sqlStringField( this, "\"" ) } )` ),
                         // this.knex.raw( `UPPER( "${viewAlias}"."${builtCondition.field.name}" )` ),
                         // this.knex.raw( `UPPER( ${builtCondition.sqlField(this)} )` ),
                         builtCondition.type,
                         typeof value === 'string' ? value.toUpperCase() :
                             this.knex.raw( `UPPER( ${value} )` )
                     );
-                }
+                } */
             }
             else {
                 // TODO: use sqlStringField 
@@ -352,6 +384,19 @@ class KdbQuery extends Query {
                         builtCondition.type,
                         value
                     );
+                }
+                else if (builtCondition?.field?.calc ||  builtCondition?.field?.field?.calc) {
+                    let calcFunction = builtCondition.field.calc ||   builtCondition.field.field?.calc;
+                    let tableName = this.entity.model.dbTableName;
+
+                    let calcField = calcFunction(tableName);
+
+                    qb.where(
+                        this.knex.raw(calcField),
+                        builtCondition.type,
+                        value
+                    );
+
                 }
                 else {
                     qb.where(
@@ -529,7 +574,7 @@ class KdbQuery extends Query {
 
                 // TODO: check if column already present
 
-                return [...acc, f];
+                return [...acc, f]; // change in: return [...acc, f.copy()]  ???
             }, this.columns );
 
             // ObjLinks.forEach(f => {
@@ -565,14 +610,31 @@ class KdbQuery extends Query {
                 // && !(f instanceof FieldAggregationCount) 
                 // && !(f instanceof FieldAllMainTable) 
             ) {
-                // adds column to select clause
-                this.qb.select(`${tableName}.${f.field.sqlSource}`);
+
+                if(f.field.calc && typeof f.field.calc === 'function') {
+                    let calcField = f.field.calc(tableName);
+                    this.qb.select(this.knex.raw(`${calcField} as ${f.field.name} `));
+                } else {
+                    // adds column to select clause
+                    this.qb.select(`${tableName}.${f.field.sqlSource}`);
+                }
+                
             }
     
             // TODO: change relateds keys to entity name
             // .............................................
             if (/*f instanceof ObjectLink &&*/ this.relateds[f.field?.name] ) {
                 this.selectRelatedDetails(f);
+            }
+            if( f.calc && typeof f.calc === 'function') {
+                // 1 : sqlSource -- mi servirebbe l'alias, prob non lo ho
+                // 2 : chiamo direttamente la calc?
+                 let calcField = f.calc(tableName);
+                // let selectExpression = fieldQueryItemCopy.sqlSource;
+                
+
+               // this.qb.select(selectExpression);
+                this.qb.select(this.knex.raw(` ${calcField} as ${f.name} `));
             }
     
         });
@@ -589,6 +651,7 @@ class KdbQuery extends Query {
         this.orderedColumns.forEach( (column) => {
 
             let relatedColumn = this.columns.find( (c) => c.field?.name === column.columnName );
+            let fieldColumn = this.columns.find( (col) => col.name === column.columnName  );
 
             if ( relatedColumn ) {
 
@@ -599,7 +662,14 @@ class KdbQuery extends Query {
 
                 this.qb.orderBy( `${r.foreignTableAlias}.${labelField.sqlSource}`, column.order );
 
-            } else if ( column.columnName ){
+            } 
+            else if (fieldColumn?.calc && typeof fieldColumn?.calc === 'function') {
+                let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
+                let calcField = fieldColumn.calc(tableName);
+
+                this.qb.orderByRaw(`${calcField} ${column.order}`);
+            }
+            else if ( column.columnName ){
                 this.qb.orderBy( this[ column.columnName ].sqlSource, column.order );
             }
         })
@@ -661,7 +731,15 @@ class KdbQuery extends Query {
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
             let sourceSql = wrap.sourceField || `${tableName}.${wrap.field.sqlSource}`;
             // la groupBy non fa anche la select /*.select( field.source )*/
-            this.qb.groupBy(sourceSql);
+
+            if(wrap?.field?.calc && typeof wrap?.field?.calc === 'function' ) {
+                let calcField = wrap.field.calc(tableName);
+                this.qb.groupBy(this.knex.raw(`${calcField}`));
+                //sourceSql = this.knex.raw(`${calcField}`);
+            }
+            else {
+                this.qb.groupBy(sourceSql);
+            }
 
             // if (wrap.field instanceof ObjectLink) {
             //     let r = wrap.field.getSelection();

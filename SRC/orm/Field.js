@@ -8,7 +8,7 @@
  */
 const FieldAggregation = require("./FieldAggregation")
 const { FieldAggregationMax } = require("./FieldAggregation");
-const { FieldConditionDef, IsNullFieldConditionDef, IsNotNullFieldConditionDef, FieldQueryItem } = require("./FieldConditionDef");
+const { FieldConditionDef, ExpressionQueryItem, IsNullFieldConditionDef, IsNotNullFieldConditionDef, FieldQueryItem } = require("./FieldConditionDef");
 
 
 /**Model of a Field
@@ -29,6 +29,9 @@ class Field {
     }
 
     get sqlSource() {
+/*         if (this.calc) {
+            return this.calc(this); // should pass tableName
+        } */
         if (this.sourceAlias) {
             return `${this.sourceAlias}.${this.sourceField || this.name}`;
         }
