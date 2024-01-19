@@ -20,6 +20,12 @@ class FieldQueryItem {
      * 
      */
     get sqlSource() {
+        if (this.calc || this.field?.calc) {
+            let calcFunction = this.calc || this.field?.calc;
+            let tableName = this.sourceAlias;  // check for different cases?
+            
+            return calcFunction(tableName);
+        }
         if (this.sourceAlias) {
             return `${this.sourceAlias}.${this.sourceField || this.name}`;
         }
@@ -99,6 +105,37 @@ class FieldQueryItem {
     max() {
         return new FieldAggregationMax(this);
     }
+}
+
+/**
+ * TODO
+ */
+class ExpressionQueryItem extends FieldQueryItem {
+    constructor ( field ) {
+        this.field = field;
+        this.name = field.name;
+        this.type = field.type;
+        this.calc = field.calc;
+        this.calcType = fiedl.calcType;
+        // c.toEntityName = this.toEntityName;
+        // c.factory = this.factory;
+        // c.tableModel = this.tableModel;
+        // this.sourceField = field.sourceField;
+    }
+
+    get sqlSource() {
+   /*      if (this.calc) {
+            return `${this.calc}`;
+        } */
+        if (this.calc || this.field?.calc) {
+            let calcFunction = this.calc || this.field?.calc;
+            let tableName = this.sourceAlias;  // check for different cases?
+            
+            return calcFunction(tableName);
+        }
+        return this.sourceField || this.name;
+    }
+
 }
 
 
@@ -360,6 +397,7 @@ class IsNotNullFieldConditionDef extends FieldConditionDef {
 }
 
 exports.FieldConditionDef = FieldConditionDef;
+exports.ExpressionQueryItem = ExpressionQueryItem;
 exports.FieldQueryItem = FieldQueryItem;
 exports.IsNullFieldConditionDef = IsNullFieldConditionDef;
 exports.IsNotNullFieldConditionDef = IsNotNullFieldConditionDef;
