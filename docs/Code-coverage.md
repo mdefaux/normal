@@ -18,7 +18,7 @@ Best practice is to establish what percentage of coverage is acceptable for your
 
 Istanbul: The most famous JS tool for code coverage. Supporting unit tests, server-side functional tests, and browser tests. And it’s all for free!
 
-Blanket: A simple, free-to-use JS library designed for both the web and the server-side of JavaScript.
+Blanket: No more mantained.
 
 jscoverage: Written purely in JavaScript, this free tool is an ideal companion for verifying code coverage both on the browser and server-side of your application.
 
@@ -26,3 +26,7 @@ https://about.codecov.io/blog/the-best-code-coverage-tools-by-programming-langua
 
 ## Install
 
+### JS Coverage
+
+
+https://github.com/fishbar/jscoverage
