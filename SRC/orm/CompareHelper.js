@@ -6,7 +6,14 @@ const CompareHelper = {
      * 
      * @param {*} sourceRec 
      * @param {*} destRec 
-     * @returns 
+     * @returns false if there are no difference between source and destination records
+     *      an object with:
+     *      {
+     *          id:  the record id
+                newValues: {...accumulator.newValues, [colName]: newValue},
+                oldValues: {...accumulator.oldValues, [colName]: destValue},
+                differentColumns: [ <array of column names that differs> ]
+     *      }
      */
     compareColumns( sourceRec, destRec, parameters, entityDest ) {
 
@@ -22,7 +29,7 @@ const CompareHelper = {
             // let eq = value === destValue;
             let destField = entityDest.metaData.model.fields[colName];
             let eq = false;
-            let newValue = value
+            let newValue = value;
 
             // columnMap could pass a function in a field. This function should already compare the two records.
             // the result includes the equals result (true/false) and the new value
@@ -39,17 +46,17 @@ const CompareHelper = {
                     //...accumulator, 
                     newValues: {...accumulator.newValues, [colName]: newValue},
                     oldValues: {...accumulator.oldValues, [colName]: destValue},
-                    differentColmns: [...accumulator.differentColmns, colName]
+                    differentColumns: [...accumulator.differentColumns, colName]
                 }
             }   
 
             return accumulator
          
-        }, {id: null,  newValues: {}, oldValues: {}, differentColmns: []  });
+        }, {id: null,  newValues: {}, oldValues: {}, differentColumns: []  });
 
 
-       // return differentColmns.length === 0 ? false : {
-        return response.differentColmns.length === 0 ? false : response;
+       // return differentColumns.length === 0 ? false : {
+        return response.differentColumns.length === 0 ? false : response;
     },
     
 
