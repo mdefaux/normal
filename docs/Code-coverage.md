@@ -26,6 +26,53 @@ https://about.codecov.io/blog/the-best-code-coverage-tools-by-programming-langua
 
 ## Install
 
+    npm i nyc --save-dev
+
+Add to package.json scripts:
+
+    "test-with-coverage": "nyc --reporter=text --check-coverage --lines 50 --per-file mocha --recursive *.test.js"
+
+Package.json should be:
+
+    
+  "scripts": {
+    "test": "mocha --recursive --timeout 3000 test/*.test.js test/entity-rel/*.test.js",
+    "test-with-coverage": "nyc --reporter=text --check-coverage --lines 50 --per-file mocha --recursive --timeout 3000 test/*.test.js test/entity-rel/*.test.js",
+    "start": "node src/test.js"
+  },
+
+## How to use
+Run for entire project:
+
+    npm run test-with-coverage
+
+Use: 
+    npx nyc --reporter=text --check-coverage --lines 90 --per-file mocha test/entity-rel/compareHelper.test.js
+
+Fail if the code coverage of at least one file is below 90%:
+
+    nyc --check-coverage --lines 90 --per-file
+
+    ~/Projects/normal (nyc) $ npx nyc --reporter=text --check-coverage --lines 90 --per-file mocha test/entity-rel/compareHelper.test.js
+
+    CompareHelper test
+        compareColumns method
+        ✔ same record
+        ✔ name differs
+
+    2 passing (7ms)
+
+    ERROR: Coverage for lines (16.12%) does not meet threshold (90%) for Projects\normal\src\orm\CompareHelper.js
+    ------------------|---------|----------|---------|---------|-------------------
+    File              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+    ------------------|---------|----------|---------|---------|-------------------
+    All files         |      16 |     7.31 |   10.52 |   16.12 | 
+    CompareHelper.js  |      16 |     7.31 |   10.52 |   16.12 | 37-39,64-285     
+    ------------------|---------|----------|---------|---------|-------------------
+
+
+    https://stackoverflow.com/questions/16633246/code-coverage-with-mocha
+
 ### JS Coverage
 
 

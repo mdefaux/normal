@@ -2,9 +2,12 @@
  * 
  * @usage
  *  mocha test/entity-rel/compareHelper.test.js 
+ *  
+ * With coverage:
+ *  npx nyc --reporter=text mocha test/entity-rel/compareHelper.test.js
  */
 const { CompareHelper } = require("../../src/orm/CompareHelper");
-const Customer = require("../skel/Customer");
+// const Customer = require("../skel/Customer");
 const assert = require( "assert" );
 
 
@@ -12,6 +15,7 @@ describe( "CompareHelper test", function () {
 
     describe( "compareColumns method", function () {
         
+        // Stub Entity
         const Customer = {
             metaData: {
                 model: {
