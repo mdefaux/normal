@@ -13,6 +13,64 @@ const assert = require( "assert" );
 
 describe( "CompareHelper test", function () {
 
+    // Stub Entity
+    const Customer = {
+        metaData: {
+            model: {
+                fields: {
+                    name: { equalValues: (a,b) => (a === b) },
+                    address: { equalValues: (a,b) => (a === b) },
+                }
+            }
+        },
+        id: {
+            in( keyToFind ) {
+                assert( keyToFind );
+                return true;
+            }
+        }
+    };
+    
+    const sourceQuery = {
+        page( c, sp ) {
+            assert( c === null || !isNaN( c ) );
+            assert( !isNaN( sp ) );
+        },
+        async exec() {
+            return [];
+        }
+    };
+
+    const destQuery = {
+        entity: Customer,
+        clone() { return this; },
+        page( c, sp ) {
+            assert( c === null || !isNaN( c ) );
+            assert( !isNaN( sp ) );
+        },
+        where( condition ) {
+            assert( condition );
+            return this;
+        },
+        andWhere( condition ) {
+            assert( condition !== undefined );
+            return this;
+        },
+        async exec() {
+            return [];
+        },
+        id: {
+            in( keyToFind ) {
+                assert( keyToFind );
+                return true;
+            },
+            notIn( arr ) {
+                assert( Array.isArray( arr ) );
+                return true;
+            }
+        }
+    };
+
     describe( "compareColumns method", function () {
         
         // Stub Entity
@@ -60,6 +118,43 @@ describe( "CompareHelper test", function () {
             assert( result.differentColumns[0] === "name" );
             assert( result.newValues.name === "Agenore Srl" );
             assert( result.oldValues.name === "Bambooooo Srl" );
+        });
+    });
+
+    // copy and uncomment to create a new test
+    describe( "compareChunk test", function () {
+         //
+        it( "template_test", async function () {
+
+            let accumulator = { 
+                notInSource: {},
+                notInDest: {},
+                match: {},
+                diff: {},
+                duplicateKeys: [],
+                destEntity: destQuery.entity,
+                sourceEnd: false
+            }
+            const parameters = {};
+            const chunk = 0;
+            
+            let out = await CompareHelper.compareChunk( 
+                accumulator, sourceQuery, destQuery, parameters, chunk );
+
+            assert( out );
+        });
+    });
+
+    // copy and uncomment to create a new test
+    describe( "compare test", function () {
+         //
+        it( "compare test", async function () {
+            const parameters = {};
+
+            let out = await CompareHelper.compare( 
+                sourceQuery, destQuery, parameters );
+
+            assert( out );
         });
     });
 

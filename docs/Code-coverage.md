@@ -73,6 +73,13 @@ Fail if the code coverage of at least one file is below 90%:
 
     https://stackoverflow.com/questions/16633246/code-coverage-with-mocha
 
+
+## Check only changed files
+
+### Finds changed file
+
+    git diff --name-only remotes/origin/main... -- src/*.js
+
 ### JS Coverage
 
 
