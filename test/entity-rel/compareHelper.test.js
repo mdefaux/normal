@@ -155,7 +155,7 @@ describe( "CompareHelper test", function () {
         it( "compare test", async function () {
             const parameters = {};
 
-            let out = await CompareHelper.compare( 
+            let out = await CompareHelper.compareSet( 
                 sourceQuery, destQuery, parameters );
 
             assert( out );
@@ -328,6 +328,20 @@ describe( "CompareHelper test", function () {
 
            let out = await CompareHelper.align( 
             localSourceQuery, localDestQuery, parameters );
+
+           assert( out );
+       });
+   });
+   
+
+    // copy and uncomment to create a new test
+    describe( "compareSorted test", function () {
+        //
+       it( "compareSorted test", async function () {
+           const parameters = {};
+
+           let out = await CompareHelper.compareSorted( 
+               sourceQuery, destQuery, parameters );
 
            assert( out );
        });

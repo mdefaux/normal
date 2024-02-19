@@ -154,7 +154,7 @@ const CompareHelper = {
     },
 
     
-    async compare( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
+    async compareSet( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
         // let result = { 
         //     notInSource: {},
         //     notInDest: {},
@@ -165,7 +165,7 @@ const CompareHelper = {
         //     sourceEnd: false
         // }
         let result = new ComparisonResult();
-        result.destEntity= destQuery.entity;
+        const destEntity= destQuery.entity;
         let keyFieldDest = parameters.keyFieldD || "id";
 
         for( let chunk = 0; chunk < (chunkLimit||10000) && !result.sourceEnd; chunk++ ) {
@@ -174,12 +174,12 @@ const CompareHelper = {
             
             // performs a specific action for records not present in destination
             if ( actions?.handleNotInDestination ) {
-                result = await actions.handleNotInDestination( result );
+                result = await actions.handleNotInDestination( destEntity, result );
             }
             // performs a specific action for records which have same key 
             // but column value different
             if ( actions?.handleValueDifferent ) {
-                result = await actions.handleValueDifferent( result );
+                result = await actions.handleValueDifferent( destEntity, result );
             }
         }
 
@@ -201,7 +201,7 @@ const CompareHelper = {
 
         // performs a specific action for records not presentin source
         if ( actions?.handleNotInSource ) {
-            result = await actions?.handleNotInSource( result, parameters );
+            result = await actions?.handleNotInSource( destEntity, result, parameters );
         }
 
         result.matchCount = Object.keys( result.match ).length;
@@ -217,18 +217,31 @@ const CompareHelper = {
             }
         }
 
-        delete result.destEntity;
+        // delete result.destEntity;
     
         return result;
     },
 
+    
+    async compareSorted( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
+        let result = new ComparisonResult();
+        const destEntity= destQuery.entity;
+        let keyFieldDest = parameters.keyFieldD || "id";
+
+        for( let chunk = 0; chunk < (chunkLimit||10000) && !result.sourceEnd; chunk++ ) {
+
+        }
+
+        return result;
+    },
+
     async diff( sourceRs, destRs, parameters, chunk = 0 ) {
-        let comparison = this.compare( sourceRs, destRs, parameters, chunk );
+        let comparison = this.compareSet( sourceRs, destRs, parameters, chunk );
 
         return comparison;
     },
 
-    async insertInDestination( result ) {
+    async insertInDestination( destEntity, result ) {
         let toInsert = Object.entries( result.notInDest )
             .map( ([,rec]) => (rec) );
 
@@ -236,7 +249,7 @@ const CompareHelper = {
             return result;
         }
 
-        await result.destEntity.insert( toInsert );
+        await destEntity.insert( toInsert );
 
         return {
             ...result,
@@ -246,7 +259,7 @@ const CompareHelper = {
         };
     },
 
-    async removeFromDestination( result, parameters ) {
+    async removeFromDestination( destEntity, result, parameters ) {
 
         let toDelete = Object.entries( result.notInSource )
             .map( ([,rec]) => (rec) );
@@ -258,11 +271,11 @@ const CompareHelper = {
         if(parameters.removed != undefined )
         {
             //aspetta che tutti gli update siano stati fatti effettivamente
-           await Promise.all(toDelete.map(r=> result.destEntity.update(r[result.destEntity.metaData.model.idField], parameters.removed)));
+           await Promise.all(toDelete.map(r=> destEntity.update(r[destEntity.metaData.model.idField], parameters.removed)));
 
         }  
 
-        if(!parameters.noDelete) await result.destEntity.delete( toDelete );
+        if(!parameters.noDelete) await destEntity.delete( toDelete );
 
         return {
             ...result,
@@ -272,7 +285,7 @@ const CompareHelper = {
         };
     },
 
-    async updateDestination( result ) {
+    async updateDestination( destEntity, result ) {
 
         let toUpdate = Object.entries( result.diff || {} )
             .map( ([,e]) => (e) );
@@ -282,7 +295,7 @@ const CompareHelper = {
         }
 
         for ( let entryToUpdate of toUpdate ){
-            await result.destEntity.update( entryToUpdate.id, entryToUpdate.newValues );
+            await destEntity.update( entryToUpdate.id, entryToUpdate.newValues );
         }
 
         return {
@@ -296,7 +309,7 @@ const CompareHelper = {
 
     async align( sourceQuery, destQuery, parameters ) {
 
-        return await this.compare( sourceQuery, destQuery, parameters, false, {
+        return await this.compareSet( sourceQuery, destQuery, parameters, false, {
             handleNotInDestination: CompareHelper.insertInDestination,
             handleNotInSource: CompareHelper.removeFromDestination,
             handleValueDifferent: CompareHelper.updateDestination,
