@@ -1,5 +1,17 @@
 
 
+class ComparisonResult {
+    constructor () {
+        this.notInSource= {},
+        this.notInDest= {},
+        this.match= {},
+        this.diff= {},
+        this.duplicateKeys= [],
+        // this.destEntity= destQuery.entity,
+        this.sourceEnd= false
+    }
+}
+
 const CompareHelper = {
 
     /**
@@ -143,15 +155,17 @@ const CompareHelper = {
 
     
     async compare( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
-        let result = { 
-            notInSource: {},
-            notInDest: {},
-            match: {},
-            diff: {},
-            duplicateKeys: [],
-            destEntity: destQuery.entity,
-            sourceEnd: false
-        }
+        // let result = { 
+        //     notInSource: {},
+        //     notInDest: {},
+        //     match: {},
+        //     diff: {},
+        //     duplicateKeys: [],
+        //     destEntity: destQuery.entity,
+        //     sourceEnd: false
+        // }
+        let result = new ComparisonResult();
+        result.destEntity= destQuery.entity;
         let keyFieldDest = parameters.keyFieldD || "id";
 
         for( let chunk = 0; chunk < (chunkLimit||10000) && !result.sourceEnd; chunk++ ) {
