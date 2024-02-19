@@ -241,7 +241,7 @@ const CompareHelper = {
             return result;
         }
 
-        if(parameters.removed != 'undefined')
+        if(parameters.removed != undefined )
         {
             //aspetta che tutti gli update siano stati fatti effettivamente
            await Promise.all(toDelete.map(r=> result.destEntity.update(r[result.destEntity.metaData.model.idField], parameters.removed)));
