@@ -1,4 +1,5 @@
 
+ const assert = require( "assert" );
 
 class ComparisonResult {
     constructor () {
@@ -11,7 +12,7 @@ class ComparisonResult {
         this.sourceEnd= false
     }
 }
-
+const defaultPageSize=500;
 const CompareHelper = {
 
     /**
@@ -223,13 +224,50 @@ const CompareHelper = {
     },
 
     
-    async compareSorted( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
+    async compareSorted( sourceQuery, destQuery, parameters, chunkLimit = 1000000, actions = {} ) {
+        assert(destQuery);
+        
         let result = new ComparisonResult();
+        const sourcePageSize = parameters.sourcePageSize || defaultPageSize;
+        const destPageSize = parameters.destPageSize || defaultPageSize;
         const destEntity= destQuery.entity;
-        let keyFieldDest = parameters.keyFieldD || "id";
+        const keyFieldDest = parameters.keyFieldD || "id";        
+        const keyFieldSource = parameters.keyFieldS || "id";
+        //initial page for the source
+        let pageSource=1; 
+        //initial offset for the destination. 
+        //offset is used for destination instead of pagination because insertion and deletion can change data interval 
+        let offsetDest=0;       
+        let offsetend=0;
+        let insertSize = parameters.insertSize || 500; 
+        //inizialized for the count of the source number of data
+        let sourceRecordCount=sourcePageSize;
+        //let endfor=false;
+        //let alreadyMatched= null;
+        // indicates when it is at the end of the destination or the source
+        let arraySourceEnd=false; 
+        let arrayDestEnd=false; 
 
-        for( let chunk = 0; chunk < (chunkLimit||10000) && !result.sourceEnd; chunk++ ) {
+        let destination = destQuery
+            .pageSize( destPageSize )
+            .orderBy({ columnName: keyFieldDest, order: "asc" }); 
+            //un domani la orderby potrebbe avere una funzione che la rende più complessa per i casi particolari
+            //es. se devo definire una chive a cui sostituisco i numeri con le lettere ecc
 
+
+
+
+        for( let chunk = 0; chunk < (chunkLimit) && !result.sourceEnd; chunk++ ) {
+            //controllo se devo fare la fetch
+            //se si, popolo l'arraySource e destination e azzero l'indice corrispondente
+            //dopo aver fatto la fetch, se non ci sono dati esco
+
+
+            //se sono entrambi fetchati scorro uno e l'altro e li confronto per chiave
+            //se corrispondo verifico ulteriormente se è effettivamente lo stesso record
+            //se è lo stesso record chiamo la comparecolumns
+        
+        
         }
 
         return result;

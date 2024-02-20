@@ -45,6 +45,13 @@ exports.FakeQuery = class FakeQuery {
         assert(condition);
         return this.where(condition);
     }
+    pageSize(size){
+        this.size=size;
+        return this;
+    }
+    orderBy(){
+        return this;
+    }
     clone() {
         let clone = new FakeQuery();
         clone.entity = this.entity;

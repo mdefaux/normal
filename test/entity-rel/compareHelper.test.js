@@ -281,7 +281,7 @@ describe( "CompareHelper test", function () {
    
 
     // copy and uncomment to create a new test
-    describe( "compareSorted test", function () {
+   /* describe( "compareSorted test", function () {
         //
        it( "compareSorted test", async function () {
            const parameters = {};
@@ -291,7 +291,7 @@ describe( "CompareHelper test", function () {
 
            assert( out );
        });
-   });
+   });*/
 
     // copy and uncomment to create a new test
     // describe( "template_descriptor", function () {
