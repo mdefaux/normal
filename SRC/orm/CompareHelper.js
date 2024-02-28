@@ -234,11 +234,14 @@ const CompareHelper = {
         const keyFieldDest = parameters.keyFieldD || "id";        
         const keyFieldSource = parameters.keyFieldS || "id";
         //initial page for the source
-        let pageSource=1; 
+        let pageSourceIndex=1; 
         //initial offset for the destination. 
         //offset is used for destination instead of pagination because insertion and deletion can change data interval 
         let offsetDest=0;       
         let offsetend=0;
+
+        // dest page fetching
+        let pageDestIndex = 0;
         let insertSize = parameters.insertSize || 500; 
         //inizialized for the count of the source number of data
         let sourceRecordCount=sourcePageSize;
@@ -248,30 +251,124 @@ const CompareHelper = {
         let arraySourceEnd=false; 
         let arrayDestEnd=false; 
 
-        let destination = destQuery
+        // indexes to cycle source and dest array
+        let iSource = 0;
+        let iDest = 0;
+
+        sourceQuery.page(pageSourceIndex, sourcePageSize);
+
+        //  let destination = destQuery
+        destQuery
             .pageSize( destPageSize )
             .orderBy({ columnName: keyFieldDest, order: "asc" }); 
             //un domani la orderby potrebbe avere una funzione che la rende più complessa per i casi particolari
             //es. se devo definire una chive a cui sostituisco i numeri con le lettere ecc
 
+        let sourceArray = [];
+        let destArray = [];
 
-
-
+        // infinite loop; exit if comparing more than 1M records.
         for( let chunk = 0; chunk < (chunkLimit) && !result.sourceEnd; chunk++ ) {
             //controllo se devo fare la fetch
-            //se si, popolo l'arraySource e destination e azzero l'indice corrispondente
-            //dopo aver fatto la fetch, se non ci sono dati esco
+            if (iSource >= sourceArray.length && !arraySourceEnd ) {
+                sourceArray = await sourceQuery.page(pageSourceIndex++).exec();
+                iSource = 0;
 
+                // TODO: eventually update count of total records.
 
-            //se sono entrambi fetchati scorro uno e l'altro e li confronto per chiave
-            //se corrispondo verifico ulteriormente se è effettivamente lo stesso record
-            //se è lo stesso record chiamo la comparecolumns
-        
+                if(sourceArray.length === 0) {
+                    arraySourceEnd = true;
+                    // break;
+                }
+            }
+
+            if (iDest >= destArray.length && !arrayDestEnd ) {
+                let offset = (pageDestIndex++*destPageSize) + offsetDest;
+                destQuery.page(null, destPageSize, offset);
+                destArray = await destQuery.exec();
+                iDest = 0;
+
+                if(destArray.length === 0) {
+                    arrayDestEnd = true;
+                    // break;
+                }
+            }
+
+            // exit if both arrays have no more records. 
+            if(arraySourceEnd  && arrayDestEnd) {
+                break;
+            }
+           
+            // compare function can be passed as parameter.
+            let compareFunction = parameters.compareFunction || CompareHelper.compareKeys ;
+            
+            let compareResult = iSource < sourceArray.length &&
+                iDest < destArray.length &&
+                compareFunction(sourceArray[iSource], destArray[iDest], keyFieldSource, keyFieldDest );
+                //sourceArray[iSource][keyFieldSource] === destArray[iDest][keyFieldDest];
+          
+            
+
+            // "UPDATE"
+            if( compareResult === 0 ) {
+
+                // same key; check if the record is the same column per column
+                let differentColumns = CompareHelper.compareColumns( sourceArray[iSource], destArray[iDest], parameters, destQuery.entity );
+
+                
+                // if at least one columns is different, call a function with await (will save an array buffer of records to update and execute it when a certain threshold is met)
+                if(differentColumns) {
+                    await actions?.handleValueDifferent(destQuery.entity, differentColumns.newValues);
+                }
+                
+
+                iSource++;
+                iDest++;
+            }
+            // "DELETE"
+            else if(iSource > sourceArray.length || arraySourceEnd || compareResult > 0) {
+
+                // all records in destination from here on are not in source and can be deleted
+                // call a function with await (will save an array buffer of records to delete and execute it when a certain threshold is met)
+                await actions?.handleNotInSource(destQuery.entity, destArray[iDest]);
+
+                iDest++;
+            }
+            // "INSERT"
+            else if(iDest > destArray.length || arrayDestEnd || compareResult < 0) {
+
+                // all records in source from here on are not in destination and can be inserted
+                // call a function with await (will save an array buffer of records to insert and execute it when a certain threshold is met)
+                await actions?.handleNotInDestination(destQuery.entity, sourceArray[iSource]);
+
+                iSource++;
+            }
+
+           
         
         }
 
+
+        
+
         return result;
     },
+
+    compareKeys(a, b, keyFieldA, keyFieldB) {
+        assert(a);
+        assert(b);
+        assert(keyFieldA);
+        assert(keyFieldB);
+
+
+        if(a[keyFieldA] < b[keyFieldB] ) {
+            return -1;
+        } else if (a[keyFieldA] > b[keyFieldB]) {
+            return 1;
+        }
+        return 0;
+    },
+    
 
     async diff( sourceRs, destRs, parameters, chunk = 0 ) {
         let comparison = this.compareSet( sourceRs, destRs, parameters, chunk );
@@ -351,6 +448,16 @@ const CompareHelper = {
             handleNotInDestination: CompareHelper.insertInDestination,
             handleNotInSource: CompareHelper.removeFromDestination,
             handleValueDifferent: CompareHelper.updateDestination,
+        } );
+    },
+
+    async alignSorted( sourceQuery, destQuery, parameters ) {
+
+        return await this.compareSorted( sourceQuery, destQuery, parameters, false, {
+            // change default functions with new functions
+            handleNotInDestination: parameters.handleNotInDestination ||  CompareHelper.insertInDestination,
+            handleNotInSource: parameters.handleNotInSource || CompareHelper.removeFromDestination,
+            handleValueDifferent: parameters.handleValueDifferent ||  CompareHelper.updateDestination,
         } );
     }
 
