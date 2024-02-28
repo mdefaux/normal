@@ -9,14 +9,23 @@ exports.FakeQuery = class FakeQuery {
         this.recordSet = [];
     }
     
-    page(c, sp) {
-        assert(c === null || !isNaN(c));
-        assert(!isNaN(sp));
+    page(pageIndex, pageSize, offset) {
+        // assert(c === null || !isNaN(c));
+        // assert(!isNaN(sp));
+
+     //   this.pageIndex = pageIndex;
+        this.size = pageSize || this.size;
+        this.offset = offset !== undefined ? offset : (pageIndex-1)*this.size;
+
+        assert(this.offset !== undefined);
+        return this;
     }
 
     async exec() {
 
-        if (!this.whereValue) return this.recordSet;
+ /*        if (!this.whereValue) {
+            return this.recordSet
+        }; */
 
         /*     let condition = this.whereValue[0];
  
@@ -24,13 +33,20 @@ exports.FakeQuery = class FakeQuery {
                  condition.f
              ); */
 
-        let result = this.whereValue.reduce((acc, condition) => {
+        let whereConditions = this.whereValue || [];
+
+        let result = whereConditions.reduce((acc, condition) => {
 
             return acc.filter(
                 condition.f
             );
 
         }, this.recordSet);
+
+        // paging
+        if(this.offset !== undefined) {
+            result = result.slice(this.offset,  this.offset + this.size );
+        }
 
 
         return result;
