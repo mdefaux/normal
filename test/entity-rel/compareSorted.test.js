@@ -1,17 +1,19 @@
 /**Test for CompareHelper
  * 
  * @usage
- *  mocha test/entity-rel/compareHelper.test.js 
+ *  mocha test/entity-rel/compareSorted.test.js 
  *  
  * With coverage:
- *  npx nyc --reporter=text mocha test/entity-rel/compareHelper.test.js
+ *  npx nyc --reporter=text mocha test/entity-rel/compareSorted.test.js
  */
 const { CompareHelper } = require("../../src/orm/CompareHelper");
 const assert = require("assert");
 const { FakeQuery } = require("./FakeQuery");
 
 const { compareSortedSource } = require("./skelData/compareSortedData/sourceData")
+const { compareSortedSourceMoreRecords } = require("./skelData/compareSortedData/sourceDataMoreRecords")
 const {compareSortedDest} = require("./skelData/compareSortedData/destData")
+const {compareSortedDestMoreRecords} = require("./skelData/compareSortedData/destDataMoreRecords")
 
 
 
@@ -198,14 +200,17 @@ describe("CompareSorted test", function () {
             // aggiungere il parametro result per le statistiche
             handleValueDifferent: (entity, values) => {
                 console.log("update in progress...");
+                assert(values.name === 'UpdateHere')
                 return Promise.resolve(true);
             } ,
             handleNotInSource: (entity, record) => {
                 console.log(`executing delete for record with id ${record?.id}`);
-                return Promise.resolve(true);
+                assert(record.id === 3);
+               return Promise.resolve(true);
             },
             handleNotInDestination: (entity, record) => {
                 console.log(`executing insert for record with id ${record?.id}`);
+                assert(record.id === 5);
                 return Promise.resolve(true);
             },
 
@@ -217,6 +222,69 @@ describe("CompareSorted test", function () {
         assert(out);
     });
 
+
+    it("compareSorted test, source with more records", async function () {
+        //const parameters = {};
+        localFakeSourceQuery.recordSet = compareSortedSourceMoreRecords;
+        localDestQuery.recordSet = compareSortedDest;
+
+        let actions = {
+            // aggiungere il parametro result per le statistiche
+            handleValueDifferent: (entity, values) => {
+                console.log("update in progress...");
+                assert(false)
+                return Promise.resolve(true);
+            } ,
+            handleNotInSource: (entity, record) => {
+                console.log(`executing delete for record with id ${record?.id}`);
+                assert(false);
+               return Promise.resolve(true);
+            },
+            handleNotInDestination: (entity, record) => {
+                console.log(`executing insert for record with id ${record?.id}`);
+                assert(record.id === 7 || record.id === 8 || record.id === 9  || record.id === 10 );
+                return Promise.resolve(true);
+            },
+
+        };
+
+        let out = await CompareHelper.compareSorted(
+            localFakeSourceQuery, localDestQuery, parameters, undefined, actions);
+
+        assert(out);
+    });
+
+
+    it("compareSorted test, dest with more records", async function () {
+        //const parameters = {};
+        localFakeSourceQuery.recordSet = compareSortedSource;
+        localDestQuery.recordSet = compareSortedDestMoreRecords;
+
+        let actions = {
+            // aggiungere il parametro result per le statistiche
+            handleValueDifferent: (entity, values) => {
+                console.log("update in progress...");
+                assert(false)
+                return Promise.resolve(true);
+            } ,
+            handleNotInSource: (entity, record) => {
+                console.log(`executing delete for record with id ${record?.id}`);
+                assert(record.id === 100 || record.id === 101 || record.id === 102 ||record.id === 103 );
+               return Promise.resolve(true);
+            },
+            handleNotInDestination: (entity, record) => {
+                console.log(`executing insert for record with id ${record?.id}`);
+                assert(false);
+                return Promise.resolve(true);
+            },
+
+        };
+
+        let out = await CompareHelper.compareSorted(
+            localFakeSourceQuery, localDestQuery, parameters, undefined, actions);
+
+        assert(out);
+    });
 
 
 
