@@ -224,7 +224,7 @@ const CompareHelper = {
     },
 
     
-    async compareSorted( sourceQuery, destQuery, parameters, chunkLimit = 1000000, actions = {} ) {
+    async compareSorted( sourceQuery, destQuery, parameters, iterationLimit = 1000000, buffer = {} ) {
         assert(destQuery);
         
         let result = new ComparisonResult();
@@ -268,7 +268,7 @@ const CompareHelper = {
         let destArray = [];
 
         // infinite loop; exit if comparing more than 1M records.
-        for( let chunk = 0; chunk < (chunkLimit) && !result.sourceEnd; chunk++ ) {
+        for( let iteration = 0; iteration < (iterationLimit) && !result.sourceEnd; iteration++ ) {
             // check if fetch is needed
             if (iSource >= sourceArray.length && !arraySourceEnd ) {
                 sourceArray = await sourceQuery.page(pageSourceIndex++).exec();
@@ -322,7 +322,7 @@ const CompareHelper = {
                 
                 // if at least one columns is different, call a function with await (will save an array buffer of records to update and execute it when a certain threshold is met)
                 if(differentColumns) {
-                    await actions?.handleValueDifferent(destQuery.entity, differentColumns.newValues);
+                    await buffer?.handleValueDifferent(destQuery.entity, differentColumns.newValues);
                 }
                 
 
@@ -334,7 +334,7 @@ const CompareHelper = {
 
                 // all records in destination from here on are not in source and can be deleted
                 // call a function with await (will save an array buffer of records to delete and execute it when a certain threshold is met)
-                await actions?.handleNotInSource(destQuery.entity, destArray[iDest]);
+                await buffer?.handleNotInSource(destQuery.entity, destArray[iDest]);
 
                 iDest++;
             }
@@ -343,7 +343,7 @@ const CompareHelper = {
 
                 // all records in source from here on are not in destination and can be inserted
                 // call a function with await (will save an array buffer of records to insert and execute it when a certain threshold is met)
-                await actions?.handleNotInDestination(destQuery.entity, sourceArray[iSource]);
+                await buffer?.handleNotInDestination(destQuery.entity, sourceArray[iSource]);
 
                 iSource++;
             }
@@ -361,7 +361,7 @@ const CompareHelper = {
     compareKeys(a, b, keyFieldA, keyFieldB) {
         assert(a);
         assert(b);
-        assert(keyFieldA);
+        assert(keyFieldA);4
         assert(keyFieldB);
 
 
