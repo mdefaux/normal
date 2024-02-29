@@ -15,7 +15,7 @@ exports.FakeQuery = class FakeQuery {
 
      //   this.pageIndex = pageIndex;
         this.size = pageSize || this.size;
-        this.offset = offset !== undefined ? offset : (pageIndex-1)*this.size;
+        this.offset = offset !== undefined ? offset : ((pageIndex|| 1)-1)*this.size;
 
         assert(this.offset !== undefined);
         return this;

@@ -199,17 +199,16 @@ describe("CompareSorted test", function () {
         let actions = {
             // aggiungere il parametro result per le statistiche
             handleValueDifferent: (entity, values) => {
-                console.log("update in progress...");
                 assert(values.name === 'UpdateHere')
                 return Promise.resolve(true);
             } ,
             handleNotInSource: (entity, record) => {
-                console.log(`executing delete for record with id ${record?.id}`);
+                // console.log(`executing delete for record with id ${record?.id}`);
                 assert(record.id === 3);
                return Promise.resolve(true);
             },
             handleNotInDestination: (entity, record) => {
-                console.log(`executing insert for record with id ${record?.id}`);
+                // console.log(`executing insert for record with id ${record?.id}`);
                 assert(record.id === 5);
                 return Promise.resolve(true);
             },
@@ -231,17 +230,17 @@ describe("CompareSorted test", function () {
         let actions = {
             // aggiungere il parametro result per le statistiche
             handleValueDifferent: (entity, values) => {
-                console.log("update in progress...");
+                
                 assert(false)
                 return Promise.resolve(true);
             } ,
             handleNotInSource: (entity, record) => {
-                console.log(`executing delete for record with id ${record?.id}`);
+                // console.log(`executing delete for record with id ${record?.id}`);
                 assert(false);
                return Promise.resolve(true);
             },
             handleNotInDestination: (entity, record) => {
-                console.log(`executing insert for record with id ${record?.id}`);
+                // console.log(`executing insert for record with id ${record?.id}`);
                 assert(record.id === 7 || record.id === 8 || record.id === 9  || record.id === 10 );
                 return Promise.resolve(true);
             },
@@ -263,17 +262,17 @@ describe("CompareSorted test", function () {
         let actions = {
             // aggiungere il parametro result per le statistiche
             handleValueDifferent: (entity, values) => {
-                console.log("update in progress...");
+                
                 assert(false)
                 return Promise.resolve(true);
             } ,
             handleNotInSource: (entity, record) => {
-                console.log(`executing delete for record with id ${record?.id}`);
+                // console.log(`executing delete for record with id ${record?.id}`);
                 assert(record.id === 100 || record.id === 101 || record.id === 102 ||record.id === 103 );
                return Promise.resolve(true);
             },
             handleNotInDestination: (entity, record) => {
-                console.log(`executing insert for record with id ${record?.id}`);
+                // console.log(`executing insert for record with id ${record?.id}`);
                 assert(false);
                 return Promise.resolve(true);
             },
