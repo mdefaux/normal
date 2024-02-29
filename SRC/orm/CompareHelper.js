@@ -269,7 +269,7 @@ const CompareHelper = {
 
         // infinite loop; exit if comparing more than 1M records.
         for( let chunk = 0; chunk < (chunkLimit) && !result.sourceEnd; chunk++ ) {
-            //controllo se devo fare la fetch
+            // check if fetch is needed
             if (iSource >= sourceArray.length && !arraySourceEnd ) {
                 sourceArray = await sourceQuery.page(pageSourceIndex++).exec();
                 iSource = 0;
@@ -299,6 +299,10 @@ const CompareHelper = {
                 break;
             }
            
+            // TODO: check if source and destination have different rules for ordering.
+            // for example: check first X records from source and destination and check the keys, maybe one starts with capital letters and the other with numbers.
+
+            
             // compare function can be passed as parameter.
             let compareFunction = parameters.compareFunction || CompareHelper.compareKeys ;
             
