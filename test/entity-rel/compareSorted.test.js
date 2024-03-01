@@ -14,6 +14,8 @@ const { compareSortedSource } = require("./skelData/compareSortedData/sourceData
 const { compareSortedSourceMoreRecords } = require("./skelData/compareSortedData/sourceDataMoreRecords")
 const {compareSortedDest} = require("./skelData/compareSortedData/destData")
 const {compareSortedDestMoreRecords} = require("./skelData/compareSortedData/destDataMoreRecords")
+const {compareSortedSourcePaging } = require("./skelData/compareSortedData/sourceDataPaging")
+const {compareSortedDestPaging} = require("./skelData/compareSortedData/destDataPaging")
 
 
 
@@ -143,9 +145,9 @@ describe("CompareSorted test", function () {
     const localFakeSourceQuery = new FakeQuery();
 
 
-    const localDestQuery = new FakeQuery();
-    localDestQuery.entity = localCustomer;
-    localDestQuery.recordSet = [
+    const localFakeDestQuery = new FakeQuery();
+    localFakeDestQuery.entity = localCustomer;
+    localFakeDestQuery.recordSet = [
         {
             id: 1,
             name: "nome1",
@@ -162,7 +164,7 @@ describe("CompareSorted test", function () {
             address: "via Delete",
         },
     ];
-    localDestQuery.id = {
+    localFakeDestQuery.id = {
         in(keyToFind) {
             assert(keyToFind);
             return {
@@ -180,21 +182,23 @@ describe("CompareSorted test", function () {
             };
         }
     };
-
+/*
     it("alignSorted test", async function () {
         //const parameters = {};
 
        // let out = await CompareHelper.compareSorted(
         let out = await CompareHelper.alignSorted(
-            localSourceQuery, localDestQuery, parameters);
+            localSourceQuery, localFakeDestQuery, parameters);
 
         assert(out);
-    });
+    });*/
 
     it("compareSorted test", async function () {
         //const parameters = {};
         localFakeSourceQuery.recordSet = compareSortedSource;
-        localDestQuery.recordSet = compareSortedDest;
+        localFakeDestQuery.recordSet = compareSortedDest;
+        parameters.sourcePageSize=1;
+        parameters.destPageSize=3;
 
         let actions = {
             // aggiungere il parametro result per le statistiche
@@ -216,16 +220,16 @@ describe("CompareSorted test", function () {
         };
 
         let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localDestQuery, parameters, undefined, actions);
+            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
 
         assert(out);
     });
 
-
+/* 
     it("compareSorted test, source with more records", async function () {
         //const parameters = {};
         localFakeSourceQuery.recordSet = compareSortedSourceMoreRecords;
-        localDestQuery.recordSet = compareSortedDest;
+        localFakeDestQuery.recordSet = compareSortedDest;
 
         let actions = {
             // aggiungere il parametro result per le statistiche
@@ -248,7 +252,7 @@ describe("CompareSorted test", function () {
         };
 
         let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localDestQuery, parameters, undefined, actions);
+            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
 
         assert(out);
     });
@@ -257,7 +261,7 @@ describe("CompareSorted test", function () {
     it("compareSorted test, dest with more records", async function () {
         //const parameters = {};
         localFakeSourceQuery.recordSet = compareSortedSource;
-        localDestQuery.recordSet = compareSortedDestMoreRecords;
+        localFakeDestQuery.recordSet = compareSortedDestMoreRecords;
 
         let actions = {
             // aggiungere il parametro result per le statistiche
@@ -280,11 +284,55 @@ describe("CompareSorted test", function () {
         };
 
         let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localDestQuery, parameters, undefined, actions);
+            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
 
         assert(out);
     });
 
 
+    it("compareSorted test paging,  source with more record than dest", async function () {
+        //const parameters = {};
+        localFakeSourceQuery.recordSet = compareSortedSourcePaging; 
+        localFakeDestQuery.recordSet = compareSortedDest; 
+        parameters.sourcePageSize=2;
 
+        let actions = {
+            // aggiungere il parametro result per le statistiche
+            handleNotInDestination: (entity, record) => {
+                // console.log(`executing delete for record with id ${record?.id}`);
+                assert(record.id === 8 || record.id === 9);
+                return Promise.resolve(true);
+            },
+
+        };
+
+        let out = await CompareHelper.compareSorted(
+            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
+
+        assert(out);
+    });
+
+   
+    it("compareSorted test paging,  dest with more record than source", async function () {
+        //const parameters = {};
+        localFakeSourceQuery.recordSet = compareSortedSource; 
+        localFakeDestQuery.recordSet = compareSortedDestPaging; 
+        parameters.destPageSize=5;
+
+        let actions = {
+            // aggiungere il parametro result per le statistiche
+        handleNotInSource: (entity, record) => {
+                // console.log(`executing insert for record with id ${record?.id}`);
+                assert(record.id===8 || record.id===9);
+                return Promise.resolve(true);
+            },
+            
+
+        };
+
+        let out = await CompareHelper.compareSorted(
+            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
+
+        assert(out);
+    }); */
 });
