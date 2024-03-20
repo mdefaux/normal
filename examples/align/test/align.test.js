@@ -9,16 +9,17 @@
  * With coverage:
  *  npx nyc --reporter=text mocha test/entity-rel/compareSorted.test.js
  */
-const { CompareHelper } = require("../../src/orm/CompareHelper");
+const { CompareHelper } = require("../../../src/orm/CompareHelper");
 const assert = require("assert");
-const { FakeQuery } = require("./FakeQuery");
+const { FakeQuery } = require("../../../test/entity-rel/FakeQuery");
+const { Customer } = require("../skel/Customer");
 
-const { compareSortedSource } = require("./skelData/compareSortedData/sourceData")
-const { compareSortedSourceMoreRecords } = require("./skelData/compareSortedData/sourceDataMoreRecords")
-const {compareSortedDest} = require("./skelData/compareSortedData/destData")
-const {compareSortedDestMoreRecords} = require("./skelData/compareSortedData/destDataMoreRecords")
-const {compareSortedSourcePaging } = require("./skelData/compareSortedData/sourceDataPaging")
-const {compareSortedDestPaging} = require("./skelData/compareSortedData/destDataPaging")
+const { compareSortedSource } = require("../../../test/entity-rel/skelData/compareSortedData/sourceData")
+const { compareSortedSourceMoreRecords } = require("../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
+const {compareSortedDest} = require("../../../test/entity-rel/skelData/compareSortedData/destData")
+const {compareSortedDestMoreRecords} = require("../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
+const {compareSortedSourcePaging } = require("../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
+const {compareSortedDestPaging} = require("../../../test/entity-rel/skelData/compareSortedData/destDataPaging")
 
 
 
@@ -144,6 +145,7 @@ describe("CompareSorted test", function () {
         }
     };
 
+    const localSourceArrayQuery = Customer.select();
 
     const localFakeSourceQuery = new FakeQuery();
 
@@ -198,7 +200,7 @@ describe("CompareSorted test", function () {
 
     it("compareSorted test", async function () {
         //const parameters = {};
-        localFakeSourceQuery.recordSet = compareSortedSource;
+        //localFakeSourceQuery.recordSet = compareSortedSource;
         localFakeDestQuery.recordSet = compareSortedDest;
         parameters.sourcePageSize=1;
         parameters.destPageSize=3;
@@ -223,12 +225,12 @@ describe("CompareSorted test", function () {
         };
 
         let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
+            localSourceArrayQuery, localFakeDestQuery, parameters, undefined, actions);
 
         assert(out);
     });
 
-    it("compareSorted test, source with more records", async function () {
+    /* it("compareSorted test, source with more records", async function () {
         //const parameters = {};
         localFakeSourceQuery.recordSet = compareSortedSourceMoreRecords;
         localFakeDestQuery.recordSet = compareSortedDest;
@@ -336,5 +338,5 @@ describe("CompareSorted test", function () {
             localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
 
         assert(out);
-    });
+    }); */
 });
