@@ -1,4 +1,7 @@
-/**Test for CompareHelper
+/**Test for case study of align
+ * The source is a json data
+ * 
+ * NOT WORKING change require paths
  * 
  * @usage
  *  mocha test/entity-rel/compareSorted.test.js 
