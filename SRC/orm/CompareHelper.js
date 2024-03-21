@@ -30,17 +30,24 @@ const CompareHelper = {
      */
     compareColumns( sourceRec, destRec, parameters, entityDest ) {
 
+        // requires destination entity has fields metadata
+        assert( entityDest?.metaData?.model?.fields );
+
         let modSourceRec = sourceRec;
 
         // translate sourceRec for later comparison
-        if(parameters.columnMap) modSourceRec = parameters.columnMap(sourceRec,destRec)
-        
+        if (parameters.columnMap) {
+            modSourceRec = parameters.columnMap(sourceRec, destRec);
+        }
 
         // compare values for every column
         let response = Object.entries(modSourceRec).reduce((accumulator, [colName, value]) => {
             let destValue = destRec[colName];
-            // let eq = value === destValue;
+            // Gets the destination field from destination entity and checks if exhists
             let destField = entityDest.metaData.model.fields[colName];
+            if ( !destField ) {
+                throw new Error( `Column '${colName}' not found in entity '${entityDest.metaData}'. Column map function: ${parameters.columnMap}` )
+            }
             let eq = false;
             let newValue = value;
 

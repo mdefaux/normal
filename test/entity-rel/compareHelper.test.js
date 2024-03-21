@@ -124,6 +124,26 @@ describe( "CompareHelper test", function () {
             assert( result.newValues.name === "Agenore Srl" );
             assert( result.oldValues.name === "Bambooooo Srl" );
         });
+        // 
+        it( "field not found in destination", function () {
+            const sourceRec = {
+                name: 'Agenore Srl', address: 'quiz street'
+            };
+            const destRec = {
+                name: 'Bambooooo Srl', address: 'quiz street'
+            };
+
+            // 
+            const columnMap = ( rec ) => ( {notExhistingField: rec} );
+
+            try {
+                let result = CompareHelper.compareColumns(
+                    sourceRec, destRec, { columnMap: columnMap }, Customer);
+                assert(false);
+            } catch (err) {
+                assert( err.message.startsWith( "Column 'notExhistingField' not found in entity ") );
+            }
+        });
     });
 
     // copy and uncomment to create a new test

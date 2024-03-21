@@ -12,7 +12,7 @@
 const { CompareHelper } = require("../../../src/orm/CompareHelper");
 const assert = require("assert");
 const { FakeQuery } = require("../../../test/entity-rel/FakeQuery");
-const { Customer } = require("../skel/Customer");
+const Customer2 = require("../skel/Customer");
 
 const { compareSortedSource } = require("../../../test/entity-rel/skelData/compareSortedData/sourceData")
 const { compareSortedSourceMoreRecords } = require("../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
@@ -23,9 +23,9 @@ const {compareSortedDestPaging} = require("../../../test/entity-rel/skelData/com
 
 
 
-describe("CompareSorted test", function () {
+describe("Align test", function () {
     const parameters = {
-        columnMap: (rec) => (rec)
+        columnMap: (rec) => ({name: rec.name})
     };
     const Customer = {
         metaData: {
@@ -60,7 +60,7 @@ describe("CompareSorted test", function () {
     };
 
     const destQuery = {
-        entity: Customer,
+        entity: Customer2,
         clone() { return this; },
         page(c, sp) {
             assert(c === null || !isNaN(c));
@@ -145,7 +145,7 @@ describe("CompareSorted test", function () {
         }
     };
 
-    const localSourceArrayQuery = Customer.select();
+    const localSourceArrayQuery = Customer2.select();
 
     const localFakeSourceQuery = new FakeQuery();
 
@@ -198,7 +198,7 @@ describe("CompareSorted test", function () {
         assert(out);
     });*/
 
-    it("compareSorted test", async function () {
+    it("use a json as source", async function () {
         //const parameters = {};
         //localFakeSourceQuery.recordSet = compareSortedSource;
         localFakeDestQuery.recordSet = compareSortedDest;
