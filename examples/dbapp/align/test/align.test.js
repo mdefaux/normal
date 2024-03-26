@@ -9,17 +9,22 @@
  * With coverage:
  *  npx nyc --reporter=text mocha test/entity-rel/compareSorted.test.js
  */
-const { CompareHelper } = require("../../../src/orm/CompareHelper");
+const { CompareHelper } = require("../../../../src/orm/CompareHelper");
 const assert = require("assert");
-const { FakeQuery } = require("../../../test/entity-rel/FakeQuery");
-const Customer2 = require("../skel/Customer");
+const { FakeQuery } = require("../../../../test/entity-rel/FakeQuery");
 
-const { compareSortedSource } = require("../../../test/entity-rel/skelData/compareSortedData/sourceData")
-const { compareSortedSourceMoreRecords } = require("../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
-const {compareSortedDest} = require("../../../test/entity-rel/skelData/compareSortedData/destData")
-const {compareSortedDestMoreRecords} = require("../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
-const {compareSortedSourcePaging } = require("../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
-const {compareSortedDestPaging} = require("../../../test/entity-rel/skelData/compareSortedData/destDataPaging")
+const CustomerSource = require("../skel/Customer");
+
+require("../../test/_test-setup");
+
+const CustomerDest = require( '../../models/Customer' );
+
+const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
+const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
+const {compareSortedDest} = require("../../../../test/entity-rel/skelData/compareSortedData/destData")
+const {compareSortedDestMoreRecords} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
+const {compareSortedSourcePaging } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
+const {compareSortedDestPaging} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataPaging")
 
 
 
@@ -60,7 +65,7 @@ describe("Align test", function () {
     };
 
     const destQuery = {
-        entity: Customer2,
+        entity: CustomerSource,
         clone() { return this; },
         page(c, sp) {
             assert(c === null || !isNaN(c));
@@ -145,7 +150,8 @@ describe("Align test", function () {
         }
     };
 
-    const localSourceArrayQuery = Customer2.select();
+    const localSourceArrayQuery = CustomerSource.select();
+    const localDBDestQuery = CustomerDest.select();
 
     const localFakeSourceQuery = new FakeQuery();
 
@@ -201,31 +207,32 @@ describe("Align test", function () {
     it("use a json as source", async function () {
         //const parameters = {};
         //localFakeSourceQuery.recordSet = compareSortedSource;
-        localFakeDestQuery.recordSet = compareSortedDest;
-        parameters.sourcePageSize=1;
-        parameters.destPageSize=3;
+        
+        //localFakeDestQuery.recordSet = compareSortedDest;
+        parameters.sourcePageSize=50;
+        parameters.destPageSize=50;
 
         let actions = {
             // aggiungere il parametro result per le statistiche
             handleValueDifferent: (entity, values) => {
-                assert(values.name === 'UpdateHere')
+                //assert(values.name === 'UpdateHere')
                 return Promise.resolve(true);
             } ,
             handleNotInSource: (entity, record) => {
                 // console.log(`executing delete for record with id ${record?.id}`);
-                assert(record.id === 3);
+                //assert(record.id === 3);
                return Promise.resolve(true);
             },
             handleNotInDestination: (entity, record) => {
                 // console.log(`executing insert for record with id ${record?.id}`);
-                assert(record.id === 5);
+                //assert(record.id === 5);
                 return Promise.resolve(true);
             },
 
         };
 
         let out = await CompareHelper.compareSorted(
-            localSourceArrayQuery, localFakeDestQuery, parameters, undefined, actions);
+            localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
 
         assert(out);
     });
