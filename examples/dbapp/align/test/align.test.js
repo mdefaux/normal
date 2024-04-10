@@ -4,10 +4,10 @@
  * NOT WORKING change require paths
  * 
  * @usage
- *  mocha test/entity-rel/compareSorted.test.js 
+ *  mocha align/test/align.test.js  
  *  
  * With coverage:
- *  npx nyc --reporter=text mocha test/entity-rel/compareSorted.test.js
+ *  npx nyc --reporter=text mocha align/test/align.test.js 
  */
 const { CompareHelper } = require("../../../../src/orm/CompareHelper");
 const assert = require("assert");
@@ -18,6 +18,7 @@ const CustomerSource = require("../skel/Customer");
 require("../../test/_test-setup");
 
 const CustomerDest = require( '../../models/Customer' );
+const Log = require( '../../models/Log' );
 
 const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
 const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
@@ -235,6 +236,15 @@ describe("Align test", function () {
             localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
 
         assert(out);
+
+        await Log.insert( {
+            what: `The test precedure has ended `,
+            activity_type: `align-customer`
+        } );
+
+        const logs = await Log.select().exec();
+
+        console.log( logs );
     });
 
     /* it("compareSorted test, source with more records", async function () {
