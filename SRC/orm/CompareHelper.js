@@ -262,7 +262,7 @@ const CompareHelper = {
         let iSource = 0;
         let iDest = 0;
 
-        sourceQuery.page(pageSourceIndex, sourcePageSize);
+        sourceQuery.pageSize(sourcePageSize);
 
         //  let destination = destQuery
         destQuery
@@ -291,7 +291,7 @@ const CompareHelper = {
 
             if (iDest >= destArray.length && !arrayDestEnd ) {
                 let offset = (pageDestIndex++*destPageSize) + offsetDest;
-                destQuery.page(null, destPageSize, offset);
+                destQuery.setRange(destPageSize, offset);
                 destArray = await destQuery.exec();
                 iDest = 0;
 
@@ -368,7 +368,7 @@ const CompareHelper = {
     compareKeys(a, b, keyFieldA, keyFieldB) {
         assert(a);
         assert(b);
-        assert(keyFieldA);4
+        assert(keyFieldA);
         assert(keyFieldB);
 
 
@@ -462,13 +462,13 @@ const CompareHelper = {
         } );
     },
 
-    async alignSorted( sourceQuery, destQuery, parameters ) {
+    async alignSorted( sourceQuery, destQuery, parameters, buffer ) {
 
         return await this.compareSorted( sourceQuery, destQuery, parameters, false, {
             // change default functions with new functions
-            handleNotInDestination: parameters.handleNotInDestination ||  CompareHelper.insertInDestination,
-            handleNotInSource: parameters.handleNotInSource || CompareHelper.removeFromDestination,
-            handleValueDifferent: parameters.handleValueDifferent ||  CompareHelper.updateDestination,
+            handleNotInDestination: parameters.handleNotInDestination || buffer?.insert, //   CompareHelper.insertInDestination,
+            handleNotInSource: parameters.handleNotInSource || buffer?.delete, // CompareHelper.removeFromDestination,
+            handleValueDifferent: parameters.handleValueDifferent || buffer?.update, //  CompareHelper.updateDestination,
         } );
     }
 

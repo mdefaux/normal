@@ -20,6 +20,20 @@ exports.FakeQuery = class FakeQuery {
         assert(this.offset !== undefined);
         return this;
     }
+  
+    /**Sets a range for the data 
+     * 
+     * @param {int} limit number of records to extract
+     * @param {int} offset starting record to return, 0 is the first record
+     * @returns 
+     * @example range(100, 300)  extract from record 300 to 399
+     */
+     setRange( limit, offset=0 ) {
+      this.limit = limit || this.limit ||  50;
+      this.offset = parseInt(offset);
+    
+      return this;
+    }
 
     async exec() {
 

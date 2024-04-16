@@ -20,6 +20,7 @@ require("../../test/_test-setup");
 const CustomerDest = require( '../../models/Customer' );
 const Log = require( '../../models/Log' );
 const Aligner = require( '../skel/Aligner' );
+const IAlignBuffer = require( '../../../../src/orm/IAlignBuffer' );
 
 const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
 const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
@@ -195,18 +196,50 @@ describe("Align test", function () {
             };
         }
     };
-/*
-    it("alignSorted test", async function () {
-        //const parameters = {};
 
-       // let out = await CompareHelper.compareSorted(
-        let out = await CompareHelper.alignSorted(
-            localSourceQuery, localFakeDestQuery, parameters);
+    // it("use a json as source", async function () {
+    //     //const parameters = {};
+    //     //localFakeSourceQuery.recordSet = compareSortedSource;
+        
+    //     //localFakeDestQuery.recordSet = compareSortedDest;
+    //     parameters.sourcePageSize=50;
+    //     parameters.destPageSize=50;
 
-        assert(out);
-    });*/
+    //     let actions = {
+    //         // aggiungere il parametro result per le statistiche
+    //         handleValueDifferent: (entity, values) => {
+    //             //assert(values.name === 'UpdateHere')
+    //             return Promise.resolve(true);
+    //         } ,
+    //         handleNotInSource: (entity, record) => {
+    //             // console.log(`executing delete for record with id ${record?.id}`);
+    //             //assert(record.id === 3);
+    //            return Promise.resolve(true);
+    //         },
+    //         handleNotInDestination: (entity, record) => {
+    //             // console.log(`executing insert for record with id ${record?.id}`);
+    //             //assert(record.id === 5);
+    //             return Promise.resolve(true);
+    //         },
 
-    it("use a json as source", async function () {
+    //     };
+
+    //     let out = await CompareHelper.compareSorted(
+    //         localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
+
+    //     assert(out);
+
+    //     await Log.insert( {
+    //         what: `The test precedure has ended `,
+    //         activity_type: `align-customer`
+    //     } );
+
+    //     const logs = await Log.select().exec();
+
+    //     console.log( logs );
+    // });
+
+    it("use a buffer", async function () {
         //const parameters = {};
         //localFakeSourceQuery.recordSet = compareSortedSource;
         
@@ -233,8 +266,17 @@ describe("Align test", function () {
 
         };
 
+        const buffer = new IAlignBuffer();
+
+        localSourceArrayQuery.dataStorage.data[0].name = 'change1'
+        localSourceArrayQuery.dataStorage.data[1].address = 'change2'
+        
         let out = await CompareHelper.compareSorted(
             localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
+
+
+        // let out = await CompareHelper.alignSorted(
+        //     localSourceArrayQuery, localDBDestQuery, parameters, buffer );
 
         assert(out);
 
@@ -247,44 +289,43 @@ describe("Align test", function () {
 
         console.log( logs );
     });
-
     
 
-    it("use Aligner helper", async function () {
-        //const parameters = {};
-        //localFakeSourceQuery.recordSet = compareSortedSource;
+    // it("use Aligner helper", async function () {
+    //     //const parameters = {};
+    //     //localFakeSourceQuery.recordSet = compareSortedSource;
         
-        //localFakeDestQuery.recordSet = compareSortedDest;
-        parameters.sourcePageSize=50;
-        parameters.destPageSize=50;
+    //     //localFakeDestQuery.recordSet = compareSortedDest;
+    //     parameters.sourcePageSize=50;
+    //     parameters.destPageSize=50;
 
-        let actions = {
-            // aggiungere il parametro result per le statistiche
-            handleValueDifferent: (entity, values) => {
-                //assert(values.name === 'UpdateHere')
-                return Promise.resolve(true);
-            } ,
-            handleNotInSource: (entity, record) => {
-                // console.log(`executing delete for record with id ${record?.id}`);
-                //assert(record.id === 3);
-               return Promise.resolve(true);
-            },
-            handleNotInDestination: (entity, record) => {
-                // console.log(`executing insert for record with id ${record?.id}`);
-                //assert(record.id === 5);
-                return Promise.resolve(true);
-            },
+    //     let actions = {
+    //         // aggiungere il parametro result per le statistiche
+    //         handleValueDifferent: (entity, values) => {
+    //             //assert(values.name === 'UpdateHere')
+    //             return Promise.resolve(true);
+    //         } ,
+    //         handleNotInSource: (entity, record) => {
+    //             // console.log(`executing delete for record with id ${record?.id}`);
+    //             //assert(record.id === 3);
+    //            return Promise.resolve(true);
+    //         },
+    //         handleNotInDestination: (entity, record) => {
+    //             // console.log(`executing insert for record with id ${record?.id}`);
+    //             //assert(record.id === 5);
+    //             return Promise.resolve(true);
+    //         },
 
-        };
+    //     };
 
-        let out = await Aligner.run( "flow-name",
-            localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
+    //     let out = await Aligner.run( "flow-name",
+    //         localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
 
-        assert(out);
+    //     assert(out);
 
-        const logs = await Log.select().exec();
+    //     const logs = await Log.select().exec();
 
-        console.log( logs );
-    });
+    //     console.log( logs );
+    // });
 
 });
