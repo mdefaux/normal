@@ -19,13 +19,14 @@ require("../../test/_test-setup");
 
 const CustomerDest = require( '../../models/Customer' );
 const Log = require( '../../models/Log' );
+const Aligner = require( '../skel/Aligner' );
 
 const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
 const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
 const {compareSortedDest} = require("../../../../test/entity-rel/skelData/compareSortedData/destData")
 const {compareSortedDestMoreRecords} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
 const {compareSortedSourcePaging } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
-const {compareSortedDestPaging} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataPaging")
+const {compareSortedDestPaging} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataPaging");
 
 
 
@@ -247,113 +248,43 @@ describe("Align test", function () {
         console.log( logs );
     });
 
-    /* it("compareSorted test, source with more records", async function () {
+    
+
+    it("use Aligner helper", async function () {
         //const parameters = {};
-        localFakeSourceQuery.recordSet = compareSortedSourceMoreRecords;
-        localFakeDestQuery.recordSet = compareSortedDest;
+        //localFakeSourceQuery.recordSet = compareSortedSource;
+        
+        //localFakeDestQuery.recordSet = compareSortedDest;
+        parameters.sourcePageSize=50;
+        parameters.destPageSize=50;
 
         let actions = {
             // aggiungere il parametro result per le statistiche
             handleValueDifferent: (entity, values) => {
-                
-                assert(false)
+                //assert(values.name === 'UpdateHere')
                 return Promise.resolve(true);
             } ,
             handleNotInSource: (entity, record) => {
                 // console.log(`executing delete for record with id ${record?.id}`);
-                assert(false);
+                //assert(record.id === 3);
                return Promise.resolve(true);
             },
             handleNotInDestination: (entity, record) => {
                 // console.log(`executing insert for record with id ${record?.id}`);
-                assert(record.id === 7 || record.id === 8 || record.id === 9  || record.id === 10 );
+                //assert(record.id === 5);
                 return Promise.resolve(true);
             },
 
         };
 
-        let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
+        let out = await Aligner.run( "flow-name",
+            localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
 
         assert(out);
+
+        const logs = await Log.select().exec();
+
+        console.log( logs );
     });
 
-
-    it("compareSorted test, dest with more records", async function () {
-        //const parameters = {};
-        localFakeSourceQuery.recordSet = compareSortedSource;
-        localFakeDestQuery.recordSet = compareSortedDestMoreRecords;
-
-        let actions = {
-            // aggiungere il parametro result per le statistiche
-            handleValueDifferent: (entity, values) => {
-                
-                assert(false)
-                return Promise.resolve(true);
-            } ,
-            handleNotInSource: (entity, record) => {
-                // console.log(`executing delete for record with id ${record?.id}`);
-                assert(record.id === 100 || record.id === 101 || record.id === 102 ||record.id === 103 );
-               return Promise.resolve(true);
-            },
-            handleNotInDestination: (entity, record) => {
-                // console.log(`executing insert for record with id ${record?.id}`);
-                assert(false);
-                return Promise.resolve(true);
-            },
-
-        };
-
-        let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
-
-        assert(out);
-    });
-
-
-    it("compareSorted test paging,  source with more record than dest", async function () {
-        //const parameters = {};
-        localFakeSourceQuery.recordSet = compareSortedSourcePaging; 
-        localFakeDestQuery.recordSet = compareSortedDest; 
-        parameters.sourcePageSize=2;
-
-        let actions = {
-            // aggiungere il parametro result per le statistiche
-            handleNotInDestination: (entity, record) => {
-                // console.log(`executing delete for record with id ${record?.id}`);
-                assert(record.id === 8 || record.id === 9);
-                return Promise.resolve(true);
-            },
-
-        };
-
-        let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
-
-        assert(out);
-    });
-
-   
-    it("compareSorted test paging,  dest with more record than source", async function () {
-        //const parameters = {};
-        localFakeSourceQuery.recordSet = compareSortedSource; 
-        localFakeDestQuery.recordSet = compareSortedDestPaging; 
-        parameters.destPageSize=5;
-
-        let actions = {
-            // aggiungere il parametro result per le statistiche
-        handleNotInSource: (entity, record) => {
-                // console.log(`executing insert for record with id ${record?.id}`);
-                assert(record.id===8 || record.id===9);
-                return Promise.resolve(true);
-            },
-            
-
-        };
-
-        let out = await CompareHelper.compareSorted(
-            localFakeSourceQuery, localFakeDestQuery, parameters, undefined, actions);
-
-        assert(out);
-    }); */
 });

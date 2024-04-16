@@ -9,7 +9,7 @@ module.exports = store.entity( 'Flow', (model) => {
     model.string( 'name' );
     model.label( 'name' );
 
-    model.string( 'severity_status' );
+    model.string( 'severity_status' );  // the highest severity level
     model.string( 'message' );
 
     model.integer("updated_rows"),                     // 
