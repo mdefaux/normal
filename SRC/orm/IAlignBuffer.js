@@ -6,19 +6,19 @@ class IAlignBuffer {
 
     }
 
-    async update() {
+    async update( entity, record ) {
 
     }
 
-    async insert() {
+    async insert( entity, record ) {
 
     }
 
-    async delete() {
+    async delete( entity, record ) {
 
     }
 
-    async flush() {
+    async flush( entity ) {
 
     }
 
