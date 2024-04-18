@@ -1,24 +1,32 @@
 
 
-class IAlignBuffer {
+
+class ThresholdBuffer extends IAlignBuffer {
 
     constructor() {
 
     }
 
     async update( entity, record ) {
-        this.doUpdate();
+        // update counter
+        // TODO: if counter reach threshold 
+        this.doUpdate(entity);
     }
 
     async insert( entity, record ) {
-        this.doInsert();
+        // update counter
+        // TODO: if counter reach threshold 
+        this.doInsert(entity);
     }
 
     async delete( entity, record ) {
-        this.doDelete();
+        // update counter
+        // TODO: if counter reach threshold 
+        this.doDelete(entity);
     }
 
     async flush( entity ) {
+
     }
 
     /**Methods to implement
@@ -32,4 +40,4 @@ class IAlignBuffer {
 }
 
 
-module.exports = IAlignBuffer;
+module.exports = ThresholdBuffer;

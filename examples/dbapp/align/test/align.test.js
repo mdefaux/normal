@@ -247,32 +247,30 @@ describe("Align test", function () {
         parameters.sourcePageSize=50;
         parameters.destPageSize=50;
 
-        let actions = {
-            // aggiungere il parametro result per le statistiche
-            handleValueDifferent: (entity, values) => {
-                //assert(values.name === 'UpdateHere')
+        // const buffer = new IAlignBuffer();
+        const MyBuffer = class extends IAlignBuffer {
+            update (entity, values) {                
+                assert(false)
                 return Promise.resolve(true);
-            } ,
-            handleNotInSource: (entity, record) => {
+            }
+            delete (entity, record) {
                 // console.log(`executing delete for record with id ${record?.id}`);
-                //assert(record.id === 3);
-               return Promise.resolve(true);
-            },
-            handleNotInDestination: (entity, record) => {
-                // console.log(`executing insert for record with id ${record?.id}`);
-                //assert(record.id === 5);
+                assert(false);
                 return Promise.resolve(true);
-            },
-
-        };
-
-        const buffer = new IAlignBuffer();
+            }
+            insert (entity, record) {
+                // console.log(`executing insert for record with id ${record?.id}`);
+                assert(record.id === 7 || record.id === 8 || record.id === 9  || record.id === 10 );
+                return Promise.resolve(true);
+            }
+        }
+        let buffer = new MyBuffer();
 
         localSourceArrayQuery.dataStorage.data[0].name = 'change1'
         localSourceArrayQuery.dataStorage.data[1].address = 'change2'
         
         let out = await CompareHelper.compareSorted(
-            localSourceArrayQuery, localDBDestQuery, parameters, undefined, actions);
+            localSourceArrayQuery, localDBDestQuery, parameters, undefined, buffer);
 
 
         // let out = await CompareHelper.alignSorted(
