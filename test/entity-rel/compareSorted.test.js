@@ -16,7 +16,7 @@ const {compareSortedDest} = require("./skelData/compareSortedData/destData")
 const {compareSortedDestMoreRecords} = require("./skelData/compareSortedData/destDataMoreRecords")
 const {compareSortedSourcePaging } = require("./skelData/compareSortedData/sourceDataPaging")
 const {compareSortedDestPaging} = require("./skelData/compareSortedData/destDataPaging");
-const IAlignBuffer = require("../../src/orm/IAlignBuffer");
+const {IAlignBuffer} = require("../../src/orm/IAlignBuffer");
 
 
 
