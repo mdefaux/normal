@@ -1,6 +1,7 @@
 
  const assert = require( "assert" );
-const IAlignBuffer = require("./IAlignBuffer");
+const {IAlignBuffer} = require("./IAlignBuffer");
+const ILogger = require("./ILogger");
 
 class ComparisonResult {
     constructor () {
@@ -63,7 +64,7 @@ const CompareHelper = {
 
             if(!eq) {
                 return {
-                    id: destRec.id,
+                    id: destRec.id, // TODO: change in id column from keyField
                     //...accumulator, 
                     newValues: {...accumulator.newValues, [colName]: newValue},
                     oldValues: {...accumulator.oldValues, [colName]: destValue},
@@ -240,7 +241,7 @@ const CompareHelper = {
      * @param {IAlignBuffer} buffer 
      * @returns 
      */
-    async compareSorted( sourceQuery, destQuery, parameters, iterationLimit = 1000000, buffer = new IAlignBuffer() ) {
+    async compareSorted( sourceQuery, destQuery, parameters, iterationLimit = 1000000, buffer = new IAlignBuffer(), logger = new ILogger(), ) {
         assert(destQuery);
         // assert( !(buffer instanceof IAlignBuffer) );
         if ( !(buffer instanceof IAlignBuffer) ) {
@@ -342,7 +343,12 @@ const CompareHelper = {
                 
                 // if at least one columns is different, call a function with await (will save an array buffer of records to update and execute it when a certain threshold is met)
                 if(differentColumns) {
-                    await buffer.update(destQuery.entity, differentColumns.newValues);
+                    try {
+                        await buffer.update(destQuery.entity, differentColumns.newValues, differentColumns.id);
+                    } catch(e) {
+                      logger.error(e);  
+                    }
+                    
                 }
                 
 
@@ -354,7 +360,13 @@ const CompareHelper = {
 
                 // all records in destination from here on are not in source and can be deleted
                 // call a function with await (will save an array buffer of records to delete and execute it when a certain threshold is met)
-                await buffer.delete(destQuery.entity, destArray[iDest]);
+                try {
+                    await buffer.delete(destQuery.entity, destArray[iDest]);
+                }
+                catch(e){
+                    logger.error(e);
+                }
+                
 
                 iDest++;
             }
@@ -363,7 +375,14 @@ const CompareHelper = {
 
                 // all records in source from here on are not in destination and can be inserted
                 // call a function with await (will save an array buffer of records to insert and execute it when a certain threshold is met)
-                await buffer.insert(destQuery.entity, sourceArray[iSource]);
+                try {
+                    await buffer.insert(destQuery.entity, sourceArray[iSource]);
+                }
+                catch(e){
+                    logger.error(e);
+                }
+                
+                
 
                 iSource++;
             }
@@ -373,7 +392,13 @@ const CompareHelper = {
         }
 
 
-        buffer.flush( destQuery.entity );
+        try {
+            await buffer.flush( destQuery.entity );
+        }
+        catch(e){
+            logger.error(e);
+        }
+        
 
         return result;
     },
@@ -475,12 +500,13 @@ const CompareHelper = {
         } );
     },
 
-    async alignSorted( sourceQuery, destQuery, parameters, buffer ) {
+    async alignSorted( sourceQuery, destQuery, parameters, buffer, logger ) {
 
         return await this.compareSorted( sourceQuery, destQuery, 
             parameters, 
             parameters.maxIteration, 
-            buffer
+            buffer,
+            logger
             // {
             //     // change default functions with new functions
             //     handleNotInDestination: parameters.handleNotInDestination || buffer?.insert, //   CompareHelper.insertInDestination,
