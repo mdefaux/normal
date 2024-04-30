@@ -183,7 +183,10 @@ class DateField extends Field
         if( typeof value === 'string' )
         {
             let dtm;
-            if( dtm = value.match( /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/ ) )
+            if( dtm = value.match( /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/ ) ) {
+                return new Date( value );
+            }
+            else if( dtm = value.match( /(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})/ ) )
             {
                 return new Date( dtm[3], dtm[2]-1, dtm[1] );
             }
