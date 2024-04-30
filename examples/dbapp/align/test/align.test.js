@@ -20,7 +20,8 @@ require("../../test/_test-setup");
 const CustomerDest = require( '../../models/Customer' );
 const Log = require( '../../models/Log' );
 const Aligner = require( '../skel/Aligner' );
-const IAlignBuffer = require( '../../../../src/orm/IAlignBuffer' );
+const {IAlignBuffer} = require( '../../../../src/orm/IAlignBuffer' );
+const ThresholdBuffer = require('../skel/ThresholdBuffer')
 
 const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
 const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
@@ -33,7 +34,7 @@ const {compareSortedDestPaging} = require("../../../../test/entity-rel/skelData/
 
 describe("Align test", function () {
     const parameters = {
-        columnMap: (rec) => ({name: rec.name})
+        columnMap: (rec) => ({name: rec.name, address: rec.address})
     };
     const Customer = {
         metaData: {
@@ -249,8 +250,10 @@ describe("Align test", function () {
 
         // const buffer = new IAlignBuffer();
         const MyBuffer = class extends IAlignBuffer {
-            update (entity, values) {                
-                assert(false)
+    //    const MyBuffer = class extends ThresholdBuffer {
+            update (entity, values, keys) {   
+                assert(keys === 1 || keys === 2)             
+             //   assert(false)
                 return Promise.resolve(true);
             }
             delete (entity, record) {
@@ -268,6 +271,7 @@ describe("Align test", function () {
 
         localSourceArrayQuery.dataStorage.data[0].name = 'change1'
         localSourceArrayQuery.dataStorage.data[1].address = 'change2'
+
         
         let out = await CompareHelper.compareSorted(
             localSourceArrayQuery, localDBDestQuery, parameters, undefined, buffer);
@@ -275,7 +279,7 @@ describe("Align test", function () {
 
         // let out = await CompareHelper.alignSorted(
         //     localSourceArrayQuery, localDBDestQuery, parameters, buffer );
-
+        
         assert(out);
 
         await Log.insert( {
@@ -285,6 +289,51 @@ describe("Align test", function () {
 
         const logs = await Log.select().exec();
 
+        console.log( logs );
+    });
+
+    it("use a  Threshold buffer", async function () {
+        //const parameters = {};
+        //localFakeSourceQuery.recordSet = compareSortedSource;
+        
+        //localFakeDestQuery.recordSet = compareSortedDest;
+        parameters.sourcePageSize=50;
+        parameters.destPageSize=50;
+
+        const MyBuffer = class extends ThresholdBuffer {
+            async update (entity, values, keys) {   
+                assert(keys === 1 || keys === 2)             
+             //   assert(false)
+                await super.update(entity, values, keys);
+            }
+ 
+        }
+        let buffer = new MyBuffer();
+        //let buffer = new ThresholdBuffer();
+
+        localSourceArrayQuery.dataStorage.data[0].name = 'change1'
+        localSourceArrayQuery.dataStorage.data[1].address = 'change2'
+
+        let before = await CustomerDest.select().where(CustomerDest.id.in([1,2])).exec();
+        
+    let out =   await CompareHelper.compareSorted(
+            localSourceArrayQuery, localDBDestQuery, parameters, undefined, buffer);
+
+
+        // let out = await CompareHelper.alignSorted(
+        //     localSourceArrayQuery, localDBDestQuery, parameters, buffer );
+        let after = await CustomerDest.select().where(CustomerDest.id.in([1,2])).exec();
+        
+        assert(out);
+
+        await Log.insert( {
+            what: `The test precedure has ended `,
+            activity_type: `align-customer`
+        } );
+
+        const logs = await Log.select().exec();
+
+        // TODO: assert check instead of console.log
         console.log( logs );
     });
     

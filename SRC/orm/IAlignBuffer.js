@@ -6,7 +6,7 @@ class IAlignBuffer {
 
     }
 
-    async update( entity, record ) {
+    async update( entity, record, keys ) {
         this.doUpdate();
     }
 
@@ -32,4 +32,5 @@ class IAlignBuffer {
 }
 
 
-module.exports = IAlignBuffer;
+// module.exports = IAlignBuffer;
+exports.IAlignBuffer = IAlignBuffer;

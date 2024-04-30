@@ -1,4 +1,4 @@
-const IAlignBuffer = require("../../../../src/orm/IAlignBuffer");
+const {IAlignBuffer} = require("../../../../src/orm/IAlignBuffer");
 
 
 class DbBuffer extends IAlignBuffer {

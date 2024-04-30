@@ -371,7 +371,7 @@ const defs = {
     },
 
     data( name, jsonData ) {
-        this.data[ name ] = new DataStorage();
+        if(!this.data[name]) this.data[ name ] = new DataStorage();
         this.data[ name ].setData( jsonData );
 
         let idField = 'id';
