@@ -18,4 +18,4 @@ class ILogger {
     }
 }
 
-module.exports = ILogger;
+exports.ILogger = ILogger;
