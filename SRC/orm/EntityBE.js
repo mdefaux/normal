@@ -310,7 +310,7 @@ class EntityBE {
 
     
     async compare( sourceQuery, destQuery, parameters, chunkLimit = 1 ) {
-        return CompareHelper.compare( sourceQuery, destQuery, parameters, chunkLimit );
+        return CompareHelper.compareSet( sourceQuery, destQuery, parameters, chunkLimit );
     }
 
     async  alignNew( sourceQuery, destQuery, parameters ) {

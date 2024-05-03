@@ -1,28 +1,57 @@
 
+ const assert = require( "assert" );
+const {IAlignBuffer} = require("./IAlignBuffer");
+const ILogger = require("./ILogger");
 
+class ComparisonResult {
+    constructor () {
+        this.notInSource= {},
+        this.notInDest= {},
+        this.match= {},
+        this.diff= {},
+        this.duplicateKeys= [],
+        // this.destEntity= destQuery.entity,
+        this.sourceEnd= false
+    }
+}
+const defaultPageSize=500;
 const CompareHelper = {
 
     /**
      * 
      * @param {*} sourceRec 
      * @param {*} destRec 
-     * @returns 
+     * @returns false if there are no difference between source and destination records
+     *      an object with:
+     *      {
+     *          id:  the record id
+                newValues: {...accumulator.newValues, [colName]: newValue},
+                oldValues: {...accumulator.oldValues, [colName]: destValue},
+                differentColumns: [ <array of column names that differs> ]
+     *      }
      */
     compareColumns( sourceRec, destRec, parameters, entityDest ) {
+
+        // requires destination entity has fields metadata
+        assert( entityDest?.metaData?.model?.fields );
 
         let modSourceRec = sourceRec;
 
         // translate sourceRec for later comparison
-        if(parameters.columnMap) modSourceRec = parameters.columnMap(sourceRec,destRec)
-        
+        if (parameters.columnMap) {
+            modSourceRec = parameters.columnMap(sourceRec, destRec);
+        }
 
         // compare values for every column
         let response = Object.entries(modSourceRec).reduce((accumulator, [colName, value]) => {
             let destValue = destRec[colName];
-            // let eq = value === destValue;
+            // Gets the destination field from destination entity and checks if exhists
             let destField = entityDest.metaData.model.fields[colName];
+            if ( !destField ) {
+                throw new Error( `Column '${colName}' not found in entity '${entityDest.metaData}'. Column map function: ${parameters.columnMap}` )
+            }
             let eq = false;
-            let newValue = value
+            let newValue = value;
 
             // columnMap could pass a function in a field. This function should already compare the two records.
             // the result includes the equals result (true/false) and the new value
@@ -35,21 +64,21 @@ const CompareHelper = {
 
             if(!eq) {
                 return {
-                    id: destRec.id,
+                    id: destRec.id, // TODO: change in id column from keyField
                     //...accumulator, 
                     newValues: {...accumulator.newValues, [colName]: newValue},
                     oldValues: {...accumulator.oldValues, [colName]: destValue},
-                    differentColmns: [...accumulator.differentColmns, colName]
+                    differentColumns: [...accumulator.differentColumns, colName]
                 }
             }   
 
             return accumulator
          
-        }, {id: null,  newValues: {}, oldValues: {}, differentColmns: []  });
+        }, {id: null,  newValues: {}, oldValues: {}, differentColumns: []  });
 
 
-       // return differentColmns.length === 0 ? false : {
-        return response.differentColmns.length === 0 ? false : response;
+       // return differentColumns.length === 0 ? false : {
+        return response.differentColumns.length === 0 ? false : response;
     },
     
 
@@ -135,16 +164,18 @@ const CompareHelper = {
     },
 
     
-    async compare( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
-        let result = { 
-            notInSource: {},
-            notInDest: {},
-            match: {},
-            diff: {},
-            duplicateKeys: [],
-            destEntity: destQuery.entity,
-            sourceEnd: false
-        }
+    async compareSet( sourceQuery, destQuery, parameters, chunkLimit = 1, actions = {} ) {
+        // let result = { 
+        //     notInSource: {},
+        //     notInDest: {},
+        //     match: {},
+        //     diff: {},
+        //     duplicateKeys: [],
+        //     destEntity: destQuery.entity,
+        //     sourceEnd: false
+        // }
+        let result = new ComparisonResult();
+        const destEntity= destQuery.entity;
         let keyFieldDest = parameters.keyFieldD || "id";
 
         for( let chunk = 0; chunk < (chunkLimit||10000) && !result.sourceEnd; chunk++ ) {
@@ -153,12 +184,12 @@ const CompareHelper = {
             
             // performs a specific action for records not present in destination
             if ( actions?.handleNotInDestination ) {
-                result = await actions.handleNotInDestination( result );
+                result = await actions.handleNotInDestination( destEntity, result );
             }
             // performs a specific action for records which have same key 
             // but column value different
             if ( actions?.handleValueDifferent ) {
-                result = await actions.handleValueDifferent( result );
+                result = await actions.handleValueDifferent( destEntity, result );
             }
         }
 
@@ -180,7 +211,7 @@ const CompareHelper = {
 
         // performs a specific action for records not presentin source
         if ( actions?.handleNotInSource ) {
-            result = await actions?.handleNotInSource( result, parameters );
+            result = await actions?.handleNotInSource( destEntity, result, parameters );
         }
 
         result.matchCount = Object.keys( result.match ).length;
@@ -196,18 +227,205 @@ const CompareHelper = {
             }
         }
 
-        delete result.destEntity;
+        // delete result.destEntity;
     
         return result;
     },
 
+    /**
+     * 
+     * @param {*} sourceQuery 
+     * @param {*} destQuery 
+     * @param {Object} parameters 
+     * @param {long} iterationLimit sets a limit to iteration, if undefined continue to 1000000
+     * @param {IAlignBuffer} buffer 
+     * @returns 
+     */
+    async compareSorted( sourceQuery, destQuery, parameters, iterationLimit = 1000000, buffer = new IAlignBuffer(), logger = new ILogger(), ) {
+        assert(destQuery);
+        // assert( !(buffer instanceof IAlignBuffer) );
+        if ( !(buffer instanceof IAlignBuffer) ) {
+            throw new Error( `buffer parameter should be of type IAlignBuffer`);
+        }
+        
+        let result = new ComparisonResult();
+        const sourcePageSize = parameters.sourcePageSize || defaultPageSize;
+        const destPageSize = parameters.destPageSize || defaultPageSize;
+        const destEntity= destQuery.entity;
+        const keyFieldDest = parameters.keyFieldD || "id";        
+        const keyFieldSource = parameters.keyFieldS || "id";
+        //initial page for the source
+        let pageSourceIndex=1; 
+        //initial offset for the destination. 
+        //offset is used for destination instead of pagination because insertion and deletion can change data interval 
+        let offsetDest=0;       
+        let offsetend=0;
+
+        // dest page fetching
+        let pageDestIndex = 0;
+        let insertSize = parameters.insertSize || 500; 
+        //inizialized for the count of the source number of data
+        let sourceRecordCount=sourcePageSize;
+        //let endfor=false;
+        //let alreadyMatched= null;
+        // indicates when it is at the end of the destination or the source
+        let arraySourceEnd=false; 
+        let arrayDestEnd=false; 
+
+        // indexes to cycle source and dest array
+        let iSource = 0;
+        let iDest = 0;
+
+        sourceQuery.pageSize(sourcePageSize);
+
+        //  let destination = destQuery
+        destQuery
+            .pageSize( destPageSize )
+            .orderBy({ columnName: keyFieldDest, order: "asc" }); 
+            //un domani la orderby potrebbe avere una funzione che la rende più complessa per i casi particolari
+            //es. se devo definire una chive a cui sostituisco i numeri con le lettere ecc
+
+        let sourceArray = [];
+        let destArray = [];
+
+        // infinite loop; exit if comparing more than 1M records.
+        for( let iteration = 0; iteration < (iterationLimit) && !result.sourceEnd; iteration++ ) {
+            // check if fetch is needed
+            if (iSource >= sourceArray.length && !arraySourceEnd ) {
+                sourceArray = await sourceQuery.page(pageSourceIndex++).exec();
+                iSource = 0;
+
+                // TODO: eventually update count of total records.
+
+                if(sourceArray.length === 0) {
+                    arraySourceEnd = true;
+                    // break;
+                }
+            }
+
+            if (iDest >= destArray.length && !arrayDestEnd ) {
+                let offset = (pageDestIndex++*destPageSize) + offsetDest;
+                destQuery.setRange(destPageSize, offset);
+                destArray = await destQuery.exec();
+                iDest = 0;
+
+                if(destArray.length === 0) {
+                    arrayDestEnd = true;
+                    // break;
+                }
+            }
+
+            // exit if both arrays have no more records. 
+            if(arraySourceEnd  && arrayDestEnd) {
+                break;
+            }
+           
+            // TODO: check if source and destination have different rules for ordering.
+            // for example: check first X records from source and destination and check the keys, maybe one starts with capital letters and the other with numbers.
+
+            
+            // compare function can be passed as parameter.
+            let compareFunction = parameters.compareFunction || CompareHelper.compareKeys ;
+            
+            let compareResult = iSource < sourceArray.length &&
+                iDest < destArray.length &&
+                compareFunction(sourceArray[iSource], destArray[iDest], keyFieldSource, keyFieldDest );
+                //sourceArray[iSource][keyFieldSource] === destArray[iDest][keyFieldDest];
+          
+            
+
+            // "UPDATE"
+            if( compareResult === 0 ) {
+
+                // same key; check if the record is the same column per column
+                let differentColumns = CompareHelper.compareColumns( sourceArray[iSource], destArray[iDest], parameters, destQuery.entity );
+
+                
+                // if at least one columns is different, call a function with await (will save an array buffer of records to update and execute it when a certain threshold is met)
+                if(differentColumns) {
+                    try {
+                        await buffer.update(destQuery.entity, differentColumns.newValues, differentColumns.id);
+                    } catch(e) {
+                      logger.error(e);  
+                    }
+                    
+                }
+                
+
+                iSource++;
+                iDest++;
+            }
+            // "DELETE"
+            else if(iSource > sourceArray.length || arraySourceEnd || compareResult > 0) {
+
+                // all records in destination from here on are not in source and can be deleted
+                // call a function with await (will save an array buffer of records to delete and execute it when a certain threshold is met)
+                try {
+                    await buffer.delete(destQuery.entity, destArray[iDest]);
+                }
+                catch(e){
+                    logger.error(e);
+                }
+                
+
+                iDest++;
+            }
+            // "INSERT"
+            else if(iDest > destArray.length || arrayDestEnd || compareResult < 0) {
+
+                // all records in source from here on are not in destination and can be inserted
+                // call a function with await (will save an array buffer of records to insert and execute it when a certain threshold is met)
+                try {
+                    await buffer.insert(destQuery.entity, sourceArray[iSource]);
+                }
+                catch(e){
+                    logger.error(e);
+                }
+                
+                
+
+                iSource++;
+            }
+
+           
+        
+        }
+
+
+        try {
+            await buffer.flush( destQuery.entity );
+        }
+        catch(e){
+            logger.error(e);
+        }
+        
+
+        return result;
+    },
+
+    compareKeys(a, b, keyFieldA, keyFieldB) {
+        assert(a);
+        assert(b);
+        assert(keyFieldA);
+        assert(keyFieldB);
+
+
+        if(a[keyFieldA] < b[keyFieldB] ) {
+            return -1;
+        } else if (a[keyFieldA] > b[keyFieldB]) {
+            return 1;
+        }
+        return 0;
+    },
+    
+
     async diff( sourceRs, destRs, parameters, chunk = 0 ) {
-        let comparison = this.compare( sourceRs, destRs, parameters, chunk );
+        let comparison = this.compareSet( sourceRs, destRs, parameters, chunk );
 
         return comparison;
     },
 
-    async insertInDestination( result ) {
+    async insertInDestination( destEntity, result ) {
         let toInsert = Object.entries( result.notInDest )
             .map( ([,rec]) => (rec) );
 
@@ -215,7 +433,7 @@ const CompareHelper = {
             return result;
         }
 
-        await result.destEntity.insert( toInsert );
+        await destEntity.insert( toInsert );
 
         return {
             ...result,
@@ -225,7 +443,7 @@ const CompareHelper = {
         };
     },
 
-    async removeFromDestination( result, parameters ) {
+    async removeFromDestination( destEntity, result, parameters ) {
 
         let toDelete = Object.entries( result.notInSource )
             .map( ([,rec]) => (rec) );
@@ -234,14 +452,14 @@ const CompareHelper = {
             return result;
         }
 
-        if(parameters.removed != 'undefined')
+        if(parameters.removed != undefined )
         {
             //aspetta che tutti gli update siano stati fatti effettivamente
-           await Promise.all(toDelete.map(r=> result.destEntity.update(r[result.destEntity.metaData.model.idField], parameters.removed)));
+           await Promise.all(toDelete.map(r=> destEntity.update(r[destEntity.metaData.model.idField], parameters.removed)));
 
         }  
 
-        if(!parameters.noDelete) await result.destEntity.delete( toDelete );
+        if(!parameters.noDelete) await destEntity.delete( toDelete );
 
         return {
             ...result,
@@ -251,7 +469,7 @@ const CompareHelper = {
         };
     },
 
-    async updateDestination( result ) {
+    async updateDestination( destEntity, result ) {
 
         let toUpdate = Object.entries( result.diff || {} )
             .map( ([,e]) => (e) );
@@ -261,7 +479,7 @@ const CompareHelper = {
         }
 
         for ( let entryToUpdate of toUpdate ){
-            await result.destEntity.update( entryToUpdate.id, entryToUpdate.newValues );
+            await destEntity.update( entryToUpdate.id, entryToUpdate.newValues );
         }
 
         return {
@@ -275,11 +493,27 @@ const CompareHelper = {
 
     async align( sourceQuery, destQuery, parameters ) {
 
-        return await this.compare( sourceQuery, destQuery, parameters, false, {
+        return await this.compareSet( sourceQuery, destQuery, parameters, false, {
             handleNotInDestination: CompareHelper.insertInDestination,
             handleNotInSource: CompareHelper.removeFromDestination,
             handleValueDifferent: CompareHelper.updateDestination,
         } );
+    },
+
+    async alignSorted( sourceQuery, destQuery, parameters, buffer, logger ) {
+
+        return await this.compareSorted( sourceQuery, destQuery, 
+            parameters, 
+            parameters.maxIteration, 
+            buffer,
+            logger
+            // {
+            //     // change default functions with new functions
+            //     handleNotInDestination: parameters.handleNotInDestination || buffer?.insert, //   CompareHelper.insertInDestination,
+            //     handleNotInSource: parameters.handleNotInSource || buffer?.delete, // CompareHelper.removeFromDestination,
+            //     handleValueDifferent: parameters.handleValueDifferent || buffer?.update, //  CompareHelper.updateDestination,
+            // } 
+        );
     }
 
 }

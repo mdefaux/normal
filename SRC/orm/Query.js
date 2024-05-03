@@ -318,10 +318,59 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return this.where(filters);
   }
 
+  /**Sets the size of the page that
+   * will be used by page
+   * 
+   * @example
+   * sourceQuery.pageSize(sourcePageSize);
+   * sourceQuery.page(pageSourceIndex++).exec()
+   * 
+   * @param {*} numberOfRecord 
+   * @returns this
+   */
   pageSize(numberOfRecord) {
     // TODO:
+    this.limit = numberOfRecord;
     return this;
   }
+  
+  /** Limits the resultSet to a specific page 
+   * 
+   * @param {int} page  number of page, 1+
+   * @param {int} limit number of records per page, same as pageSize.
+   * @param {int} offset starting record to return, 1+ 
+   * @returns 
+   * @example page(2, 100)   second page of 100 records, from record 101 to 200
+   * @example page(null, 100, 101)  100 records starting from record 101
+   */
+   page(page, limit, offset) {
+    if(page) {
+     this.limit = limit || this.limit || 50;
+     this.offset =  ((parseInt(page) -1)*this.limit);
+
+     return this;
+    }
+
+    this.limit = limit || this.limit ||  50;
+    this.offset = parseInt(offset-1) || this.offset ||  0;
+
+
+    return this;
+}
+  
+/**Sets a range for the data 
+ * 
+ * @param {int} limit number of records to extract
+ * @param {int} offset starting record to return, 0 is the first record
+ * @returns 
+ * @example range(100, 300)  extract from record 300 to 399
+ */
+ setRange( limit, offset=0 ) {
+  this.limit = limit || this.limit ||  50;
+  this.offset = parseInt(offset);
+
+  return this;
+}
 
   groupBy(column) {
     // does nothing
@@ -396,7 +445,11 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
 
     // TODO: make a plan listing all needed sources
     // TODO: fetch some records from all sources 
-    let range = { ...this.range };
+    // let range = { ...this.range };
+    let range = { 
+      start: this.offset,
+      size: this.limit
+    };
     let rsData = [];
 
 
@@ -415,7 +468,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       ))];
     }
     else {
-      rsData = [...rsData, ...data];
+      rsData = [...rsData, ...(data||[])];
     }
     // TODO: applies groupby
 

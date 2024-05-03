@@ -4,7 +4,10 @@
   "description": "Network distributed Object Relation Model",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --recursive --timeout 3000 test/**/*.test.js",
+    "test-with-coverage": "nyc --reporter=text --check-coverage --lines 50 --per-file npm run test",
+    "test-changed": "git diff --name-only remotes/origin/main... -- *.test.js |xargs  mocha --recursive --timeout 3000",
+    "test-changed-coverage": "nyc --reporter=text --check-coverage --stmts 80 --lines 80 --branches 60 --per-file npm run test-changed",
     "start": "node src/test.js"
   },
   "engines": {
@@ -21,6 +24,7 @@
   },
   "homepage": "https://github.com/mdefaux/normal#readme",
   "devDependencies": {
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0"
   }
 }

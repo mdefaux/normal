@@ -4,7 +4,7 @@
  * 
  */
 
-const {URLquery} = require('normalize');
+const {URLquery} = require('normaly');
 var defs = require("../models/index");
 //  var express = require("express");
 var ormGenericRoute = require("express").Router();
