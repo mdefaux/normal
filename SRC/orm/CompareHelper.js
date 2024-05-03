@@ -1,7 +1,7 @@
 
  const assert = require( "assert" );
 const {IAlignBuffer} = require("./IAlignBuffer");
-const ILogger = require("./ILogger");
+const {ILogger} = require("./ILogger");
 
 class ComparisonResult {
     constructor () {
