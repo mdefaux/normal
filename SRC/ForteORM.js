@@ -331,6 +331,10 @@ class ModelDef {
     paged( isPaged = true ) {
         this.entity.metaData.model.paged = isPaged;
     }
+
+    rowLevelSecurity(rls) {
+        this.entity.rowLevelSecurity = rls;
+    }
 }
 
 class EntityProxy extends EntityBE
