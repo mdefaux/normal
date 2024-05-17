@@ -3,8 +3,8 @@
  */
 const { ObjectLink, Field } = require("./Field");
 const { Statement } = require("./Statement");
-const { FieldAggregation, FieldAggregationCount, FieldAllMainTable } = require('./FieldAggregation');
-const { FieldQueryItem } = require("./FieldConditionDef");
+const {FieldAllMainTable} = require('./FieldAggregation');
+const {FieldConditionDef, FieldQueryItem} = require("./FieldConditionDef");
 
 
 /**Oggetto per creare una query ed ottenere un recordset.
@@ -406,6 +406,86 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
 
     return this;
   }
+
+  /**
+   * TODO: rename to defineContdition as for build we intend
+   * the final query building over knex qb.
+   * 
+   * Build the query conditions by type
+   *
+   * @param {*} conditions
+   * @returns the set of defined condition
+   */
+  buildCondition(conditions) {
+    if (!conditions) return false;
+
+    if (Array.isArray(conditions)) {
+      return conditions.map((c) => this.buildCondition(c));
+    }
+
+    if (typeof conditions === "function") {
+      return this.buildCondition(conditions(this));
+      return conditions; // this.buildCondition(conditions(this));
+    } else if (typeof conditions === "object") {
+      // handles case of normaly defined conditions
+      // TODO: extract to method
+      if (conditions instanceof FieldConditionDef) {
+        // checks for column alias. This is important to avoids column ambiguity
+        // for e.g.: .where( Partnumber.id ) if translated into `where id=?`
+        if (conditions.field && !conditions.field.sourceAlias) {
+          // if the condition refers to a column of main query entity
+          if (this.entity && conditions.field.sourceEntity === this.entity) {
+            conditions.field.sourceAlias =
+              this.tableAlias || this.model.dbTableName || this.model.name;
+
+            return conditions;
+          }
+          // now the condition refers to another entity... looks if the other entity is joined in the query
+          // if no joins defined... throws exception
+          if (!this.relateds || Object.keys(this.relateds).length === 0) {
+            throw new Error(`The query has no joins.`);
+          }
+          // finds a joined related table with the source entity of the condition
+          let related = Object.entries(this.relateds).find(
+            ([, r]) => r.field.toEntity === conditions.field.sourceEntity
+          );
+
+          // TODO: handle the case in which more related matches....... and throws an exception
+
+          // TODO: useful?
+          if (
+            this.relateds[
+              conditions.field./*sourceEntity?.metaData?.model?.*/ name
+            ]
+          ) {
+            // loooks for alias in related table
+            let alias =
+              this.related[
+                conditions.field./*sourceEntity.metaData.model.*/ name
+              ]?.joinedTableAlias;
+            conditions.field.sourceAlias = alias;
+          } else if (related) {
+            // loooks for alias in related table
+            let alias = related[1].joinedTableAlias;
+            conditions.field.sourceAlias = alias;
+          }
+        }
+        return conditions;
+      }
+
+      // maps field name to field sources
+      return Object.fromEntries(
+        Object.entries(conditions).map(([fieldName, value]) => {
+          let field = this.model.fields[fieldName];
+
+          return [field?.sqlSource || fieldName, value];
+        })
+      );
+    }
+
+    return conditions;
+  }
+
 
   sortBy(columns) {
     // 
