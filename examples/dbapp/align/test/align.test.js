@@ -4,6 +4,7 @@
  * NOT WORKING change require paths
  * 
  * @usage
+ *  cd examples/dbapp
  *  mocha align/test/align.test.js  
  *  
  * With coverage:
