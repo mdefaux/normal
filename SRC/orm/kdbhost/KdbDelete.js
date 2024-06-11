@@ -26,34 +26,28 @@ const { DeleteStatement } = require("../DeleteStatement");
     /**Creates the knex statment and configure it
      *  
      */ 
-     async execute() {
+    async execute() {
+      let ids = this.processedRecord;
 
-
-        let ids = this.processedRecord;
-        
-        if(Array.isArray(this.processedRecord)) {
-                ids = this.processedRecord.map(e=> {
-                return e[this.entity.metaData.model.idField];
-            });
-    
-        }
-        
-        let whereCondition = {
-            [this.entity.metaData.model.idField]: ids
-        };
-
-        // 
-        // return new Promise( (resolve, reject ) => (
-        return await this.knex( this.entity.model.dbTableName )
-                .delete()
-                .debug( this.debugOn )
-                .where (this.entity.metaData.model.idField, 'in',ids )
-                .then()
-                // .into( this.entity.model.dbTableName )
-                // .returning( this.entity.model.idField )
-                // .then( rows => (rows[0]) )
-                // .then( (rec) => ( resolve( rec ) ) )
-        // ))
+      if (Array.isArray(this.processedRecord)) {
+        ids = this.processedRecord.map((e) => {
+          return e[this.entity.metaData.model.idField];
+        });
+      } else {
+        ids = [ids];
+      }
+      
+      // return new Promise( (resolve, reject ) => (
+      return await this.knex( this.entity.model.dbTableName )
+              .delete()
+              .debug( this.debugOn )
+              .where (this.entity.metaData.model.idField, 'in',ids )
+              .then()
+              // .into( this.entity.model.dbTableName )
+              // .returning( this.entity.model.idField )
+              // .then( rows => (rows[0]) )
+              // .then( (rec) => ( resolve( rec ) ) )
+      // ))
     }
 
 

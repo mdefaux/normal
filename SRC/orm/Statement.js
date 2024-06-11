@@ -60,15 +60,17 @@ class Statement {
     }
 
     async resolveRecord( record, cache ) {
+        if (typeof record !== "object") return record;
+        
         return Object.fromEntries( await Promise.all (
             Object.entries( record ).map( async ([key,value]) => {
-
                 if ( typeof value === 'function' ) {
                     value = await value( cache, this );
                 }
+
                 return [key,value];
-            } )
-        ) )
+            })
+        ))
     }
 
     // TODO: 'exec' should call 'execute'

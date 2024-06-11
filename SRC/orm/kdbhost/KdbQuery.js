@@ -721,23 +721,22 @@ class KdbQuery extends Query {
     }
 
     buildGroupBy() {
-
-        if (!this.groups) {
-            return this;
-        }
+        if (!this.groups) return this;
 
         this.groups.forEach((wrap) => {
-
             let tableName = this.tableAlias || this.model.dbTableName || this.model.name;
-            let sourceSql = wrap.sourceField || `${tableName}.${wrap.field.sqlSource}`;
+            let sourceSql = (wrap.sourceAlias && wrap.sourceField) 
+                            ? `${wrap.sourceAlias}.${wrap.sourceField}` 
+                            : wrap.sourceField || `${tableName}.${wrap.field.sqlSource}`;
+            
             // la groupBy non fa anche la select /*.select( field.source )*/
-
-            if(wrap?.field?.calc && typeof wrap?.field?.calc === 'function' ) {
+            
+            if (wrap?.field?.calc && typeof wrap?.field?.calc === 'function') {
                 let calcField = wrap.field.calc(tableName);
+                
                 this.qb.groupBy(this.knex.raw(`${calcField}`));
                 //sourceSql = this.knex.raw(`${calcField}`);
-            }
-            else {
+            } else {
                 this.qb.groupBy(sourceSql);
             }
 
@@ -746,7 +745,6 @@ class KdbQuery extends Query {
             //     this.qb.groupBy(`${r.foreignTableAlias}.${r.foreignTableLabel}`);
             //     this.joinRelated(wrap);
             // }
-
         })
 
         return this;
