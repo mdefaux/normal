@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "DB application test for normalize",
   "main": "app.js",
+  "type": "module",
   "directories": {},
   "scripts": {
     "test": "mocha test/_test-setup.js --exit test/ --recursive --timeout 15000",

@@ -7,8 +7,8 @@
   * 
   */
 
-const ILogger = require( '../../../../src/orm/ILogger' );
-const Log = require( '../../models/Log' );
+import {ILogger} from '../../../../src/orm/ILogger.js';
+import Log from '../../models/Log.js';
 
 const severities = [ 'I', 'W', 'E', 'C' ];
 
@@ -75,4 +75,5 @@ class Logger extends ILogger {
     }
 }
 
-module.exports = Logger;
+// module.exports = Logger;
+export default Logger;

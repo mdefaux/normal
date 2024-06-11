@@ -4,32 +4,36 @@
  * NOT WORKING change require paths
  * 
  * @usage
+ *  VSCode run and debug: Debug Mocha Test
+ * 
+ * or
+ * 
  *  cd examples/dbapp
  *  mocha align/test/align.test.js  
  *  
  * With coverage:
  *  npx nyc --reporter=text mocha align/test/align.test.js 
  */
-const { CompareHelper } = require("../../../../src/orm/CompareHelper");
-const assert = require("assert");
-const { FakeQuery } = require("../../../../test/entity-rel/FakeQuery");
+import { CompareHelper } from "normaly";
+import assert from "assert";
+import { FakeQuery } from "../../../../test/entity-rel/FakeQuery";
 
-const CustomerSource = require("../skel/Customer");
+import CustomerSource from "../skel/Customer";
 
-require("../../test/_test-setup");
+import "../../test/_test-setup";
 
-const CustomerDest = require( '../../models/Customer' );
-const Log = require( '../../models/Log' );
-const Aligner = require( '../skel/Aligner' );
-const {IAlignBuffer} = require( '../../../../src/orm/IAlignBuffer' );
-const ThresholdBuffer = require('../skel/ThresholdBuffer')
+import CustomerDest from  '../../models/Customer' ;
+import Log from  '../../models/Log' ;
+import Aligner from  '../skel/Aligner.js'
+import {IAlignBuffer} from  '../../../../src/orm/IAlignBuffer' ;
+import ThresholdBuffer from '../skel/ThresholdBuffer'
 
-const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
-const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
-const {compareSortedDest} = require("../../../../test/entity-rel/skelData/compareSortedData/destData")
-const {compareSortedDestMoreRecords} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
-const {compareSortedSourcePaging } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
-const {compareSortedDestPaging} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataPaging");
+import { compareSortedSource } from "../../../../test/entity-rel/skelData/compareSortedData/sourceData"
+import { compareSortedSourceMoreRecords } from "../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords"
+import {compareSortedDest} from "../../../../test/entity-rel/skelData/compareSortedData/destData"
+import {compareSortedDestMoreRecords} from "../../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords"
+import {compareSortedSourcePaging } from "../../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging"
+import {compareSortedDestPaging} from "../../../../test/entity-rel/skelData/compareSortedData/destDataPaging";
 
 
 

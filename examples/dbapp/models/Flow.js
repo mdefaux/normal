@@ -1,8 +1,8 @@
 
-var store = require( './store' );
+import store from './store.js';
 
 
-module.exports = store.entity( 'Flow', (model) => {
+export default store.entity( 'Flow', (model) => {
 
     model.source( 'flow' );
 

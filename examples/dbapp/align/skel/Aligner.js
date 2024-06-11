@@ -5,10 +5,10 @@
   * - logs procedure finish status
   * 
   */
-const Logger = require( './Logger' );
-const Flow = require( '../../models/Flow' );
+import Logger from './Logger.js';
+import Flow from '../../models/Flow.js';
 
-const Aligner = {
+export const Aligner = {
     
     /**Runs a flow defined in Flow db table.
      * 
@@ -70,4 +70,5 @@ const Aligner = {
     }
 }
 
-module.exports = Aligner;
+// module.exports = Aligner;
+export default Aligner;
