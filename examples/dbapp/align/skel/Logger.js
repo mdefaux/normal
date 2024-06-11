@@ -7,7 +7,7 @@
   * 
   */
 
-const ILogger = require( '../../../../src/orm/ILogger' );
+const {ILogger} = require( 'normaly' );
 const Log = require( '../../models/Log' );
 
 const severities = [ 'I', 'W', 'E', 'C' ];

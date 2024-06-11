@@ -19,3 +19,5 @@ class ILogger {
 }
 
 exports.ILogger = ILogger;
+// TODO: change into
+// module.exports = ILogger;
