@@ -670,6 +670,9 @@ class KdbQuery extends Query {
                 this.qb.orderByRaw(`${calcField} ${column.order}`);
             }
             else if ( column.columnName ){
+                if(!this[column.columnName]) {
+                        throw new Error(`Ordering column '${column.columnName}' not found in entity '${this.entity.metaData.name}'`);
+                    }
                 this.qb.orderBy( this[ column.columnName ].sqlSource, column.order );
             }
         })
