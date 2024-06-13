@@ -4,6 +4,11 @@
  * NOT WORKING change require paths
  * 
  * @usage
+ *  VSCode run and debug: Debug Mocha Test
+ * 
+ * or
+ * 
+ *  cd examples/dbapp
  *  mocha align/test/align.test.js  
  *  
  * With coverage:
@@ -17,24 +22,24 @@ const CustomerSource = require("../skel/Customer");
 
 require("../../test/_test-setup");
 
-const CustomerDest = require( '../../models/Customer' );
-const Log = require( '../../models/Log' );
-const Aligner = require( '../skel/Aligner' );
-const {IAlignBuffer} = require( '../../../../src/orm/IAlignBuffer' );
+const CustomerDest = require('../../models/Customer');
+const Log = require('../../models/Log');
+const Aligner = require('../skel/Aligner');
+const { IAlignBuffer } = require('../../../../src/orm/IAlignBuffer');
 const ThresholdBuffer = require('../skel/ThresholdBuffer')
 
 const { compareSortedSource } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceData")
 const { compareSortedSourceMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataMoreRecords")
-const {compareSortedDest} = require("../../../../test/entity-rel/skelData/compareSortedData/destData")
-const {compareSortedDestMoreRecords} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
-const {compareSortedSourcePaging } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
-const {compareSortedDestPaging} = require("../../../../test/entity-rel/skelData/compareSortedData/destDataPaging");
+const { compareSortedDest } = require("../../../../test/entity-rel/skelData/compareSortedData/destData")
+const { compareSortedDestMoreRecords } = require("../../../../test/entity-rel/skelData/compareSortedData/destDataMoreRecords")
+const { compareSortedSourcePaging } = require("../../../../test/entity-rel/skelData/compareSortedData/sourceDataPaging")
+const { compareSortedDestPaging } = require("../../../../test/entity-rel/skelData/compareSortedData/destDataPaging");
 
 
 
 describe("Align test", function () {
     const parameters = {
-        columnMap: (rec) => ({name: rec.name, address: rec.address})
+        columnMap: (rec) => ({ name: rec.name, address: rec.address })
     };
     const Customer = {
         metaData: {
@@ -59,9 +64,9 @@ describe("Align test", function () {
 
     const sourceQuery = {
         page(c, sp) {
-       //     assert(c === null || !isNaN(c));
-         //   assert(!isNaN(sp));
-         return this;
+            //     assert(c === null || !isNaN(c));
+            //   assert(!isNaN(sp));
+            return this;
         },
         async exec() {
             return [];
@@ -201,7 +206,7 @@ describe("Align test", function () {
     // it("use a json as source", async function () {
     //     //const parameters = {};
     //     //localFakeSourceQuery.recordSet = compareSortedSource;
-        
+
     //     //localFakeDestQuery.recordSet = compareSortedDest;
     //     parameters.sourcePageSize=50;
     //     parameters.destPageSize=50;
@@ -243,27 +248,27 @@ describe("Align test", function () {
     it("use a buffer", async function () {
         //const parameters = {};
         //localFakeSourceQuery.recordSet = compareSortedSource;
-        
+
         //localFakeDestQuery.recordSet = compareSortedDest;
-        parameters.sourcePageSize=50;
-        parameters.destPageSize=50;
+        parameters.sourcePageSize = 50;
+        parameters.destPageSize = 50;
 
         // const buffer = new IAlignBuffer();
         const MyBuffer = class extends IAlignBuffer {
-    //    const MyBuffer = class extends ThresholdBuffer {
-            update (entity, values, keys) {   
-                assert(keys === 1 || keys === 2)             
-             //   assert(false)
+            //    const MyBuffer = class extends ThresholdBuffer {
+            update(entity, values, keys) {
+                assert(keys === 1 || keys === 2)
+                //   assert(false)
                 return Promise.resolve(true);
             }
-            delete (entity, record) {
+            delete(entity, record) {
                 // console.log(`executing delete for record with id ${record?.id}`);
                 assert(false);
                 return Promise.resolve(true);
             }
-            insert (entity, record) {
+            insert(entity, record) {
                 // console.log(`executing insert for record with id ${record?.id}`);
-                assert(record.id === 7 || record.id === 8 || record.id === 9  || record.id === 10 );
+                assert(record.id === 7 || record.id === 8 || record.id === 9 || record.id === 10);
                 return Promise.resolve(true);
             }
         }
@@ -272,41 +277,41 @@ describe("Align test", function () {
         localSourceArrayQuery.dataStorage.data[0].name = 'change1'
         localSourceArrayQuery.dataStorage.data[1].address = 'change2'
 
-        
+
         let out = await CompareHelper.compareSorted(
             localSourceArrayQuery, localDBDestQuery, parameters, undefined, buffer);
 
 
         // let out = await CompareHelper.alignSorted(
         //     localSourceArrayQuery, localDBDestQuery, parameters, buffer );
-        
+
         assert(out);
 
-        await Log.insert( {
-            what: `The test precedure has ended `,
+        await Log.insert({
+            what: `Test "use a buffer" has ended`,
             activity_type: `align-customer`
-        } );
+        });
 
         const logs = await Log.select().exec();
 
-        console.log( logs );
+        console.log(logs);
     });
 
-    it("use a  Threshold buffer", async function () {
+    it("use a Threshold buffer", async function () {
         //const parameters = {};
         //localFakeSourceQuery.recordSet = compareSortedSource;
-        
+
         //localFakeDestQuery.recordSet = compareSortedDest;
-        parameters.sourcePageSize=50;
-        parameters.destPageSize=50;
+        parameters.sourcePageSize = 50;
+        parameters.destPageSize = 50;
 
         const MyBuffer = class extends ThresholdBuffer {
-            async update (entity, values, keys) {   
-                assert(keys === 1 || keys === 2)             
-             //   assert(false)
+            async update(entity, values, keys) {
+                assert(keys === 1 || keys === 2)
+                //   assert(false)
                 await super.update(entity, values, keys);
             }
- 
+
         }
         let buffer = new MyBuffer();
         //let buffer = new ThresholdBuffer();
@@ -314,34 +319,34 @@ describe("Align test", function () {
         localSourceArrayQuery.dataStorage.data[0].name = 'change1'
         localSourceArrayQuery.dataStorage.data[1].address = 'change2'
 
-        let before = await CustomerDest.select().where(CustomerDest.id.in([1,2])).exec();
-        
-    let out =   await CompareHelper.compareSorted(
+        let before = await CustomerDest.select().where(CustomerDest.id.in([1, 2])).exec();
+
+        let out = await CompareHelper.compareSorted(
             localSourceArrayQuery, localDBDestQuery, parameters, undefined, buffer);
 
 
         // let out = await CompareHelper.alignSorted(
         //     localSourceArrayQuery, localDBDestQuery, parameters, buffer );
-        let after = await CustomerDest.select().where(CustomerDest.id.in([1,2])).exec();
-        
+        let after = await CustomerDest.select().where(CustomerDest.id.in([1, 2])).exec();
+
         assert(out);
 
-        await Log.insert( {
-            what: `The test precedure has ended `,
+        await Log.insert({
+            what: `Test 'use a Threshold buffer' has ended`,
             activity_type: `align-customer`
-        } );
+        });
 
         const logs = await Log.select().exec();
 
         // TODO: assert check instead of console.log
-        console.log( logs );
+        console.log(logs);
     });
-    
+
 
     // it("use Aligner helper", async function () {
     //     //const parameters = {};
     //     //localFakeSourceQuery.recordSet = compareSortedSource;
-        
+
     //     //localFakeDestQuery.recordSet = compareSortedDest;
     //     parameters.sourcePageSize=50;
     //     parameters.destPageSize=50;
