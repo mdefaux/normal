@@ -1,6 +1,7 @@
 
  const assert = require( "assert" );
 const {IAlignBuffer} = require("./IAlignBuffer");
+const ThresholdBuffer = require("./ThresholdBuffer");
 const {ILogger} = require("./ILogger");
 
 class ComparisonResult {
@@ -376,7 +377,7 @@ const CompareHelper = {
                 // all records in source from here on are not in destination and can be inserted
                 // call a function with await (will save an array buffer of records to insert and execute it when a certain threshold is met)
                 try {
-                    await buffer.insert(destQuery.entity, sourceArray[iSource]);
+                    await buffer.insert(destQuery.entity, typeof parameters.columnMap === 'function' ? parameters.columnMap(sourceArray[iSource]) : sourceArray[iSource]);
                 }
                 catch(e){
                     logger.error(e);
@@ -500,7 +501,7 @@ const CompareHelper = {
         } );
     },
 
-    async alignSorted( sourceQuery, destQuery, parameters, buffer, logger ) {
+    async alignSorted( sourceQuery, destQuery, parameters, buffer= new ThresholdBuffer, logger ) {
 
         return await this.compareSorted( sourceQuery, destQuery, 
             parameters, 
