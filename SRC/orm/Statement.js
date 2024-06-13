@@ -47,22 +47,33 @@ class Statement {
             return;
         }
         let cache = {};
-        if ( Array.isArray( this.processedRecord ) ) {
-            this.processedRecord = await Promise.all( 
+
+
+        if (  !Array.isArray( this.processedRecord ) ) {
+            this.processedRecord = await this.resolveRecord( this.processedRecord, cache );
+            return;
+
+         
+        }
+
+        
+        /*           this.processedRecord = await Promise.all( 
                 this.processedRecord.map( (pr) => (
                     this.resolveRecord( pr, cache )
                 ) ) 
-            );
+            ); */
+
+        for(let i= 0; i<this.processedRecord.length; i++) {
+            this.processedRecord[i] = await this.resolveRecord(this.processedRecord[i], cache);
         }
-        else {
-            this.processedRecord = await this.resolveRecord( this.processedRecord, cache );
-        }
+           
+        
     }
 
     async resolveRecord( record, cache ) {
         if (typeof record !== "object") return record;
         
-        return Object.fromEntries( await Promise.all (
+/*         return Object.fromEntries( await Promise.all (
             Object.entries( record ).map( async ([key,value]) => {
                 if ( typeof value === 'function' ) {
                     value = await value( cache, this );
@@ -70,7 +81,20 @@ class Statement {
 
                 return [key,value];
             })
-        ))
+        )) */
+        let r = [];
+
+        for (let [key, value] of Object.entries(record)) {
+            if(typeof value === 'function') {
+                value = await value(cache, this);
+            }
+
+            r.push([key, value]);
+
+        }
+
+        return Object.fromEntries(r);
+
     }
 
     // TODO: 'exec' should call 'execute'
