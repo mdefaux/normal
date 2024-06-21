@@ -8,7 +8,7 @@ const data = require('./Customer.data.json');
 const dataStorage = store.data( "customer", data ); 
 
 // setups an entity that has storage set to point to "Customer" data
-const Customer = store.entity( 'Customer', (model) => {
+const CustomerExt = store.entity( 'CustomerExt', (model) => {
 
     model.source( 'customer' );
 
@@ -22,4 +22,4 @@ const Customer = store.entity( 'Customer', (model) => {
     model.storageData( dataStorage );
 } );
 
-module.exports = Customer;
+module.exports = CustomerExt;

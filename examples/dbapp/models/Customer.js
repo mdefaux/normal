@@ -2,7 +2,7 @@
 var store = require( './store' );
 
 
-module.exports = store.entity( 'Customer', (model) => {
+const Customer = store.entity( 'Customer', (model) => {
 
     model.source( 'customer' );
 
@@ -14,3 +14,6 @@ module.exports = store.entity( 'Customer', (model) => {
     model.number( 'telephone' );
 
 } );
+
+
+module.exports = Customer;
