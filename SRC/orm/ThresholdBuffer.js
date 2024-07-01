@@ -125,6 +125,7 @@ class ThresholdBuffer extends IAlignBuffer {
 
         //this.emptyRecordArray(this.updateRecords);
         this.updateRecords = [];
+        this.updateCounter = 0;
         //return updateResults;
         return;
     }
@@ -134,6 +135,7 @@ class ThresholdBuffer extends IAlignBuffer {
         let result = await entity.insert(arrayOfRecord);
         // this.emptyRecordArray(this.insertRecords);
         this.insertRecords = [];
+        this.insertCounter = 0;
         return result;
 
     }
@@ -143,6 +145,7 @@ class ThresholdBuffer extends IAlignBuffer {
         let result = await entity.delete(arrayOfRecord);
       //  this.emptyRecordArray(this.deleteRecords);
         this.deleteRecords = [];
+        this.deleteCounter = 0;
         return result;
 
     }
