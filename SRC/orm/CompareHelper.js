@@ -306,16 +306,6 @@ const CompareHelper = {
 
             if (iDest >= destArray.length && !arrayDestEnd ) {
 
-                // if buffer is configured, INSERT/DELETE/UPDATE operations are not executed instantly.
-                // execute them before fetching new dest data.
-                if(buffer?.flush && iDest > 0) {
-                    try {
-                        await buffer.flush( destQuery.entity );
-                    }
-                    catch(e){
-                        logger.error(e);
-                    }
-                }
                 let offset = (pageDestIndex++*destPageSize) + offsetDest;
                 destQuery.setRange(destPageSize, offset);
                 destArray = await destQuery.exec();
@@ -411,7 +401,7 @@ const CompareHelper = {
             logger.error(e);
         }
         
-
+        result.buffer = buffer;
         return result;
     },
 
