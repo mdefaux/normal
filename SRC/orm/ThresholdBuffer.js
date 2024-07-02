@@ -8,14 +8,17 @@ class ThresholdBuffer extends IAlignBuffer {
         this.updateThreshold = 100;
         this.updateCounter = 0;
         this.updateRecords = [];
+        this.totalUpdate = 0;
 
         this.insertThreshold = 100;
         this.insertCounter = 0;
         this.insertRecords = [];
+        this.totalInsert = 0;
 
         this.deleteThreshold = 100;
         this.deleteCounter = 0;
         this.deleteRecords = [];
+        this.totalDelete = 0;
 
     }
 
@@ -38,6 +41,7 @@ class ThresholdBuffer extends IAlignBuffer {
     async update(entity, record, keys) {
         // update counter
         this.updateCounter++;
+        this.totalInsert++;
 
         let ref = {
             keys: keys,
@@ -62,6 +66,7 @@ class ThresholdBuffer extends IAlignBuffer {
     async insert(entity, record) {
         // update counter
         this.insertCounter++;
+        this.totalInsert++;
 
         // add record to insertRecords array
         this.insertRecords.push(record);
@@ -79,6 +84,7 @@ class ThresholdBuffer extends IAlignBuffer {
     async delete(entity, record) {
         // update counter
         this.deleteCounter++;
+        this.totalDelete++;
         this.deleteRecords.push(record);
 
         // TODO: if counter reach threshold
