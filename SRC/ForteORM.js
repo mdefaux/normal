@@ -426,7 +426,7 @@ const defs = {
     entity( name, callback, clazz ) {
         // console.log( `Setting up class ${name}.` );
         if( this.entities[ name ] ) {
-            return;
+            // return;
             throw new Error( `Entity '${name}' already defined.` );
         }
         let model = new Model( name );
