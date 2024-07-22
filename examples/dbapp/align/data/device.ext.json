@@ -1,0 +1,25 @@
+[
+    { "id":  1, "serial_number": "0001A2B3C4D", "ip_address": "192.168.1.3", "hostname": "firewall1-gamma", "device_model_id": 3, "site_id": 3, "customer_id": 3 },
+    { "id":  2, "serial_number": "0004D5E6F7G", "ip_address": "192.168.3.1", "hostname": "router2-gamma", "device_model_id": 1, "site_id": 5, "customer_id": 3 },
+    { "id":  3, "serial_number": "0007H8I9J0K", "ip_address": "192.168.4.1", "hostname": "ap2-gamma", "device_model_id": 4, "site_id": 3, "customer_id": 3 },
+
+    { "id": 17, "serial_number": "000N1B2C3D4", "ip_address": "192.168.2.4", "hostname": "ap3-gamma", "device_model_id": 4, "site_id": 3, "customer_id": 3 },
+    { "id": 18, "serial_number": "000H1Y2J3K4", "ip_address": "192.168.1.6", "hostname": "storage4-gamma", "device_model_id": 5, "site_id": 3, "customer_id": 3 },
+    { "id": 19, "serial_number": "000Y9T8U7V6", "ip_address": "192.168.3.4", "hostname": "firewall3-gamma", "device_model_id": 3, "site_id": 3, "customer_id": 3 },
+
+    { "id":  4, "serial_number": "C0009K8L7M6N", "ip_address": "192.168.4.2", "hostname": "storage2-acme", "device_model_id": 5, "site_id": 1, "customer_id": 1 },
+    { "id":  5, "serial_number": "C000A1B2C3D4", "ip_address": "192.168.1.1", "hostname": "router1-acme", "device_model_id": 1, "site_id": 1, "customer_id": 1 },
+    { "id":  6, "serial_number": "C000D4E5F6G7", "ip_address": "192.168.2.1", "hostname": "ap1-acme", "device_model_id": 4, "site_id": 1, "customer_id": 1 },
+    { "id":  7, "serial_number": "C000H3J4K5L6", "ip_address": "192.168.3.2", "hostname": "switch2-acme", "device_model_id": 2, "site_id": 1, "customer_id": 1 },
+    { "id":  8, "serial_number": "C000L5P2M3N1", "ip_address": "192.168.1.4", "hostname": "router3-acme", "device_model_id": 1, "site_id": 1, "customer_id": 1 },
+    { "id":  9, "serial_number": "C000M1B2V3D4", "ip_address": "192.168.3.5", "hostname": "switch4-acme", "device_model_id": 2, "site_id": 1, "customer_id": 1 },
+    { "id": 10, "serial_number": "C000Q4R5W6V7", "ip_address": "192.168.2.5", "hostname": "router5-acme", "device_model_id": 1, "site_id": 1, "customer_id": 1 },
+
+    { "id": 11, "serial_number": "L00A1M2N3O4P", "ip_address": "192.168.1.2", "hostname": "switch1-beta", "device_model_id": 2, "site_id": 2, "customer_id": 2 },
+    { "id": 20, "serial_number": "L00A5P2K3L1", "ip_address": "192.168.2.6", "hostname": "router6-beta", "device_model_id": 1, "site_id": 2, "customer_id": 2 },
+    { "id": 12, "serial_number": "L00A5Q6R7S8T", "ip_address": "192.168.2.2", "hostname": "storage1-beta", "device_model_id": 5, "site_id": 4, "customer_id": 2 },
+    { "id": 13, "serial_number": "L00A9U8V7W6X", "ip_address": "192.168.3.3", "hostname": "firewall2-beta", "device_model_id": 3, "site_id": 2, "customer_id": 2 },
+    { "id": 14, "serial_number": "L00AQ2R3T1N4", "ip_address": "192.168.2.3", "hostname": "switch3-beta", "device_model_id": 2, "site_id": 2, "customer_id": 2 },
+    { "id": 15, "serial_number": "L00AX4S3D2T1", "ip_address": "192.168.1.5", "hostname": "router4-beta", "device_model_id": 1, "site_id": 2, "customer_id": 2 },
+    { "id": 16, "serial_number": "L00AY3J4R5L6", "ip_address": "192.168.4.4", "hostname": "firewall4-beta", "device_model_id": 3, "site_id": 2, "customer_id": 2 }
+]
