@@ -12,7 +12,7 @@
   *  mocha align/test/align.test.js  
   *  
   * With coverage:
-  *  npx nyc --reporter=text mocha align/test/align.test.js 
+  *  npx nyc --reporter=text mocha align/test/join.test.js 
   */
 const {assert,expect} = require("chai");
 require("../../test/_test-setup");
@@ -28,6 +28,34 @@ describe("Join test", function () {
 
         let query =  SiteExt.select()
             .join(Customer, SiteExt.customer_id.equals(Customer.name));
+
+        expect(query.joins).to.be.a('array');
+        expect(query.joins[0].right).to.be.equal(Customer);
+        expect(query.joins[0].condition.field.name).to.be.equal("customer_id");
+        assert(query.joins[0].condition.value.field.name);
+        expect(query.joins[0].condition.value.sourceEntity.metaData.name).to.be.equal('Customer');
+
+        // execute query
+        let out = await query.exec();
+        assert(out);
+        expect(out).to.be.a('array');
+        expect(out.length).to.be.equal(7);
+
+        // there are no records without a match
+        expect(out.some( (r)=> ! r.Customer )).to.be.equal(false);
+        
+        // record with a match with customer 2
+        expect(out[0]).to.be.a('object');
+        expect(out[0].Customer).to.be.a('object');
+        expect(out[0].Customer.id).to.be.equal(2);
+        expect(out[0].Customer.name).to.be.equal("Plajo");
+
+    });
+
+    it("left outer join with local Customer", async function () {
+
+        let query =  SiteExt.select()
+            .leftJoin(Customer, SiteExt.customer_id.equals(Customer.name));
 
         expect(query.joins).to.be.a('array');
         expect(query.joins[0].right).to.be.equal(Customer);

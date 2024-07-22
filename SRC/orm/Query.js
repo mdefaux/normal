@@ -437,6 +437,13 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return this;
   }
 
+  leftJoin( rightEntity, condition ) {
+
+    this.joins = [...(this.joins || []), 
+      { right: rightEntity, condition: condition, type: 'left-outer' }];
+    return this;
+  }
+
   beforeExec(callback) {
     this.beforeExecCallback = callback;
     return this;
@@ -566,11 +573,17 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     const rightData = await right.exec();
 
     // maps each record with related object
-    return data.map( (r) => {
+    return data.reduce( (resultSet, r) => {
       
+      // TODO: use index and evaluate condition specified in join
       let found = rightData.find( (rd) => (rd[ join.condition.value.field.name ]) === r[ join.condition.field.name ] );
-      return {...r, [join.right.metaData.name]: found };
-    } )
+      // if no match found
+      if ( join.type !== 'left-outer' && !found ) {
+        return resultSet;
+      }
+      // adds a record with the addition of the related object
+      return [ ...resultSet, {...r, [join.right.metaData.name]: found } ]
+    }, [] )
   }
 }
 
