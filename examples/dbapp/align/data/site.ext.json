@@ -1,0 +1,10 @@
+[
+    { "code": "xxx001", "address": "101 River Rd, Springfield, IL", "customer_id": "Wordpedia" },
+    { "code": "xxx002", "address": "202 Mountain Dr, Denver, CO", "customer_id": "Plajo" },
+    { "code": "xxx003", "address": "303 Hill St, Austin, TX", "customer_id": "Thoughtstorm" },
+    { "code": "xxx004", "address": "404 Valley Ln, Boulder, CO", "customer_id": "Plajo" },
+    { "code": "xxx005", "address": "505 Pine Cir, San Antonio, TX", "customer_id": "Thoughtstorm" },
+    { "code": "xxx006", "address": "via Garibaldi 20, Besana in Brianza Italy", "customer_id": "Thoughtstorm" },
+    { "code": "xxx007", "address": "via Tristram 66, Calvatone Italy", "customer_id": "Glizzard" },
+    { "code": "xxx008", "address": "via Carnevali 113, Milan Italy", "customer_id": "Wordpedia" }
+]
