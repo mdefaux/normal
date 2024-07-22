@@ -543,7 +543,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
    */
   async processJoin( data ) {
     // if none defined, exits
-    if ( !this.join || this.joins?.length === 0 ) {
+    if ( !this.joins || this.joins?.length === 0 ) {
       return data;
     }
     // for each join process the data
