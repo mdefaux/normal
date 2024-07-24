@@ -163,7 +163,10 @@ const Chunknizer = {
                 else {
                     this.state.fetchRequest = false;
                 }
-                this.data = this.data.concat(out.map(row => {
+                this.data = this.data.concat(out.map((row,index) => {
+                    if ( !row[this.params.columnName] ) {
+                        throw new Error(`Key value "${this.params.columnName}" is null for row ${index}`);
+                    }
                     return row[this.params.columnName];
                 }));
             },

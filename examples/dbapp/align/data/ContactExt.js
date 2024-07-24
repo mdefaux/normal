@@ -6,22 +6,22 @@ const data = require('./sito_esempio.json');
 
 
 // sets a data storage named as desiderd table
-const dataStorage = store.data( "sito", data ); 
+const dataStorage = store.data( "contact", data ); 
 
 // setups an entity that has storage set to point to "Sito" data
-const SitoExt = store.entity( 'SitoExt', (model) => {
+const ContactExt = store.entity( 'ContactExt', (model) => {
 
-    model.source( 'sito' );
+    model.source( 'contact' );
 
-    model.string( 'serial_number' );
-    model.label( 'serial_number' );
-    model.string( 'ip_address' );
-    model.string( 'device_model_id' );
-    model.string( 'site_id' );
+    model.string( 'code' );
+    model.label( 'code' );
     model.string( 'customer_id' );
+    model.string( 'address' );
+    model.string( 'progr' );
+    model.string( 'device_model_id' );
 
     // tells model that data is taken from dataStorage previously declared
     model.storageData( dataStorage );
 } );
 
-module.exports = SitoExt;
+module.exports = ContactExt;

@@ -15,27 +15,15 @@
   *  npx nyc --reporter=text mocha align/test/join.test.js 
   */
 const {assert,expect} = require("chai");
-// require("../../test/_test-setup");
+require("../../test/_test-setup");
 
+const Contact = require("../../models/Contact");
 const ContactExt = require("../data/ContactExt");
 const {Chunknizer} = require("normaly");
 
 
-describe("Chunk-nizer test", function () {
+describe("Chunk-align test", function () {
 
-    // it("finds out chunks from site", async function () {
-
-    //     let query = DeviceExt.select();
-
-    //     let outChunks = await Chunknizer.split(query, {
-    //         pageSize: 100,
-    //         // columnName: "serial_number",
-    //         columnName: "ID_AS400",
-    //         minChunksize: 50,
-    //     });
-
-    //     assert(outChunks);
-    // })
     it("finds out chunks from site", async function () {
 
         let query = ContactExt.select();
@@ -52,9 +40,20 @@ describe("Chunk-nizer test", function () {
         
         while ( chunk = await chunknizer.next() ) {
             // 
-            if ( chunk ) {
-                outChunks.push( chunk );
-            }
+            outChunks.push( chunk );
+
+            
+
+            let dest = Contact.select()
+                // .where("CODE",">=", chunk.from)
+                // .where("CODE","<=", chunk.to)
+                .where(Contact.code.greaterOrEqualThan( chunk.from ) )
+                .where(Contact.code.lessOrEqualThan( chunk.to ) )
+                .orderBy(Contact.code)
+                .setRange(5000);
+
+            Contact.alignNew( dest, source )
+
         };
 
         assert(outChunks);
