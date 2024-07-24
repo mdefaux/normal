@@ -259,14 +259,16 @@ const CompareHelper = {
         let pageSourceIndex=1; 
         //initial offset for the destination. 
         //offset is used for destination instead of pagination because insertion and deletion can change data interval 
-        let offsetDest=0;       
-        let offsetend=0;
+        // offset is now moved in buffer class (ThresholdBuffer)
+        //let offsetDest=0;       
+        
+        // let offsetend=0;
 
         // dest page fetching
         let pageDestIndex = 0;
-        let insertSize = parameters.insertSize || 500; 
+        // let insertSize = parameters.insertSize || 500; 
         //inizialized for the count of the source number of data
-        let sourceRecordCount=sourcePageSize;
+        // let sourceRecordCount=sourcePageSize;
         //let endfor=false;
         //let alreadyMatched= null;
         // indicates when it is at the end of the destination or the source
@@ -305,8 +307,19 @@ const CompareHelper = {
             }
 
             if (iDest >= destArray.length && !arrayDestEnd ) {
+                // from second page on, call flush to execute all update/insert/delete in buffer before fetching new data.
+                if(iDest !== 0) {
+                    try {
+                        await buffer.flush( destQuery.entity );
+                    }
+                    catch(e){
+                        logger.error(e);
+                    }
+                }
+                
 
-                let offset = (pageDestIndex++*destPageSize) + offsetDest;
+                // add an offset if insert/delete are executed before fetching data
+                let offset = (pageDestIndex++*destPageSize) + buffer.getOffset() ;
                 destQuery.setRange(destPageSize, offset);
                 destArray = await destQuery.exec();
                 iDest = 0;
@@ -395,7 +408,7 @@ const CompareHelper = {
 
 
         try {
-            await buffer.flush( destQuery.entity );
+            await buffer.flush( destQuery.entity, true );
         }
         catch(e){
             logger.error(e);
