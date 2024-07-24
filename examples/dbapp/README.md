@@ -16,10 +16,27 @@ On Mac you should run `sudo npm link` command, then normal `npm link normaly`.
 
 Note: `npm link normaly` command must be run every time you launch npm ci on example app.
 
-# Testing
+## DB container
+Ensure pg-normaly-dbapp is running
+
+## Testing
 
         cd ./examples/dbapp/
         npm test
+
+## Seeding DB
+
+        $ knex migrate:rollback
+        $ knex migrate:latest
+        $ knex seed:run
+
+Or
+
+        knex migrate:rollback && knex migrate:latest && knex seed:run 
+
+Or
+
+        npm run dbseed
 
 ## Testing trouble shooting
 

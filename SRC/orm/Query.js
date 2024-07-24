@@ -430,6 +430,20 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return this;
   }
 
+  join( rightEntity, condition ) {
+
+    this.joins = [...(this.joins || []), 
+      { right: rightEntity, condition: condition }];
+    return this;
+  }
+
+  leftJoin( rightEntity, condition ) {
+
+    this.joins = [...(this.joins || []), 
+      { right: rightEntity, condition: condition, type: 'left-outer' }];
+    return this;
+  }
+
   beforeExec(callback) {
     this.beforeExecCallback = callback;
     return this;
@@ -456,6 +470,9 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     let data = this.dataStorage.getData(range);
 
     // until end of data or rs has target size
+
+    // handles joins
+    data = await this.processJoin( data );
 
     // TODO: applies filters
     if (this.filters?.length > 0) {
@@ -517,6 +534,56 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return await this//.where( (qb) => (qb[ this.model.labelField ].equals( value )) )
       .where(this.entity[this.model.labelField].equals(value))
       .first();
+  }
+
+  /**Process all join relations
+   * 
+   * @param {Array} data 
+   * @returns 
+   */
+  async processJoin( data ) {
+    // if none defined, exits
+    if ( !this.joins || this.joins?.length === 0 ) {
+      return data;
+    }
+    // for each join process the data
+    return  this.joins.reduce( async ( data, join ) => {
+        return await this.processJoinRecord( data, join );
+    }, data );
+  }
+
+  /**Given a join definition, adds to given data the
+   * information taken from the related entity
+   *
+   * 
+   * @param {Array} data 
+   * @param {JoinDefinition} join 
+   * @returns 
+   */
+  async processJoinRecord( data, join ) {
+    // sorts the array by field used in 'on' condition
+    data = data.sort( (a, b) => (a[ join.condition.field.name ] > b[ join.condition.field.name ] ? 1 : -1) );
+
+    // selects the 'right' table filtering by the string found in data
+    const right = join.right.select()
+      .where( join.condition.value.in( data.map(r=>r[ join.condition.field.name ]) ) )
+      .orderBy( { columnName: join.condition.value.field.name, order: 'asc' } );
+
+    // executes
+    const rightData = await right.exec();
+
+    // maps each record with related object
+    return data.reduce( (resultSet, r) => {
+      
+      // TODO: use index and evaluate condition specified in join
+      let found = rightData.find( (rd) => (rd[ join.condition.value.field.name ]) === r[ join.condition.field.name ] );
+      // if no match found
+      if ( join.type !== 'left-outer' && !found ) {
+        return resultSet;
+      }
+      // adds a record with the addition of the related object
+      return [ ...resultSet, {...r, [join.right.metaData.name]: found } ]
+    }, [] )
   }
 }
 

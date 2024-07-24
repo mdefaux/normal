@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "part_number": "DM1001",
+        "description": "High-speed Router",
+        "vendor": "NetTech"
+    },
+    {
+        "id": 2,
+        "part_number": "DM2002",
+        "description": "Enterprise Switch",
+        "vendor": "SwitchCorp"
+    },
+    {
+        "id": 3,
+        "part_number": "DM3003",
+        "description": "Secure Firewall",
+        "vendor": "SafeNet"
+    },
+    {
+        "id": 4,
+        "part_number": "DM4004",
+        "description": "Wireless Access Point",
+        "vendor": "AirWave"
+    },
+    {
+        "id": 5,
+        "part_number": "DM5005",
+        "description": "Network Storage Device",
+        "vendor": "StoreX"
+    }
+]

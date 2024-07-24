@@ -24,7 +24,7 @@ class DataStorage {
     }
 
     getData( range ) {
-        if( !range ) {
+        if( !range || (!range.start && !range.size) ) {
             return this.data;
         }
 

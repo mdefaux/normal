@@ -1,0 +1,7 @@
+[
+    { "id": 1, "address": "101 River Rd, Springfield, IL", "customer_id": 1 },
+    { "id": 2, "address": "202 Mountain Dr, Denver, CO", "customer_id": 2 },
+    { "id": 3, "address": "303 Hill St, Austin, TX", "customer_id": 3 },
+    { "id": 4, "address": "404 Valley Ln, Boulder, CO", "customer_id": 2 },
+    { "id": 5, "address": "505 Pine Cir, San Antonio, TX", "customer_id": 3 }
+]
