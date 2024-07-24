@@ -3,7 +3,11 @@
 class IAlignBuffer {
 
     constructor() {
+        this.offset = 0;
+    }
 
+    getOffset() {
+        return this.offset || 0;
     }
 
     async update( entity, record, keys ) {

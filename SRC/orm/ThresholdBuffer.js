@@ -24,13 +24,13 @@ class ThresholdBuffer extends IAlignBuffer {
 
 
     setThresholds(thresholds) {
-        if (thresholds.insertThreshold) {
+        if (thresholds.insertThreshold !== undefined) {
             this.insertThreshold = thresholds.insertThreshold;
         }
-        if (thresholds.updateThreshold) {
+        if (thresholds.updateThreshold !== undefined) {
             this.updateThreshold = thresholds.updateThreshold;
         }
-        if (thresholds.deleteThreshold) {
+        if (thresholds.deleteThreshold !== undefined) {
             this.updateThreshold = thresholds.deleteThreshold;
         }
 
@@ -41,7 +41,7 @@ class ThresholdBuffer extends IAlignBuffer {
     async update(entity, record, keys) {
         // update counter
         this.updateCounter++;
-        this.totalInsert++;
+        this.totalUpdate++;
 
         let ref = {
             keys: keys,
@@ -97,17 +97,18 @@ class ThresholdBuffer extends IAlignBuffer {
         return Promise.resolve(true);
     }
 
-    async flush(entity) {
-        let insertPromise = this.doInsert(entity, this.insertRecords);
-        let updatePromise = this.doUpdate(entity, this.updateRecords);
-        let deletePromise = this.doDelete(entity, this.deleteRecords);
+    async flush(entity, last) {
+        let insertPromise = await this.doInsert(entity, this.insertRecords);
+        let updatePromise = await this.doUpdate(entity, this.updateRecords);
+        let deletePromise = await this.doDelete(entity, this.deleteRecords);
 
-        await Promise.all([
+        /* await Promise.all([
             insertPromise,
             updatePromise,
             deletePromise
-        ]);
+        ]); */
 
+        return;
              
     }
 
@@ -142,6 +143,7 @@ class ThresholdBuffer extends IAlignBuffer {
         // this.emptyRecordArray(this.insertRecords);
         this.insertRecords = [];
         this.insertCounter = 0;
+        this.offset = this.offset + arrayOfRecord.length;
         return result;
 
     }
@@ -152,6 +154,7 @@ class ThresholdBuffer extends IAlignBuffer {
       //  this.emptyRecordArray(this.deleteRecords);
         this.deleteRecords = [];
         this.deleteCounter = 0;
+        this.offset = this.offset - arrayOfRecord.length;
         return result;
 
     }

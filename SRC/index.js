@@ -7,6 +7,7 @@ const { Query } = require('./orm/Query');
 const { CompareHelper } = require("./orm/CompareHelper");
 const  { IAlignBuffer }  = require("./orm/IAlignBuffer");
 const { ILogger } = require("./orm/ILogger");
+const ThresholdBuffer = require("./orm/ThresholdBuffer");
 
 module.exports= {
     URLquery: URLquery,
@@ -16,6 +17,7 @@ module.exports= {
     CompareHelper: CompareHelper,
     IAlignBuffer: IAlignBuffer,
     ILogger: ILogger,
+    ThresholdBuffer: ThresholdBuffer,
     
 
     // KDB
