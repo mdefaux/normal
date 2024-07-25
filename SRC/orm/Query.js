@@ -421,7 +421,18 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return this;
   }
 
-  orderBy(order) {
+  orderBy(order, direction = "asc") {
+
+    if ( order instanceof FieldQueryItem ) {
+      
+      this.orderedColumns = [...this.orderedColumns || [], {
+        columnName: order.name,
+        order: direction
+      }];
+    
+      return this;
+    }
+
     // il secondo parametro della orderBy è l'ordinamento di default...sarebbe da inserire nel model
     // let order = utils.orderBy(this.req.query, "id");
     // this.qb.orderBy(order.field, order.order);
