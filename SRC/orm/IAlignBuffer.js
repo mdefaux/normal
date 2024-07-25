@@ -4,11 +4,22 @@ class IAlignBuffer {
 
     constructor() {
         this.offset = 0;
+        this.lastUniqueKey = null;
     }
 
     getOffset() {
         return this.offset || 0;
     }
+
+    getLastUniqueKey() {
+        return this.lastUniqueKey;
+    }
+
+    setLastUniqueKey(value) {
+        this.lastUniqueKey = value;
+        return ;
+    }
+
 
     async update( entity, record, keys ) {
         this.doUpdate();

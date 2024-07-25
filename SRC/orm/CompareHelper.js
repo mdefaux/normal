@@ -334,6 +334,25 @@ const CompareHelper = {
             if(arraySourceEnd  && arrayDestEnd) {
                 break;
             }
+
+
+            // check if actual uniqueKey is the same as the last one.
+            // if a duplicate is met, skip it
+            let lastUniqueKey = buffer.getLastUniqueKey();
+            let isDuplicate = lastUniqueKey === sourceArray[iSource][keyFieldSource];
+
+            // set lastUniqueKey in any case
+            buffer.setLastUniqueKey(sourceArray[iSource][keyFieldSource]);
+
+            // if uniqueKey is duplicate, log and skip this source record.
+            if(isDuplicate) {
+                // log. Use Logger?
+                console.log(`Duplicate on uniqueKey found: ${lastUniqueKey}`);
+                //logger.info(`Duplicate on uniqueKey found: ${lastUniqueKey}`);
+                iSource++;
+                continue;
+
+            }
            
             // TODO: check if source and destination have different rules for ordering.
             // for example: check first X records from source and destination and check the keys, maybe one starts with capital letters and the other with numbers.
