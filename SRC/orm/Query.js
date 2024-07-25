@@ -593,7 +593,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
         return resultSet;
       }
       // adds a record with the addition of the related object
-      return [ ...resultSet, {...r, [join.right.metaData.name]: found } ]
+      return [ ...resultSet, {...r, [join.condition.field.name]: found } ]
     }, [] )
   }
 }
