@@ -7,6 +7,7 @@ const { Query } = require('./orm/Query');
 const { CompareHelper } = require("./orm/CompareHelper");
 const  { IAlignBuffer }  = require("./orm/IAlignBuffer");
 const { ILogger } = require("./orm/ILogger");
+const { Chunknizer } = require('./utils/Chunknizer');
 const ThresholdBuffer = require("./orm/ThresholdBuffer");
 
 module.exports= {
@@ -18,7 +19,7 @@ module.exports= {
     IAlignBuffer: IAlignBuffer,
     ILogger: ILogger,
     ThresholdBuffer: ThresholdBuffer,
-    
+    Chunknizer: Chunknizer,
 
     // KDB
     KdbStoreHost: KdbStoreHost
