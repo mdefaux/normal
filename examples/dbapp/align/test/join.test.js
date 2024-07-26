@@ -89,4 +89,38 @@ describe("Join test", function () {
 
     });
 
+    it("left outer join using cache", async function () {
+
+        const myCache = {};
+        
+        let query =  SiteExt.select()
+            .leftJoin(Customer, SiteExt.customer_id.equals(Customer.name))
+            .hint( { cache: myCache });
+
+        expect(query.joins).to.be.a('array');
+        expect(query.joins[0].right).to.be.equal(Customer);
+        expect(query.joins[0].condition.field.name).to.be.equal("customer_id");
+        assert(query.joins[0].condition.value.field.name);
+        expect(query.joins[0].condition.value.sourceEntity.metaData.name).to.be.equal('Customer');
+
+        // execute query
+        let out = await query.exec();
+        assert(out);
+        expect(out).to.be.a('array');
+
+        // checks record without a match with customer
+        expect(out[0]).to.be.a('object');
+        expect(out[0]).to.be.a('object');
+        // expect(out[0].customer_id).to.be.equal("Glizzard");
+        // expect(out[0].Customer).to.be.equal(undefined);
+        expect(out[6].customer_id).to.be.equal(undefined);
+        expect(out[6].address).to.be.equal("via Tristram 66, Calvatone Italy");
+        // record with a match with customer 2
+        expect(out[1]).to.be.a('object');
+        expect(out[1].customer_id).to.be.a('object');
+        expect(out[1].customer_id.id).to.be.equal(2);
+        expect(out[1].customer_id.name).to.be.equal("Plajo");
+
+    });
+
 });
