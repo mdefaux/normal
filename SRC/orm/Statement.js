@@ -154,6 +154,25 @@ class Statement {
         this.externals = { ...this.externals || {}, ...externals };
         return this;
     }
+
+    /**Tells to statment thints on how to process data or execute something
+     * 
+     * List of possibile hints:
+     * cache: an object used for caching key-values 
+     * processEachRecord: true | false
+     * joinStrategy: 
+     * 
+     * @example 
+     * const myCache = {}
+     * hint( { cache: myCache } )
+     * 
+     * @param {Object} newHint
+     * @returns {Statement} this
+     */
+    hint( newHint ) {
+        this.hints = {...this.hints || {}, ...newHint};
+        return this;
+    }
 }
 
 exports.Statement = Statement;

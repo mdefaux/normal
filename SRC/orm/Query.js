@@ -575,16 +575,21 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
    * @returns 
    */
   async processJoinRecord( data, join ) {
+    let cache = this.hints?.cache || {};
+
     // sorts a copy (to preserve sorting) of the array by field used in 'on' condition
     const sortedData = [...data].sort( (a, b) => 
       (a[ join.condition.field.name ] > b[ join.condition.field.name ] ? 1 : -1) );
 
     let uniqueValues = sortedData.map(r=>r[ join.condition.field.name ])
       .reduce( (uniques, value) => {
-        if ( uniques.length === 0 || uniques[ uniques.length - 1 ] !== value ) {
-          return [ ...uniques, value ];
+        if ( uniques.length > 0 && uniques[ uniques.length - 1 ] === value ) {
+          return uniques;
         }
-        return uniques;
+        if ( this.hints?.cache?.[ join.condition.field.name ]?.[ value ] ) {
+          return uniques;
+        } 
+        return [ ...uniques, value ];
       }, []);
 
     // selects the 'right' table filtering by the string found in data
@@ -592,14 +597,28 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       .where( join.condition.value.in( uniqueValues ) )
       .orderBy( { columnName: join.condition.value.field.name, order: 'asc' } );
 
-    // executes
+    // executes 
     const rightData = await right.exec();
+
+    // if hints have a cache
+    if( this.hints?.cache ) {
+      // if not ehsit cache on 
+      if ( !this.hints.cache[ join.condition.field.name ] ) {
+        this.hints.cache[ join.condition.field.name ] = {};
+      }
+      // for each value, adds to key-value 
+      rightData.forEach( (r) => {
+        this.hints.cache[ join.condition.field.name ][ r[ join.condition.value.field.name ] ] = r;
+      });
+    }
 
     // maps each record with related object
     return data.reduce( (resultSet, r) => {
       
       // TODO: use index and evaluate condition specified in join
-      let found = rightData.find( (rd) => (rd[ join.condition.value.field.name ]) === r[ join.condition.field.name ] );
+      let found = this.hints?.cache?.[ join.condition.field.name ] ?
+        this.hints.cache[ join.condition.field.name ][ r[ join.condition.field.name ] ]
+        : rightData.find( (rd) => (rd[ join.condition.value.field.name ]) === r[ join.condition.field.name ] );
       // if no match found
       if ( join.type !== 'left-outer' && !found ) {
         return resultSet;
