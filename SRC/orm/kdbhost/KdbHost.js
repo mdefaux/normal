@@ -38,6 +38,10 @@ class KdbStoreHost extends StoreHost
      composeAggregation( fieldAggregation ) {
         return KdbExpression.composeAggregation( fieldAggregation );
     }
+
+    async transaction( callback ) {
+        return await this.knex.transaction( callback );
+    }
 }
 
 exports.KdbStoreHost = KdbStoreHost;

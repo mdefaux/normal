@@ -155,6 +155,11 @@ class Statement {
         return this;
     }
 
+    transacting( trx ) {
+        this.trx = trx;
+        return this;
+    }
+
     /**Tells to statment thints on how to process data or execute something
      * 
      * List of possibile hints:

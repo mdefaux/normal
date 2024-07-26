@@ -31,12 +31,19 @@ class KdbUpdate extends UpdateStatement {
             rowId = this.recordId;
         }
 
-        return await this.knex( this.entity.model.dbTableName )
+        let query = this.knex(this.entity.model.dbTableName)
             .where(rowId)
             .update(this.processedRecord /* , returning */)
-            .debug( this.debugOn )
-            .then( 
-                rows => (rows[0]) )
+            .debug(this.debugOn);
+
+        if (this.trx) {
+            query.transacting(this.trx);
+        }
+
+        return await query
+            .then(
+                rows => (rows[0])
+            );
     }
 
     value(id, record ) {
