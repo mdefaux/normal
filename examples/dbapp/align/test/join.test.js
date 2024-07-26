@@ -47,8 +47,14 @@ describe("Join test", function () {
         // record with a match with customer 2
         expect(out[0]).to.be.a('object');
         expect(out[0].customer_id).to.be.a('object');
-        expect(out[0].customer_id.id).to.be.equal(2);
-        expect(out[0].customer_id.name).to.be.equal("Plajo");
+        expect(out[0].customer_id.id).to.be.equal(1);
+        expect(out[0].customer_id.name).to.be.equal("Wordpedia");
+
+        // original sorting is preserved
+        expect(out[0].code).to.be.equal("xxx001");
+        expect(out[1].code).to.be.equal("xxx002");
+        expect(out[2].code).to.be.equal("xxx003");
+        expect(out[3].code).to.be.equal("xxx004");
 
     });
 
@@ -73,8 +79,8 @@ describe("Join test", function () {
         expect(out[0]).to.be.a('object');
         // expect(out[0].customer_id).to.be.equal("Glizzard");
         // expect(out[0].Customer).to.be.equal(undefined);
-        expect(out[0].customer_id).to.be.equal(undefined);
-        expect(out[0].address).to.be.equal("via Tristram 66, Calvatone Italy");
+        expect(out[6].customer_id).to.be.equal(undefined);
+        expect(out[6].address).to.be.equal("via Tristram 66, Calvatone Italy");
         // record with a match with customer 2
         expect(out[1]).to.be.a('object');
         expect(out[1].customer_id).to.be.a('object');

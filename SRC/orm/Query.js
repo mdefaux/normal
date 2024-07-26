@@ -564,7 +564,10 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
   }
 
   /**Given a join definition, adds to given data the
-   * information taken from the related entity
+   * information taken from the related entity.
+   * The related entity is identified by the 'on' condition.
+   * Data passed as parameter is sorted by the field used in 'on' condition,
+   * but the original sorting is preserved.
    *
    * 
    * @param {Array} data 
@@ -572,12 +575,21 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
    * @returns 
    */
   async processJoinRecord( data, join ) {
-    // sorts the array by field used in 'on' condition
-    data = data.sort( (a, b) => (a[ join.condition.field.name ] > b[ join.condition.field.name ] ? 1 : -1) );
+    // sorts a copy (to preserve sorting) of the array by field used in 'on' condition
+    const sortedData = [...data].sort( (a, b) => 
+      (a[ join.condition.field.name ] > b[ join.condition.field.name ] ? 1 : -1) );
+
+    let uniqueValues = sortedData.map(r=>r[ join.condition.field.name ])
+      .reduce( (uniques, value) => {
+        if ( uniques.length === 0 || uniques[ uniques.length - 1 ] !== value ) {
+          return [ ...uniques, value ];
+        }
+        return uniques;
+      }, []);
 
     // selects the 'right' table filtering by the string found in data
     const right = join.right.select()
-      .where( join.condition.value.in( data.map(r=>r[ join.condition.field.name ]) ) )
+      .where( join.condition.value.in( uniqueValues ) )
       .orderBy( { columnName: join.condition.value.field.name, order: 'asc' } );
 
     // executes
