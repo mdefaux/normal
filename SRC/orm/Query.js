@@ -558,9 +558,15 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       return data;
     }
     // for each join process the data
-    return  this.joins.reduce( async ( data, join ) => {
+/*     return  this.joins.reduce( async ( data, join ) => {
         return await this.processJoinRecord( data, join );
-    }, data );
+    }, data ); */
+    for( let join of this.joins ) {
+      data = await this.processJoinRecord( data, join );
+    }
+
+    return data;
+
   }
 
   /**Given a join definition, adds to given data the
