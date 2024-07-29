@@ -295,7 +295,12 @@ const CompareHelper = {
         for( let iteration = 0; iteration < (iterationLimit) && !result.sourceEnd; iteration++ ) {
             // check if fetch is needed
             if (iSource >= sourceArray.length && !arraySourceEnd ) {
+                let dateSource = Date.now();
+                logger.info(`SourcePage: ${pageSourceIndex}`);
                 sourceArray = await sourceQuery.page(pageSourceIndex++).exec();
+                
+                let getSourceTime = (Date.now() - dateSource)/ 1000;
+                logger.info(`Retrieved data in ${getSourceTime}`);
                 iSource = 0;
 
                 // TODO: eventually update count of total records.
@@ -307,16 +312,6 @@ const CompareHelper = {
             }
 
             if (iDest >= destArray.length && !arrayDestEnd ) {
-                // from second page on, call flush to execute all update/insert/delete in buffer before fetching new data.
-                if(iDest !== 0) {
-                    try {
-                        await buffer.flush( destQuery.entity );
-                    }
-                    catch(e){
-                        logger.error(e);
-                    }
-                }
-                
 
                 // add an offset if insert/delete are executed before fetching data
                 let offset = (pageDestIndex++*destPageSize) + buffer.getOffset() ;
@@ -345,14 +340,15 @@ const CompareHelper = {
             buffer.setLastUniqueKey(sourceArray[iSource][keyFieldSource]);
 
             // if uniqueKey is duplicate, log and skip this source record.
-            if(isDuplicate) {
+            // check if: isDuplicate && !arraySourceEnd && iSource attuale !== iSource precedente
+/*             if(isDuplicate) {
                 // log. Use Logger?
                 console.log(`Duplicate on uniqueKey found: ${lastUniqueKey}`);
                 //logger.info(`Duplicate on uniqueKey found: ${lastUniqueKey}`);
                 iSource++;
                 continue;
 
-            }
+            } */
            
             // TODO: check if source and destination have different rules for ordering.
             // for example: check first X records from source and destination and check the keys, maybe one starts with capital letters and the other with numbers.
