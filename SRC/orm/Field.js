@@ -119,6 +119,7 @@ class Field {
         return {
             name: this.name,
             type:  this.type,
+            mandatory: this.mandatory,
             ...this.label !== undefined && {label: this.label},
             // disabled if we don't want that FE knows about db source name
             // ...this.sourceField !== undefined && {sourceField: this.sourceField},
