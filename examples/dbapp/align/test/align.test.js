@@ -134,6 +134,51 @@ describe("Align test", function () {
     });
 
 
+
+    it("use a transaction for updates", async function () {
+        //const parameters = {};
+        //localFakeSourceQuery.recordSet = compareSortedSource;
+
+        //localFakeDestQuery.recordSet = compareSortedDest;
+        parameters.sourcePageSize = 50;
+        parameters.destPageSize = 50;
+
+        const MyBuffer = class extends ThresholdBuffer {
+            async update(entity, values, keys) {
+                assert(keys === 1 || keys === 2)
+                //   assert(false)
+                await super.update(entity, values, keys);
+            }
+
+        }
+        let buffer = new MyBuffer();
+        //let buffer = new ThresholdBuffer();
+
+        localSourceArrayQuery.dataStorage.data[0].name = 'change1'
+        localSourceArrayQuery.dataStorage.data[1].address = 'change2'
+
+        let before = await Customer.select().where(Customer.id.in([1, 2])).exec();
+
+        let out = await CompareHelper.compareSorted(
+            localSourceArrayQuery, localDBDestQuery, parameters, undefined, buffer);
+
+
+        // let out = await CompareHelper.alignSorted(
+        //     localSourceArrayQuery, localDBDestQuery, parameters, buffer );
+        let after = await Customer.select().where(Customer.id.in([1, 2])).exec();
+
+        assert(out);
+
+        await Log.insert({
+            what: `Test 'use a Threshold buffer' has ended`,
+            activity_type: `align-customer`
+        });
+
+        const logs = await Log.select().exec();
+
+        // TODO: assert check instead of console.log
+        console.log(logs);
+    });
     // it("use Aligner helper", async function () {
     //     //const parameters = {};
     //     //localFakeSourceQuery.recordSet = compareSortedSource;

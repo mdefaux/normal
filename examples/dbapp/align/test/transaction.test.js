@@ -9,7 +9,8 @@
  *
  * Note: the transaction is not working with sqlite3
  * (XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
- *
+ * 
+ * @see https://stackoverflow.com/questions/40543668/batch-update-in-knex
  * 
  */
 const assert = require("assert");

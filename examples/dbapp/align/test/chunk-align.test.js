@@ -19,7 +19,8 @@ require("../../test/_test-setup");
 
 const Contact = require("../../models/Contact");
 const ContactExt = require("../data/ContactExt");
-const {Chunknizer} = require("normaly");
+const {Chunknizer, DataQuery, CompareHelper} = require("normaly");
+
 
 
 describe("Chunk-align test", function () {
@@ -30,7 +31,6 @@ describe("Chunk-align test", function () {
 
         let chunknizer = Chunknizer.compose( query, {
             pageSize: 500,
-            // columnName: "serial_number",
             columnName: "CODE",
             minChunksize: 100,
         })
@@ -42,7 +42,13 @@ describe("Chunk-align test", function () {
             // 
             outChunks.push( chunk );
 
-            
+            let source = new DataQuery( chunk.data, ContactExt );
+            source.orderBy( ContactExt.code );
+
+            // let te = await Contact.select()
+            //     .orderBy(Contact.code)
+            //     .setRange(5000)
+            //     .exec();
 
             let dest = Contact.select()
                 // .where("CODE",">=", chunk.from)
@@ -52,7 +58,10 @@ describe("Chunk-align test", function () {
                 .orderBy(Contact.code)
                 .setRange(5000);
 
-            Contact.alignNew( dest, source )
+            await CompareHelper.alignSorted( source, dest, {
+                keyFieldSource: "code",
+                keyFieldD: "code"
+            } )
 
         };
 
