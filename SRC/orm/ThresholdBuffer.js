@@ -31,7 +31,7 @@ class ThresholdBuffer extends IAlignBuffer {
             this.updateThreshold = thresholds.updateThreshold;
         }
         if (thresholds.deleteThreshold !== undefined) {
-            this.updateThreshold = thresholds.deleteThreshold;
+            this.deleteThreshold = thresholds.deleteThreshold;
         }
 
         return;
@@ -97,7 +97,7 @@ class ThresholdBuffer extends IAlignBuffer {
         return Promise.resolve(true);
     }
 
-    async flush(entity, last) {
+    async flush(entity) {
         let insertPromise = await this.doInsert(entity, this.insertRecords);
         let updatePromise = await this.doUpdate(entity, this.updateRecords);
         let deletePromise = await this.doDelete(entity, this.deleteRecords);
