@@ -334,10 +334,14 @@ const CompareHelper = {
             // check if actual uniqueKey is the same as the last one.
             // if a duplicate is met, skip it
             let lastUniqueKey = buffer.getLastUniqueKey();
-            let isDuplicate = lastUniqueKey === sourceArray[iSource][keyFieldSource];
+            let sourceArrayKey = sourceArray[iSource]?    sourceArray[iSource][keyFieldSource] : null;
+            let isDuplicate = lastUniqueKey === sourceArrayKey;
 
             // set lastUniqueKey in any case
-            buffer.setLastUniqueKey(sourceArray[iSource][keyFieldSource]);
+            if(sourceArrayKey) {
+                buffer.setLastUniqueKey(sourceArrayKey);
+            }
+            
 
             // if uniqueKey is duplicate, log and skip this source record.
             // check if: isDuplicate && !arraySourceEnd && iSource attuale !== iSource precedente
@@ -423,7 +427,7 @@ const CompareHelper = {
 
 
         try {
-            await buffer.flush( destQuery.entity, true );
+            await buffer.flush( destQuery.entity );
         }
         catch(e){
             logger.error(e);
