@@ -360,7 +360,25 @@ const CompareHelper = {
             
             // compare function can be passed as parameter.
             let compareFunction = parameters.compareFunction || CompareHelper.compareKeys ;
-            
+        
+            // check on source: record is valid but key is null or undefined. The record will be ignored.
+            if( sourceArray[iSource] !== undefined &&
+                (sourceArray[iSource][keyFieldSource] === null || sourceArray[iSource][keyFieldSource] === undefined )) {     
+                    logger.warn(`Found record with null keyField in source, page: ${pageSourceIndex} index ${iSource}. The record will be ignored; please check the source data or choose a different key.`);
+                    iSource++;
+                    continue;           
+            }
+
+            // check on destination: record is valid but key is null or undefined. The record will be ignored.
+            if( destArray[iDest] !== undefined &&
+                (destArray[iDest][keyFieldDest] === null || destArray[iDest][keyFieldDest] === undefined )) {
+                    logger.warn(`Found record with null keyField in destination, offset: ${offset}. The record will be ignored; please check the destination data or choose a different key.`);
+                    iDest++;
+                    continue;  
+            }
+
+
+
             let compareResult = iSource < sourceArray.length &&
                 iDest < destArray.length &&
                 compareFunction(sourceArray[iSource], destArray[iDest], keyFieldSource, keyFieldDest );
@@ -437,13 +455,27 @@ const CompareHelper = {
         return result;
     },
 
+    /**
+     * 
+     * @param {*} a: source record
+     * @param {*} b: dest record 
+     * @param {*} keyFieldA: source key field 
+     * @param {*} keyFieldB: dest key field
+     * @require a[keyFieldA] !== null && a[keyFieldA] !== undefined 
+     * @require b[keyFieldB] !== null && b[keyFieldB] !== undefined 
+     * @returns same as orderBy function:
+     * 0 if keys are equal
+     * 1 if source > dest
+     * -1 if source < dest
+     */
     compareKeys(a, b, keyFieldA, keyFieldB) {
         assert(a);
         assert(b);
         assert(keyFieldA);
         assert(keyFieldB);
-
-
+        assert(a[keyFieldA] !== null && a[keyFieldA] !== undefined );
+        assert(b[keyFieldB] !== null && b[keyFieldB] !== undefined );
+        
         if(a[keyFieldA] < b[keyFieldB] ) {
             return -1;
         } else if (a[keyFieldA] > b[keyFieldB]) {
