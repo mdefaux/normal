@@ -598,10 +598,22 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
         return [ ...uniques, value ];
       }, []);
 
+    let pageSize = this.hints?.pageSize || 200;
+
     // selects the 'right' table filtering by the string found in data
     const right = join.right.select()
       .where( join.condition.value.in( uniqueValues ) )
+      .pageSize(pageSize)
       .orderBy( { columnName: join.condition.value.field.name, order: 'asc' } );
+
+      
+    if(this.hints?.logger && right.length > uniqueValues.length) {
+      this.hints.log.warn(`ProcessJoin, found duplicates for entity ${join?.right?.metaData?.name} (right length: ${right.length} with ${uniqueValues.length} unique values).`);
+    }
+
+    if(this.hints?.logger && right.length >= pageSize) {
+      this.hints.log.warn(`ProcessJoin, right overflowing possible for entity ${join?.right?.metaData?.name} (result length same as pageSize; check your configuration).`);
+    }
 
     // executes 
     const rightData = await right.exec();
