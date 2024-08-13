@@ -115,10 +115,10 @@ class Field {
     }
 
     serialize() {
-
         return {
             name: this.name,
             type:  this.type,
+            mandatory: this.mandatory,
             ...this.label !== undefined && {label: this.label},
             // disabled if we don't want that FE knows about db source name
             // ...this.sourceField !== undefined && {sourceField: this.sourceField},
@@ -314,6 +314,7 @@ class Relation extends Field {
         return {
             name: this.name,
             type:  this.type,
+            mandatory: this.mandatory,
             // ...this.label !== undefined && {label: this.label},
             // disabled if we don't want that FE knows about db source name
             // ...this.sourceField !== undefined && {sourceField: this.sourceField},
@@ -335,6 +336,7 @@ class ObjectLinkRelation extends Relation {
         return {
             name: this.name,
             type:  this.type,
+            mandatory: this.mandatory,
             // disabled if we don't want that FE knows about db source name
             // ...this.field.sourceField !== undefined && {column: this.field.sourceField},
         }
@@ -425,6 +427,7 @@ class ObjectLink extends Relation {
         return {
             ...super.serialize(),
             table: this.toEntityName,
+            mandatory: this.mandatory,
             // to disable if we don't want that FE knows about db source name
             // ...this.sourceField !== undefined && {sourceField: this.sourceField},
         }

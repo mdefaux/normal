@@ -9,12 +9,14 @@ const  { IAlignBuffer }  = require("./orm/IAlignBuffer");
 const { ILogger } = require("./orm/ILogger");
 const { Chunknizer } = require('./utils/Chunknizer');
 const ThresholdBuffer = require("./orm/ThresholdBuffer");
+const { DataQuery } = require('./orm/DataQuery');
 
 module.exports= {
     URLquery: URLquery,
     store: defs,
     StoreHost: StoreHost,
     Query: Query,
+    DataQuery: DataQuery,
     CompareHelper: CompareHelper,
     IAlignBuffer: IAlignBuffer,
     ILogger: ILogger,
