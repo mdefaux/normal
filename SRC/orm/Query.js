@@ -8,7 +8,7 @@ const { FieldQueryItem } = require("./FieldConditionDef");
 
 
 /**Oggetto per creare una query ed ottenere un recordset.
- * La query viene creata dalla Entity invocando i metodi
+ * La query creata dalla Entity invocando i metodi
  * Entity.fetch oppure Entity.query
  * Esempio:
  *
