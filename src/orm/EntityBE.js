@@ -395,24 +395,29 @@ class EntityBE {
                 //    console.log(ii);
                         break ;
                 }*/
+
+                // both Source and Destination have no more data; empty insert and delete array!
                 if (arraybend === 1 && arrayaend === 1) {
                     //  console.log(arrayI);
                     // console.log('faccio la insert pre break');
-                    if (!parameters.noInsert && arrayI.length != 0) {
-                        this.insert(arrayI);
+                    if (!parameters.noInsert && arrayI.length >= 1) {
+                      await  this.insert(arrayI);
                     }
                     //   console.log('faccio la delete');
-                    if (!parameters.noDelete && arrayD.length != 0) {
-                       // this.delete(arrayD);
+
+                    if( arrayD.length >=1 ) {
+                        if(parameters.removed !== undefined) {
+                            await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
+                        }
+                        else if (!parameters.noDelete) {
+                            await this.delete(arrayD);
+                        }
+
                     }
-                    if (parameters.noDelete && arrayD.length != 0) {
-                        if(parameters.removed !== undefined)
-                        {
-                            //aspetta che tutti gli update siano stati fatti effettivamente
-                           await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
-    
-                            }      
-         }
+
+                    arrayD = [];
+                    arrayI = [];
+                    
                     endfor = 1;
                     break;
                 }
@@ -501,19 +506,17 @@ class EntityBE {
                 }
                 if(arrayD.length>=50){
 
-                    //   console.log('faccio la delete');
-                    if (!parameters.noDelete) {
-                        if(parameters.removed !== undefined){
-                        //aspetta che tutti gli update siano stati fatti effettivamente
-                       await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
+                    // if removed is configured, call an update. No need to update the offset (no data are deleted)
+                    if(parameters.removed !== undefined) {
+                        await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
+    
+                    }
+                    // do an actual delete if noDelete is not configured
+                    else if (!parameters.noDelete) {
+                        await this.delete(arrayD);
+                        offsetend = offsetend - arrayD.length;
+                    }
 
-                        }
-                        else{
-                            await this.delete(arrayD);
-                    }
-                    
-                    offsetend = offsetend - arrayD.length;
-                    }
 
                     arrayD = [];
                 }       
@@ -533,10 +536,19 @@ class EntityBE {
         if (arrayI.length >= 1 && endfor != 1 && !parameters.noInsert) {
             await   this.insert(arrayI);
         }
-        if (arrayD.length >= 1 && endfor != 1 && !parameters.noDelete) {
+        if (arrayD.length >= 1 && endfor != 1) {
             // la delete di un array vuoto esplode
-            await   this.delete(arrayD);
+            //await   this.delete(arrayD);
+
+            if(parameters.removed !== undefined) {
+               await Promise.all(arrayD.map(r=> this.update(r[this.metaData.model.idField], parameters.removed)));
+
+            }
+            else if (!parameters.noDelete) {
+                await this.delete(arrayD);
+            }
         }
+        
 
         return;
         // ritorna l'array aggiornato di ciò che abbiamo in locale con le nuove righe o quelle a cui abbiamo aggiornato i campi
