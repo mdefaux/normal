@@ -584,8 +584,10 @@ class KdbQuery extends Query {
         }
 
         // checks for field type: select, aggregation, object links...
-
+        let calcList = [];
+        
         fields.forEach(f => {
+            
             if (typeof f === 'string') {
                 field = this.model.fields[f];
                 if (!field)
@@ -632,9 +634,13 @@ class KdbQuery extends Query {
                  let calcField = f.calc(tableName);
                 // let selectExpression = fieldQueryItemCopy.sqlSource;
                 
-
+                let findCalc = calcList.find(c => c === f.name);
                // this.qb.select(selectExpression);
+               if(!findCalc) {
                 this.qb.select(this.knex.raw(` ${calcField} as ${f.name} `));
+                calcList = [...calcList, f.name];
+               }
+                
             }
     
         });
