@@ -595,7 +595,12 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
         if ( this.hints?.cache?.[ join.condition.field.name ]?.[ value ] ) {
           return uniques;
         } 
-        return [ ...uniques, value ];
+        // exclude null and undefined values
+        if(value !== null && value !== undefined) {
+          return [ ...uniques, value ];
+        }
+        return uniques;
+        
       }, []);
 
     let pageSize = this.hints?.pageSize || 200;
