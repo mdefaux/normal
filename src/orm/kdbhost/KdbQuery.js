@@ -893,7 +893,7 @@ if(this.customQB){
 
     async execute() {
 
-        return this.qb.then(result => {
+        return this.qb.then(async result => {
             // ottenuto il risultato primario, esegue le query dipendenti
             // TODO: Promise.all( Object.entries( this.relatedQuery ).map( ... ) )
 
@@ -905,7 +905,10 @@ if(this.customQB){
                 }
                 return [{COUNT: result.length}];
             }
-            return result.map((rec) => (this.readRecord(rec)));
+            
+            // handles joins
+            let data = await this.processJoin( result );
+            return data.map((rec) => (this.readRecord(rec)));
         })
     }
 }
