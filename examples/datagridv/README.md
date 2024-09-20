@@ -1,13 +1,17 @@
 # Datagrid Normaly Example Web App
 
 ## How to run
-from the backend folder `cd ../dbapp` do:
+For first run, install dependencies with `yarn`.
+
+Running the backend going to folder `cd ../dbapp`, then do:
 
     npm start
 
-from another terminal
+From another terminal in datagridv folder:
 
     yarn dev
+
+Open the url: <http://localhost:5173/>
 
 ## How to create from Scratch
 
