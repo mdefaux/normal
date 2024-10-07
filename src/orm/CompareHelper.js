@@ -151,7 +151,9 @@ const CompareHelper = {
         // 
         let sourceRsChunkNotInDest = sourceRsChunk.filter( (rec) => !match[ rec[keyFieldSource] ] );
         notInDest = sourceRsChunkNotInDest.length > 0 ? Object.fromEntries( 
-            sourceRsChunkNotInDest.map( (rec) => ([ rec[keyFieldDest], 
+            sourceRsChunkNotInDest.map( (rec) => ([ 
+                // rec[keyFieldDest], 
+                rec[keyFieldSource], 
             parameters.columnMap(rec,match[ rec[keyFieldDest] ]) ]) ) ) : {}; // I call the columnMap because for Backlog it expects dest but in this case you don't need to pass it to it.
 
         // returns new accumulator with result for this chunk
