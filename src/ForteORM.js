@@ -349,6 +349,7 @@ class EntityProxy extends EntityBE
 }
 
 const DataStorage = require( './DataStorage' );
+const { Session } = require("./orm/Session");
 
 const defs = {
     entities: {},
@@ -450,8 +451,13 @@ const defs = {
         return (new Date()).getDate();
     },
      
-    getEntity(entityName) {
+    getEntity(entityName, sessionData) {
         if(!entityName || !this.entities[entityName] ) return null;
+
+        if ( sessionData ) {
+            const session = new Session( this, sessionData );
+            return session.getEntity( entityName );
+        }
 
         return this.entities[entityName];
     }

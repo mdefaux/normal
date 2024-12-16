@@ -468,7 +468,7 @@ class KdbQuery extends Query {
                 // for e.g.: .where( Partnumber.id ) if translated into `where id=?` 
                 if ( conditions.field && !conditions.field.sourceAlias ) {
                     // if the condition refers to a column of main query entity
-                    if ( this.entity && conditions.field.sourceEntity === this.entity ){
+                    if ( this.entity && conditions.field.sourceEntity.metaData.name === this.entity.metaData.name ){
                         conditions.field.sourceAlias = this.tableAlias || this.model.dbTableName || this.model.name;
                         
                         return conditions;
