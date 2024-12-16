@@ -42,19 +42,21 @@ class Session {
 
     getEntity(entityName) {
         if(!entityName || !this.store.entities[entityName] ) {
-            throw new Error( `Unknown entity '${entityName}'.`);
+            // throw new Error( `Unknown entity '${entityName}'.`);
+            throw new Error( `Unknown entity.`);
         }
 
         const entity = this.store.entities[entityName];
+        const session = this;
 
         // return new EntityProxy( entity, this.data );
         return new Proxy( entity, {
             get(target, name, receiver) {
     
               if ( name === 'update' ) {
-                if ( typeof entity.canUpdate === 'function' ) {
-                    if ( !entity.canUpdate( this ) ) {
-                        throw new Error( `Cannot update entity '${entityName}'.`)
+                if ( typeof entity.metaData.canUpdate === 'function' ) {
+                    if ( !entity.metaData.canUpdate( session ) ) {
+                        throw new Error( `Cannot update entity '${entity.metaData.name}'.`)
                     }
                 }
               }

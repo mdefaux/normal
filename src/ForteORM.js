@@ -335,6 +335,13 @@ class ModelDef {
     rowLevelSecurity(rls) {
         this.entity.rowLevelSecurity = rls;
     }
+
+    canUpdate( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `canUpdate paramenter should be a function.` );
+        }
+        this.entity.metaData.canUpdate = callback;
+    }
 }
 
 class EntityProxy extends EntityBE
