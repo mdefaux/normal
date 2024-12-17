@@ -52,17 +52,43 @@ class Session {
         // return new EntityProxy( entity, this.data );
         return new Proxy( entity, {
             get(target, name, receiver) {
-    
-              if ( name === 'update' ) {
-                if ( typeof entity.metaData.canUpdate === 'function' ) {
-                    if ( !entity.metaData.canUpdate( session ) ) {
-                        throw new Error( `Cannot update entity '${entity.metaData.name}'.`)
+
+                if (name === 'update') {
+                    if (typeof entity.metaData.canUpdate === 'function') {
+                        if (!entity.metaData.canUpdate(session)) {
+                            throw new Error(`Cannot update entity '${entity.metaData.name}'.`)
+                        }
+                    } else if (typeof entity.metaData.canChange === 'function') {
+                        if (!entity.metaData.canChange(session)) {
+                            throw new Error(`Cannot update entity '${entity.metaData.name}'.`)
+                        }
                     }
                 }
-              }
-    
-              let value = Reflect.get(target, name, receiver);
-              return value;
+                if (name === 'insert') {
+                    if (typeof entity.metaData.canInsert === 'function') {
+                        if (!entity.metaData.canInsert(session)) {
+                            throw new Error(`Cannot insert entity '${entity.metaData.name}'.`)
+                        }
+                    } else if (typeof entity.metaData.canChange === 'function') {
+                        if (!entity.metaData.canChange(session)) {
+                            throw new Error(`Cannot insert entity '${entity.metaData.name}'.`)
+                        }
+                    }
+                }
+                if (name === 'delete') {
+                    if (typeof entity.metaData.canDelete === 'function') {
+                        if (!entity.metaData.canDelete(session)) {
+                            throw new Error(`Cannot delete entity '${entity.metaData.name}'.`)
+                        }
+                    } else if (typeof entity.metaData.canChange === 'function') {
+                        if (!entity.metaData.canChange(session)) {
+                            throw new Error(`Cannot delete entity '${entity.metaData.name}'.`)
+                        }
+                    }
+                }
+
+                let value = Reflect.get(target, name, receiver);
+                return value;
             }
         })
     }

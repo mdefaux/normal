@@ -336,11 +336,32 @@ class ModelDef {
         this.entity.rowLevelSecurity = rls;
     }
 
+    canInsert( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `canInsert parameter should be a function.` );
+        }
+        this.entity.metaData.canInsert = callback;
+    }
+
     canUpdate( callback ) {
         if ( typeof callback !== 'function' ) {
-            throw new Error( `canUpdate paramenter should be a function.` );
+            throw new Error( `canUpdate parameter should be a function.` );
         }
         this.entity.metaData.canUpdate = callback;
+    }
+
+    canDelete( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `canDelete parameter should be a function.` );
+        }
+        this.entity.metaData.canDelete = callback;
+    }
+
+    canChange( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `canChange parameter should be a function.` );
+        }
+        this.entity.metaData.canChange = callback;
     }
 }
 
