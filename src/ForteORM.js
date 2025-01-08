@@ -90,6 +90,11 @@ class FieldDef {
         this.targetField.calc = expression;
         return this;
     }
+
+    concat(values) {
+        this.targetField.concat = values;
+        return this;
+    }
 }
 
 class ModelDef {
@@ -169,6 +174,10 @@ class ModelDef {
 
     calc(expression) {
         this.calc = expression;
+    }
+
+    concat(values) {
+        this.concat = values;
     }
 
     string( fieldName )

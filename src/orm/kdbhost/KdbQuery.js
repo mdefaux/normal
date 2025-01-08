@@ -354,6 +354,22 @@ class KdbQuery extends Query {
 
                 }
 
+                // Overwrite the field with the calculated one for concat Fields.
+                if (builtCondition?.field?.concat ||  builtCondition?.field?.field?.concat) {
+                    let concatValues = builtCondition.field.concat ||   builtCondition.field.field?.concat;
+                   // let tableName = this.entity.model.dbTableName;
+                    let type = 'CHAR'
+
+                    if(JSON.stringify( this.qb.client.driver ).indexOf( 'PG_DEPENDENCIES' ) > -1 ) type = 'VARCHAR'
+
+                    let concatString = this.getConcatString(concatValues);
+
+                    whereField = ` CAST(UPPER(${concatString}) AS ${type}) `;
+                  //  whereField = ` ${concatString} `;
+                    //whereField = this.knex.raw(calcField);
+
+                }
+
          
                 qb.where(
                     this.knex.raw(whereField),
@@ -398,6 +414,19 @@ class KdbQuery extends Query {
                     );
 
                 }
+                else if (builtCondition?.field?.concat ||  builtCondition?.field?.field?.concat) {
+                    let concatValues = builtCondition.field.concat ||  builtCondition.field.field?.concat;
+                    let concatString = this.getConcatString(concatValues);
+                    // let calcField = calcFunction(tableName);
+                    let whereField = `UPPER(${concatString})`;
+
+                    qb.where(
+                        this.knex.raw(whereField),
+                        builtCondition.type,
+                        value
+                    );
+
+                }
                 else {
                     qb.where(
                         builtCondition.sqlField(this),
@@ -431,6 +460,43 @@ class KdbQuery extends Query {
         }
 
         return this;
+    }
+
+    getConcatString(concatValues) {
+
+        if(!concatValues || concatValues.length <= 0 || !Array.isArray(concatValues) ) return '';
+
+        let condition = 'CONCAT(';
+
+        for(let val of concatValues) {
+            let sanitized = this.checkConcatValue(val);
+            if(sanitized) {
+                condition = condition.concat( sanitized, ',');
+            }
+        }
+
+        // remove last ',' char
+        condition = condition.slice(0, -1); 
+        condition = condition.concat(')');
+
+        return condition;
+
+    }
+
+    checkConcatValue(value) {
+        if(!value) return '';
+        if(value === ' ') return "' '";
+
+        if(typeof(value) === 'string') {
+            let fieldValue = this.sanitizeValue(value);
+            return `${this.model.dbTableName}.${fieldValue}`;
+        }
+
+        return this.sanitizeValue(value);
+    }
+
+    sanitizeValue(value) {
+        return value;
     }
 
     andWhere(conditions) {
@@ -614,7 +680,13 @@ class KdbQuery extends Query {
                 if(f.field.calc && typeof f.field.calc === 'function') {
                     let calcField = f.field.calc(tableName);
                     this.qb.select(this.knex.raw(`${calcField} as ${f.field.name} `));
-                } else {
+                } 
+                else if(f.field.concat && Array.isArray(f.field.concat)) {
+                  //  let calcField = f.field.calc(tableName);
+                    let concatString = this.getConcatString(f.field.concat);
+                    this.qb.select(this.knex.raw(`${concatString} as ${f.field.name} `));
+                } 
+                else {
                     // adds column to select clause
                     this.qb.select(`${tableName}.${f.field.sqlSource}`);
                 }
@@ -635,6 +707,11 @@ class KdbQuery extends Query {
 
                // this.qb.select(selectExpression);
                 this.qb.select(this.knex.raw(` ${calcField} as ${f.name} `));
+            }
+            if( f.concat && Array.isArray(f.concat)) {
+                let concatString = this.getConcatString(f.concat);
+
+                this.qb.select(this.knex.raw(` ${concatString} as ${f.name} `));
             }
     
         });
@@ -668,6 +745,11 @@ class KdbQuery extends Query {
                 let calcField = fieldColumn.calc(tableName);
 
                 this.qb.orderByRaw(`${calcField} ${column.order}`);
+            }
+            else if (fieldColumn?.concat && Array.isArray(fieldColumne?.concat)) {
+                let concatString = this.getConcatString(fielColumn.concat);
+
+                this.qb.orderByRaw(`${concatString} ${column.order}`);
             }
             else if ( column.columnName ){
                 if(!this[column.columnName]) {
@@ -708,7 +790,13 @@ class KdbQuery extends Query {
             // if( name === tableModel.idField /*|| name === tableModel.labelField*/ ) {
             //     return;
             // }
-            this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+            if(relatedField.concat && Array.isArray(relatedField.concat)) {
+                let concatString = this.getConcatString(relatedField.concat);
+                this.qb.select(this.knex.raw(`${concatString} as ${r.foreignTableAlias}.${relatedField.sqlSource} `));
+            } else {
+                this.qb.select(`${r.foreignTableAlias}.${relatedField.sqlSource} as ${r.foreignTableAlias}.${relatedField.sqlSource}`);
+            }
+            
             
             if( this.groups?.length > 0 ) {
                 let wrap = field.toEntity[name];
@@ -738,6 +826,11 @@ class KdbQuery extends Query {
                 let calcField = wrap.field.calc(tableName);
                 
                 this.qb.groupBy(this.knex.raw(`${calcField}`));
+                //sourceSql = this.knex.raw(`${calcField}`);
+            } else if (wrap?.field?.concat &&  Array.isArray(wrap?.field?.concat)) {
+                let concatField = this.getConcatString(wrap?.field?.concat);
+                
+                this.qb.groupBy(this.knex.raw(`${concatField}`));
                 //sourceSql = this.knex.raw(`${calcField}`);
             } else {
                 this.qb.groupBy(sourceSql);

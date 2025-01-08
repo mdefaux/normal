@@ -116,7 +116,8 @@ class ExpressionQueryItem extends FieldQueryItem {
         this.name = field.name;
         this.type = field.type;
         this.calc = field.calc;
-        this.calcType = fiedl.calcType;
+        this.calcType = field.calcType;
+        //this.concat = field.concat;
         // c.toEntityName = this.toEntityName;
         // c.factory = this.factory;
         // c.tableModel = this.tableModel;
