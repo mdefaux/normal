@@ -70,6 +70,10 @@ class FieldQueryItem {
         return new FieldConditionDef("=", this, objectOrFunction);
     }
 
+    notEquals(objectOrFunction) {
+        return new FieldConditionDef("<>", this, objectOrFunction);
+    }
+
     like(objectOrFunction) {
         // newCondition = new FieldCondition.textMatch();
         // newCondition.setup( this, objectOrFunction );
