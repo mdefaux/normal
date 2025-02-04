@@ -2,6 +2,8 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> } 
  */
+
+// check if still used!!!
 exports.seed = async function(knex) {
   // Deletes ALL existing entries
   await knex('project').del()

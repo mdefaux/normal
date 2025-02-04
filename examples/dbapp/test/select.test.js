@@ -1,4 +1,5 @@
 const store = require("../models/store");
+const Customer = require("../models/Customer");
 // const { StoreHost } = require("../src/orm/StoreHost");
 const assert = require( "assert" );
 
@@ -9,7 +10,7 @@ const assert = require( "assert" );
 // store.setup( new KdbStoreHost( knex ) );
 
 describe( "Select", function () {
-    const Customer = store.entity( 'Customer', (model) => {
+   /*  const Customer = store.entity( 'Customer', (model) => {
         model.source( 'customer' );
         model.string( 'name' );
         model.label( 'name' );
@@ -17,13 +18,13 @@ describe( "Select", function () {
         model.string( 'reference' );
         model.number( 'telephone' );
         // model.storageData( dataStorage );
-    } );
+    } ); */
     it( "has an Entity", async function () {
         assert( Customer.metaData.name === 'Customer' );
         assert( Customer.metaData.model.fields );
         let rs = await Customer.select('*')
             .where( Customer.name.equals( 'Yadel' ) )
             .exec();
-        assert( rs.length > 0 );
+        assert( rs.length === 1 );
     });
 });
