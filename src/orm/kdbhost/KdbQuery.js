@@ -276,11 +276,19 @@ class KdbQuery extends Query {
                 let op = builtCondition.chainedCondition.op;
                 chain[ 0 ].chainedCondition = undefined;
                 
-                qb.andWhere( (qB) => {
-                    chain.forEach( (c) => {
-                        this.applyWhereCondition( c, qB, op );
+                if ( whereOp === 'or' ) {
+                    qb.orWhere( (qB) => {
+                        chain.forEach( (c) => {
+                            this.applyWhereCondition( c, qB, op );
+                        })
                     })
-                })
+                } else {
+                    qb.andWhere( (qB) => {
+                        chain.forEach( (c) => {
+                            this.applyWhereCondition( c, qB, op );
+                        })
+                    })
+                }
                 return this;
             }
 
