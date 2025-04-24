@@ -361,17 +361,23 @@ class EntityBE {
         for (var ia=0,ib=0; ( arrayA.length!==0 || arrayB.length!==0 ); ) 
         {                  //  console.log('righe AAAAA source:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
 
+            try{
+
                 if( arrayA.length===ia && arrayaend===0) {
 
                     ia = 0
                     pageA ++;
-                    source.page(pageA);
-                    console.log('righe source:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
-                    arrayA = await source.exec();
-                    if(arrayA.length===0){
+                    if ( source.exhausted ) {
                         arrayaend=1;
+                    } else {
+                        source.page(pageA);
+                        console.log('righe source:' + countarrayA , '  insert' + insertcount , '  update:' + updatecount, '  delete:' + deletecount) ;
+                        arrayA = await source.exec();
+                        if(arrayA.length===0){
+                            arrayaend=1;
+                        }
+                        countarrayA=countarrayA+arrayA.length;
                     }
-                    countarrayA=countarrayA+arrayA.length;
                     
                 }
                 
@@ -531,6 +537,40 @@ class EntityBE {
                 }         
                     
      
+            }
+            catch (e) {
+                console.log('eccezione: ' + e);
+                console.log('arrayA: ' + arrayA.length + ' arrayB: ' + arrayB.length + ' ia: ' + ia + ' ib: ' + ib);
+                console.log('insertcount: ' + insertcount + ' updatecount: ' + updatecount + ' deletecount: ' + deletecount);
+                console.log('arrayI: ' + arrayI.length + ' arrayD: ' + arrayD.length);
+                console.log('pageA: ' + pageA + ' pageB: ' + pageB);
+                console.log('offsetend: ' + offsetend);
+                // throw e;
+                if ( parameters.dumpDelete ) {
+                    console.log('*******array delete DUMP*************');
+                    console.log(arrayD);
+                }
+                if ( parameters.dumpInsert ) {
+                    console.log('*******array insert DUMP*************');   
+                    console.log(arrayI);
+                }
+                if ( parameters.verbose ) {
+                    console.log('*******array source DUMP*************');   
+                    console.log(arrayA);
+                    console.log('*******array destination DUMP*************');
+                    console.log(arrayB);
+                } else {
+                    console.log('*******array source DUMP*************'); 
+                    // prints the subset of arrayA range [indexA-2, indexA+2]
+                    console.log(arrayA.slice(ia-2, ia+2));
+                    console.log('*******array destination DUMP*************');
+                    console.log(arrayB.slice(ib-2, ib+2));
+                }
+
+                // empties the arrays to avoid problems with the next iteration
+                arrayD = [];
+                arrayI = [];
+            }
            
         }
         if (arrayI.length >= 1 && endfor != 1 && !parameters.noInsert) {
