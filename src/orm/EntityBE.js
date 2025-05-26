@@ -384,12 +384,16 @@ class EntityBE {
                 if(arrayB.length===ib && arraybend===0) {
                     ib = 0
                     pageB ++;
-                    let offset=(pageB*pageSize)+1+offsetend;
-                    destination.page(null, pageSize,offset);
-                    //console.log('offset arrayb:' + offset + " offsetend " + offsetend + " pageSize " +  pageSize + " pageB " + pageB);
-                    arrayB =   await destination.exec();
-                    if(arrayB.length===0){
+                    if ( destination.exhausted ) {
                         arraybend=1;
+                    } else {
+                        let offset=(pageB*pageSize)+1+offsetend;
+                        destination.page(null, pageSize,offset);
+                        //console.log('offset arrayb:' + offset + " offsetend " + offsetend + " pageSize " +  pageSize + " pageB " + pageB);
+                        arrayB =   await destination.exec();
+                        if(arrayB.length===0){
+                            arraybend=1;
+                        }
                     }
                      
 
