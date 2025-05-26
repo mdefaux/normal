@@ -336,6 +336,10 @@ class ModelDef {
         this.entity.rowLevelSecurity = rls;
     }
 
+    patchPermission(f) {
+        this.entity.patchPermission = f;
+    }
+
     canInsert( callback ) {
         if ( typeof callback !== 'function' ) {
             throw new Error( `canInsert parameter should be a function.` );
