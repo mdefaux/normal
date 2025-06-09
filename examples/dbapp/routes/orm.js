@@ -184,12 +184,13 @@ ormGenericRoute.route("/:entity/:relation?/:recordToExtract?/:startingFromIndex?
 
     // return responseModel.getRelationData()
     return responseModel
-        .select()
+        .select( selectedFields )
+        // .select()
         .joinAllRelated()
         .relation( req.params.relation !== 'all' && req.params.relation )
-        .select( selectedFields )
         .where( filters )
         .groupBy( groupedFields )
+        //.debug()
         .then( (data) => {
 
             return res.send(data);
