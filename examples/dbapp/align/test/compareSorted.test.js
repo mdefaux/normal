@@ -21,7 +21,7 @@ var knex = require('../../db/knex');
 
 const { CompareHelper } = require("../../../../src/orm/CompareHelper");
 const Log = require('../../models/Log');
-const { IAlignBuffer } = require('../../../../src/orm/IAlignBuffer');
+// const { IAlignBuffer } = require('../../../../src/orm/IAlignBuffer');
 // const ThresholdBuffer = require('../helpers/ThresholdBuffer');
 const ThresholdBuffer = require('../../../../src/orm/ThresholdBuffer');
 const Aligner = require('../helpers/Aligner');
