@@ -78,4 +78,68 @@ describe("ThresholdBuffer test", function () {
         assert.strictEqual(buffer.deleteRecords.length, 0);
         assert.strictEqual(buffer.totalDelete, 2);
     });
+    it("should handle mixed operations correctly", async function () {
+        const buffer = new ThresholdBuffer();
+        buffer.updateThreshold = 2;
+        buffer.insertThreshold = 2;
+        buffer.deleteThreshold = 2;
+
+        await buffer.update(entity, { id: 1 }, 1);
+        await buffer.insert(entity, { id: 2 });
+        await buffer.delete(entity, { id: 3 });
+
+        assert.strictEqual(buffer.updateRecords.length, 1);
+        assert.strictEqual(buffer.insertRecords.length, 1);
+        assert.strictEqual(buffer.deleteRecords.length, 1);
+
+        await buffer.update(entity, { id: 4 }, 4);
+        await buffer.insert(entity, { id: 5 });
+        await buffer.delete(entity, { id: 6 });
+
+        assert.strictEqual(buffer.updateRecords.length, 0);
+        assert.strictEqual(buffer.insertRecords.length, 0);
+        assert.strictEqual(buffer.deleteRecords.length, 0);
+
+        assert.strictEqual(buffer.totalUpdate, 2);
+        assert.strictEqual(buffer.totalInsert, 2);
+        assert.strictEqual(buffer.totalDelete, 2);
+    });
+    // it("should handle empty operations gracefully", async function () {
+    //     const buffer = new ThresholdBuffer();
+    //     buffer.updateThreshold = 2;
+    //     buffer.insertThreshold = 2;
+    //     buffer.deleteThreshold = 2;
+
+    //     // No operations should not throw errors
+    //     await buffer.update(entity, {}, null);
+    //     await buffer.insert(entity, {});
+    //     await buffer.delete(entity, {});
+
+    //     assert.strictEqual(buffer.updateRecords.length, 0);
+    //     assert.strictEqual(buffer.insertRecords.length, 0);
+    //     assert.strictEqual(buffer.deleteRecords.length, 0);
+
+    //     assert.strictEqual(buffer.totalUpdate, 1);
+    //     assert.strictEqual(buffer.totalInsert, 1);
+    //     assert.strictEqual(buffer.totalDelete, 1);
+    // });
+    it("should use flush method to process remaining records", async function () {
+        const buffer = new ThresholdBuffer();
+        buffer.updateThreshold = 2;
+        buffer.insertThreshold = 2;
+        buffer.deleteThreshold = 2;
+
+        await buffer.update(entity, { id: 1 }, 1);
+        await buffer.insert(entity, { id: 2 }); // Insert one record
+        await buffer.delete(entity, { id: 3 }); // Delete one record            
+        // Flush remaining records
+        await buffer.flush(entity);
+        assert.strictEqual(buffer.updateRecords.length, 0); 
+        assert.strictEqual(buffer.insertRecords.length, 0);
+        assert.strictEqual(buffer.deleteRecords.length, 0);
+        assert.strictEqual(buffer.totalUpdate, 1);
+        assert.strictEqual(buffer.totalInsert, 1);
+        assert.strictEqual(buffer.totalDelete, 1);
+    }
+    );
 });
