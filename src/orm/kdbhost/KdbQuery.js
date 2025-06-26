@@ -306,6 +306,10 @@ class KdbQuery extends Query {
 
                 qb.whereNotNull( builtCondition.sqlField(this) );
             }
+            else if (builtCondition instanceof FieldCondition.between) {
+
+                qb.whereBetween( builtCondition.sqlField(this), builtCondition.value );
+            }
             else if (builtCondition instanceof FieldCondition.textMatch) {
 
                 let viewAlias = builtCondition.field.sourceAlias;

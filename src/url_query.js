@@ -37,6 +37,10 @@ const URLquery = {
             else if ( reqField.startsWith( "r" ) ) {
                 newCondition = new FieldCondition.greaterOrEqual();
             }
+            else if ( reqField.startsWith( "b" ) ) {
+                newCondition = new FieldCondition.between();
+                return [...filters, newCondition.setup( columnName, reqValue ) ];
+            }
             
             if ( !newCondition ) {
                 return filters;
