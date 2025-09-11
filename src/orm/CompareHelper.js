@@ -374,7 +374,7 @@ const CompareHelper = {
             // check on destination: record is valid but key is null or undefined. The record will be ignored.
             if( destArray[iDest] !== undefined &&
                 (destArray[iDest][keyFieldDest] === null || destArray[iDest][keyFieldDest] === undefined )) {
-                    let errorPosition = (pageDestIndex++*destPageSize) + buffer.getOffset();
+                    let errorPosition = (pageDestIndex*destPageSize) + iDest + buffer.getOffset();
                     logger.warn(`Found record with null keyField in destination, position ${errorPosition}. The record will be ignored; please check the destination data or choose a different key.`);
                     iDest++;
                     continue;  
