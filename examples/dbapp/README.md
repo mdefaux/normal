@@ -1,42 +1,58 @@
-# Example application
+# Example Backend DB application
 
 ## Purpose
-Create a backend db application that expose some API. It uses a PG docker container and builds a model
+Create a backend db application that expose some API. It uses a PG docker container and builds a *Normaly* model
 
 ## How to test library without publishing
 
-        cd ./route-to-normaly-library
-        npm link
+```sh
+cd ./route-to-normaly-library
+npm link
 
-        cd ./examples/dbapp
-        npm ci
-        npm link normaly
+cd ./examples/dbapp
+npm ci
+npm link normaly
+```
 
 On Mac you should run `sudo npm link` command, then normal `npm link normaly`.
 
 Note: `npm link normaly` command must be run every time you launch npm ci on example app.
 
 ## DB container
-Ensure pg-normaly-dbapp is running
+Ensure pg-normaly-dbapp is running. If not run the npm script:
+
+```sh
+npm run createdb
+```
+
+See details at [Create DB on docker](#create-db-on-docker)
 
 ## Testing
 
-        cd ./examples/dbapp/
-        npm test
+```sh
+cd ./examples/dbapp/
+npm test
+```
 
 ## Seeding DB
 
-        $ knex migrate:rollback
-        $ knex migrate:latest
-        $ knex seed:run
+```sh
+knex migrate:rollback
+knex migrate:latest
+knex seed:run
+```
 
 Or
 
-        knex migrate:rollback && knex migrate:latest && knex seed:run 
+```sh
+knex migrate:rollback && knex migrate:latest && knex seed:run 
+```
 
 Or
 
-        npm run dbseed
+```sh
+npm run dbseed
+```
 
 ## Testing trouble shooting
 
@@ -54,11 +70,14 @@ HOW THE DBAPP EXAMPLE WAS INITIALIZED
 ## Create DB on docker
 Use the command to create container pg-normaly-dbapp exposing port 5433 with "postgre" image.
 
-        docker run --name pg-normaly-dbapp \
-            -p 5433:5432 \
-            -e POSTGRES_USER=test-user -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test-db \
-            -e "TZ=UTC-2" \
-            -d postgres
+```sh
+docker run --name pg-normaly-dbapp \
+        -p 5433:5432 \
+        -e POSTGRES_USER=test-user -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test-db \
+        -e "TZ=UTC-2" \
+        -d postgres
+
+```
 
 ## How to Install
 
@@ -67,47 +86,52 @@ Use the command to create container pg-normaly-dbapp exposing port 5433 with "po
 
 ## Knex
 
-        knex init
+```sh
+knex init
+```
 
 This will create a knexfile.js:
 
 
-        /**
-        * @type { Object.<string, import("knex").Knex.Config> }
-        */
-        module.exports = {
+```js
+/**
+* @type { Object.<string, import("knex").Knex.Config> }
+*/
+module.exports = {
 
-        development: {
-                client: 'postgresql',
-                connection: {
-                        host: "localhost",
-                        port: 5433,
-                        database: "test-db",
-                        user: "test-user",
-                        password: "test"
-                },
-                pool: {
-                        min: 2,
-                        max: 100
-                },
-                acquireConnectionTimeout: 60000,
-                multipleStatements: true,
-                migrations: {
-                        directory: __dirname + "/db/migrations"
-                },
-                seeds: {
-                        directory: __dirname + "/db/seeds/development"
-                }
-                },
-        };
+development: {
+        client: 'postgresql',
+        connection: {
+                host: "localhost",
+                port: 5433,
+                database: "test-db",
+                user: "test-user",
+                password: "test"
+        },
+        pool: {
+                min: 2,
+                max: 100
+        },
+        acquireConnectionTimeout: 60000,
+        multipleStatements: true,
+        migrations: {
+                directory: __dirname + "/db/migrations"
+        },
+        seeds: {
+                directory: __dirname + "/db/seeds/development"
+        }
+        },
+};
+```
 
 ## test
 ### Testing DB app
 
-        cd ./examples/dbapp
-        npm i -D mocha chai chai-http
+```sh
+cd ./examples/dbapp
+npm i -D mocha chai chai-http
 
-        npm ci
+npm ci
 
-        npm test
-
+npm test
+```
