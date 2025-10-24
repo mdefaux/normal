@@ -53,4 +53,21 @@ describe("EntityBE test", function () {
         // assert.strictEqual(entityBE.canDelete, true);
 
     });
+
+    it("should setup an entity", function () {
+
+        entityBE.model = {
+            fields: {
+                id: { type: 'number', primaryKey: true },
+                name: { type: 'string' }
+            }
+        };
+        entityBE.setup();
+        assert( typeof entityBE.metaData === 'object' );
+        
+        assert( entityBE.hasOwnProperty('id') );
+        assert( entityBE.hasOwnProperty('name') );
+        assert.strictEqual( entityBE.id.type, 'number' );
+        assert.strictEqual( entityBE.name.type, 'string' );
+    });
 });
