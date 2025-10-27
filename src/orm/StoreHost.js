@@ -2,15 +2,15 @@
 
 class StoreHost {
 
-    createQuery() {
+    createQuery( entity ) {
         return undefined;
     }
 
-    createInsert() {
+    createInsert( entity ) {
         return undefined;
     }
 
-    createUpdate() {
+    createUpdate( entity) {
         return undefined;
     }
 

@@ -229,6 +229,35 @@ const FieldCondition = {
             return ( this.column.compare( value, this.value ) >= 0 ) 
         }
     },
+
+    between: class extends FieldConditionDef {
+
+        constructor () {
+            super( 'between', undefined, undefined, undefined, undefined ) ;
+        }
+    
+        toQueryString( column, filterValues, filter )
+        {
+            return `b${column.getSourceName()}[]=${column.toQueryString(filter.value)}&b${column.getSourceName()}[]=${column.toQueryString(filter.upperBound)}`;
+        }
+
+        match ( value ) { 
+            return ( this.column.compare( value, this.value ) >= 0 && this.column.compare( value, this.upperBound ) <= 0 ) 
+        }
+
+        toSqlValue( query ) {
+            if (typeof this.value === 'object') {
+                if (this.value instanceof Query) {
+                    return this.value.qb;
+                }
+                // else if (this.value instanceof Field) {
+                else if (this.value && this.value.sqlSource) {
+                    return this.value.sqlSource;
+                }
+            }
+            return [this.value, this.upperBound];
+        }
+    },
 }
 
 module.exports = FieldCondition;

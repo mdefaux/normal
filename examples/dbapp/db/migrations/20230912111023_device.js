@@ -11,6 +11,8 @@ exports.up = function (knex) {
         table.integer("customer_id").unsigned().references("id").inTable("customer").onDelete("CASCADE");
         table.integer("site_id").unsigned().references("id").inTable("site").onDelete("CASCADE");
         table.integer("device_model_id").unsigned().references("id").inTable("partnumber").onDelete("CASCADE");
+        table.decimal("sell_price", 16, 2);
+        table.decimal("buy_price", 16, 2);
     });
 };
 

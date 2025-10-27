@@ -18,6 +18,7 @@ var User = store.entity('User', (model) => {
     model.string('domainName')    // domainName is used as 'label' for this entity
         .source('domain_name');     // domain_name is the name of the column on the table
 
+    model.label("domainName");
     model.string('name');          // name of user
     model.string( 'email' );
     model.string( 'telephone' );

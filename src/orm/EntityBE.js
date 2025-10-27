@@ -31,11 +31,11 @@ class EntityBE {
     setup() {
         Object.entries(this.model.fields)
             .forEach(([key, field]) => {
-                Object.defineProperty(this, field.name, {
+                Object.defineProperty(this, field.name||key, {
                     get: function () {
                         // return this.model.fields[field.name];
-                        
-                        let copy = this.metaData.model.fields[field.name].copy();
+
+                        let copy = this.metaData.model.fields[field.name||key].copy();
                         copy.sourceEntity = this; //.tableAlias || this.metaData.model.dbTableName || this.metaData.model.name;
                         return copy;
 
@@ -94,6 +94,17 @@ class EntityBE {
         }
 
         return relationQuery;
+    }
+
+    createRelation( relationName, factoryCallback ) {
+        if ( this.metaData.relations[ relationName ] ) {
+            throw new Error( `Relation '${relationName}' already defined in entity '${this.metaData.name}'.`)
+        }
+        
+        this.metaData.relations = {
+            ...this.metaData.relations,
+            [ relationName ]: factoryCallback
+        }
     }
 
     getRelation( relatedEntityName, parameters ) {

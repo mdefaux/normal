@@ -1,7 +1,15 @@
-
+/** * Utility functions for string similarity and matching.
+ * 
+ */
 const Utility = {
 
 
+    /** * Compares two strings and returns a similarity score based on the number of matching characters.
+     * 
+     * @param {*} strA 
+     * @param {*} strB 
+     * @returns 
+     */
     soundsLike( strA, strB ) {
 
         if ( strA === strB ) {

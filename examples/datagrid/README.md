@@ -7,11 +7,23 @@
     npm start
 
 ## How to Run
+First, the *dbapp* example must be running on PORT 3001:
 
-    cd examples/datagrid
+    export PORT=3001
+    cd examples/dbapp
     npm start
 
+Then return to root directory of the project and enter in datagrid example folder:
+
+    cd examples/datagrid
+
+Run:
+
+    yarn start
+
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+
+![alt text](image.png)
 
 
 # Getting Started with Create React App

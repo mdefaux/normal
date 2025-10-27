@@ -15,6 +15,12 @@ class KdbStoreHost extends StoreHost
     }
 
     createQuery( entity ) {
+        // const query = super.createQuery( entity );
+
+        // composeWhere( query, entity );
+
+        // composeKdbQuery( query, entity );
+
         return new KdbQuery( entity, this.knex );
     }
 
@@ -23,10 +29,12 @@ class KdbStoreHost extends StoreHost
     }
 
     createUpdate( entity ) {
+        // composeWhere( query, entity );
         return new KdbUpdate( entity, this.knex );
     }
 
     createDelete( entity ) {
+        // composeWhere( query, entity );
         return new KdbDelete( entity, this.knex );
     }
 

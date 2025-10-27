@@ -19,8 +19,9 @@ describe('Null in query test', function() {
                 res.should.have.status(200);
                 res.should.be.json;
                 res.body.should.be.a('array');
-                res.body.length.should.equal(2); // should have 1 record
+                res.body.length.should.equal(2);
                 res.body[0].should.have.property('id');
+                res.body[0].id.should.equal(1);
                 done();
             });
     });
@@ -45,6 +46,7 @@ describe('Null in query test', function() {
                 res.body.should.be.a('array');
                 res.body.length.should.equal(1); // should have 1 record
                 res.body[0].should.have.property('id');
+                res.body[0].id.should.equal(3);
                 done();
             });
     });
