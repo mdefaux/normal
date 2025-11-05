@@ -3,5 +3,15 @@
     { "id": 2, "address": "202 Mountain Dr, Denver, CO", "customer_id": 2 },
     { "id": 3, "address": "303 Hill St, Austin, TX", "customer_id": 3 },
     { "id": 4, "address": "404 Valley Ln, Boulder, CO", "customer_id": 2 },
-    { "id": 5, "address": "505 Pine Cir, San Antonio, TX", "customer_id": 3 }
+    { "id": 5, "address": "505 Pine Cir, San Antonio, TX", "customer_id": 3 },
+    { "id": 6, "address": "606 Lakeview Blvd, Springfield, IL", "customer_id": 1 },
+    { "id": 7, "address": "707 Ocean Ave, Miami, FL", "customer_id": 4 },
+    { "id": 8, "address": "808 Desert Rd, Phoenix, AZ", "customer_id": 5 },
+    { "id": 9, "address": "909 Forest Dr, Portland, OR", "customer_id": 6 },
+    { "id": 10, "address": "1001 Canyon St, Salt Lake City, UT", "customer_id": 5 },
+    { "id": 11, "address": "1102 Meadow Ln, Madison, WI", "customer_id": 7 },
+    { "id": 12, "address": "1203 Harbor Blvd, San Diego, CA", "customer_id": 4 },
+    { "id": 13, "address": "1304 Ridge Rd, Charlotte, NC", "customer_id": 8 },
+    { "id": 14, "address": "1405 Brook St, Seattle, WA", "customer_id": 6 },
+    { "id": 15, "address": "1506 Cliffside Dr, Los Angeles, CA", "customer_id": 4 }
 ]

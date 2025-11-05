@@ -1,6 +1,6 @@
 
-var store = require( './store' );
-
+const store = require( './store' );
+const Site = require( './Site' );
 
 const Customer = store.entity( 'Customer', (model) => {
 
@@ -13,6 +13,13 @@ const Customer = store.entity( 'Customer', (model) => {
     model.string( 'reference' );
     model.number( 'telephone' );
 
+    model.many( 'sites', {
+        modelClass: "Site",
+        join: {
+            from: 'id',
+            to: 'customer_id'
+        }
+    });
 } );
 
 

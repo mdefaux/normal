@@ -255,9 +255,19 @@ class ModelDef {
         return new FieldDef( this.model.fields[ fieldName ] );
     }
 
-    many( entityName )
-    {
-        return this.model.fields[ entityName ] = new fields.RelatedObjects( entityName, this.factory, this.model.fields );
+    hasMany(){
+
+    }
+
+    many( fieldName, def ) {
+
+        if ( !def || !def.modelClass ) {
+            throw new Error( `Invalid definition for related objects in field '${fieldName}'` );
+        }
+
+        return this.model.fields[ fieldName ] = new fields.RelatedObjects( 
+            def.modelClass, this.factory, this.model.fields 
+        );
         // TODO: return new RelationDef( this.model.fields[ entityName ] )
     }
 

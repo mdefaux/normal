@@ -7,7 +7,7 @@ exports.up = function (knex) {
         table.increments("id").primary();
         table.string("address").notNullable();
         table.integer("project_id").unsigned().references("id").inTable("project").onDelete("CASCADE");
-        table.integer("customer_id").unsigned().references("id").inTable("project").onDelete("CASCADE");
+        table.integer("customer_id").unsigned().references("id").inTable("customer").onDelete("CASCADE");
     });
 };
 
