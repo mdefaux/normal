@@ -266,13 +266,12 @@ class ModelDef {
         }
 
         return this.model.fields[ fieldName ] = new fields.RelatedObjects( 
-            def.modelClass, this.factory, this.model.fields 
+            fieldName, this.factory, def 
         );
         // TODO: return new RelationDef( this.model.fields[ entityName ] )
     }
 
-    parts( entityName )
-    {
+    parts( entityName ) {
         return this.model.fields[ entityName ] = new fields.PartsOf( entityName, this.factory, this.model.fields );
         // TODO: return new RelationDef( this.model.fields[ entityName ] )
     }

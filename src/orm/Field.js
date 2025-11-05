@@ -532,16 +532,21 @@ class ObjectLink extends Relation {
 /**TODO:
  * 
  */
-class RelatedObjects extends Relation
-{
-    constructor(name, factory, tableModel)
-    {
-        super(name, factory, tableModel);
+class RelatedObjects extends Relation {
+    constructor(name, factory, def) {
+        super(name, factory, undefined);
         this.rename = name;
+        this.name = name;
+        this.toEntityName = def.modelClass;
+        this.join = {
+            from: def.join?.from || 'id',
+            to: def.join?.to || name + '_id',
+            table: def.join?.table || this.toEntityName,
+        };
+        this.sourceField = name;
     }
 
-    foreignField(sourceName)
-    {
+    foreignField(sourceName) {
         this.field = sourceName;
         return this;
     }

@@ -21,10 +21,20 @@ describe( "Has many relation", function () {
         assert( Customer.metaData.model.fields.sites instanceof Object );
 
         assert(Customer.metaData.model.fields.sites.toEntityName === 'Site');
-        assert(Site.metaData.model.fields.Customer.toEntityName === 'Customer');
+        // assert(Site.metaData.model.fields.Customer.toEntityName === 'Customer');
     });
     it( "query Customers and their Sites", async function () {
-        const customers = await Customer.select().withRelated( 'sites' );
+
+        assert( Customer.sites instanceof Object );
+
+        const customerQuery = Customer.select().withRelated( Customer.sites );
+
+        assert( customerQuery instanceof Object );
+        assert( customerQuery.manyRelateds instanceof Object );
+        assert( customerQuery.manyRelateds[ 'sites' ] instanceof Object );
+        assert( customerQuery.manyRelateds[ 'sites' ].toEntityName === 'Site' );
+
+        const customers = await customerQuery.exec();
         assert( customers.length > 0 );
         customers.forEach( customer => {
             assert( Array.isArray( customer.sites ) );

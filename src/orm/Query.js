@@ -297,6 +297,35 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return this;
   }
 
+  /**
+   * 
+   * @param {*} fieldWrapper 
+   * @returns 
+   */
+  withRelated( fieldWrapper ){
+    if ( !fieldWrapper ) {
+      return this;
+    }
+    const field = fieldWrapper.field;
+    this.manyRelateds = {
+      ...this.manyRelateds || {},
+      [field.name]: {
+        field: field,
+        toEntityName: field.toEntityName,
+        join: {
+          from: field.join?.from || 'id',
+          to: field.join?.to || field.name + '_id',
+          table: field.join?.table || field.toEntityName,
+        }
+        // leftAlias: leftTableAlias, // && '_jt_PARTNUMBER_Partnumber'
+        // idFieldKey: leftTableAlias ? `${leftTableAlias}.${field.sqlSource}` : field.sqlSource,
+        // requireObjectRead: field.name,
+        // joinedTableAlias: foreignTableAlias
+      }
+    };
+
+    return this;
+  }
 
   where(filters) {
 
