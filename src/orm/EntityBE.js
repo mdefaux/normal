@@ -29,7 +29,7 @@ class EntityBE {
     }
 
     setup() {
-        Object.entries(this.model.fields)
+        Object.entries(this.metaData.model.fields)
             .forEach(([key, field]) => {
                 Object.defineProperty(this, field.name||key, {
                     get: function () {
