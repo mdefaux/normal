@@ -542,6 +542,7 @@ class RelatedObjects extends Relation {
             from: def.join?.from || 'id',
             to: def.join?.to || name + '_id',
             table: def.join?.table || this.toEntityName,
+            where: def.join?.where || undefined,
         };
         this.sourceField = name;
     }

@@ -17,8 +17,16 @@ const Customer = store.entity( 'Customer', (model) => {
         modelClass: "Site",
         join: {
             from: 'id',
-            to: 'customer_id'
-        }
+            to: 'customer_id',
+            where:  ( Site ) => (Site.address.notNull())
+        },
+        // def: ( Site ) => ({
+        //     join: {
+        //         from: Customer.id,
+        //         to: Site.Customer,
+        //         condition: Site.address.notNull()
+        //     },
+        // })
     });
 } );
 
