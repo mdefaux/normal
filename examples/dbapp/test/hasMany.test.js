@@ -23,7 +23,7 @@ describe( "Has many relation", function () {
         assert(Customer.metaData.model.fields.sites.toEntityName === 'Site');
         // assert(Site.metaData.model.fields.Customer.toEntityName === 'Customer');
     });
-    it.skip( "query Customers and their Sites", async function () {
+    it( "query Customers and their Sites", async function () {
 
         assert( Customer.sites instanceof Object );
 

@@ -1,6 +1,6 @@
 
 const store = require( './store' );
-const Site = require( './Site' );
+// const Site = require( './Site' );
 
 const Customer = store.entity( 'Customer', (model) => {
 
@@ -17,7 +17,7 @@ const Customer = store.entity( 'Customer', (model) => {
         modelClass: "Site",
         join: {
             from: 'id',
-            to: 'customer_id',
+            to: 'Customer',
             where:  ( Site ) => (Site.address.notNull())
         },
         // def: ( Site ) => ({

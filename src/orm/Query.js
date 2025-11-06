@@ -5,6 +5,7 @@ const { ObjectLink, Field } = require("./Field");
 const { Statement } = require("./Statement");
 const { FieldAggregation, FieldAggregationCount, FieldAllMainTable } = require('./FieldAggregation');
 const { FieldQueryItem } = require("./FieldConditionDef");
+const RecordsArray = require("./RecordsArray");
 
 
 /**Oggetto per creare una query ed ottenere un recordset.
@@ -489,6 +490,28 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     return this;
   }
 
+  async applyPostProcessing( resultSet ) {
+    // if no post processing needed, exits
+    // if ( !this.translateRecord ) {
+    //   return;
+    // }
+    // resultSet.forEach( ( record, index ) => {
+    //   resultSet[ index ] = this.translateRecord( record );
+    // } );
+
+    await this.processJoin( resultSet );
+
+    return resultSet;
+  }
+
+  async exec(){
+    const resultSet = RecordsArray.fromPlainArray(await super.exec());
+
+    await this.applyPostProcessing(resultSet);
+
+    return resultSet;
+  }
+
   async execute() {
     // if ( this.beforeExecCallback ) {
     //     await this.beforeExecCallback( this );
@@ -582,16 +605,13 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
    * @returns 
    */
   async processJoin( data ) {
-    // if none defined, exits
-    if ( !this.joins || this.joins?.length === 0 ) {
-      return data;
-    }
-    // for each join process the data
-/*     return  this.joins.reduce( async ( data, join ) => {
-        return await this.processJoinRecord( data, join );
-    }, data ); */
-    for( let join of this.joins ) {
+    
+    for( let join of this.joins || [] ) {
       data = await this.processJoinRecord( data, join );
+    }
+
+    for( let [key, many] of Object.entries(this.manyRelateds||{}) ) {
+      data = await this.processManyRelated( data, many );
     }
 
     return data;
@@ -673,6 +693,40 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       // adds a record with the addition of the related object
       return [ ...resultSet, {...r, [join.condition.field.name]: found } ]
     }, [] )
+  }
+
+  async processManyRelated( data, many ) {
+    // implementation for processing many related records
+
+    const uniqueValues = data.getUniqueFieldValues( many.join.from );
+    const toEntity = this.factory[ many.toEntityName ];
+    const toField = typeof many.join.to === 'string' ? toEntity[ many.join.to ] 
+      : typeof many.join.to === 'function' ? many.join.to( toEntity ) : many.join.to;
+    // const fromField = typeof many.join.from === 'string' ? this.entity[ many.join.from ]
+    //   : typeof many.join.from === 'function' ? many.join.from( this.entity ) : many.join.from;
+    const whereCondition = typeof many.join.where === 'function' ? 
+      many.join.where( toEntity ) : many.join.where;
+    
+    let pageSize = this.hints?.pageSize || 200;
+
+    const relatedQuery = toEntity.select()
+      .where( toField.in( uniqueValues ) )
+      .pageSize(pageSize)
+      .orderBy( { columnName: toField.name, order: 'asc' } );
+
+    let relatedData = await relatedQuery.exec();
+    let relatedIndex = 0;
+    for( let r of data ) {
+      r[ many.field.name ] = [];
+
+      while( relatedIndex < relatedData.length &&
+        relatedData[ relatedIndex ][ toField.name ].id === r[ many.join.from ] ) 
+      {
+        r[ many.field.name ].push( relatedData[ relatedIndex ] );
+        relatedIndex++;
+      }
+
+    }
   }
 }
 

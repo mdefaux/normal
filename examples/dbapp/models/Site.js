@@ -7,7 +7,7 @@ const Site = store.entity("Site", (model) => {
     model.label("address");
     model.string("address");
     // model.number("customer_id");
-    model.objectLink(Customer, "Customer")
+    model.objectLink(Customer)
         .source("customer_id");
 });
 
