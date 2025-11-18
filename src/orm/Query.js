@@ -702,15 +702,16 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     const toEntity = this.factory[ many.toEntityName ];
     const toField = typeof many.join.to === 'string' ? toEntity[ many.join.to ] 
       : typeof many.join.to === 'function' ? many.join.to( toEntity ) : many.join.to;
-    // const fromField = typeof many.join.from === 'string' ? this.entity[ many.join.from ]
-    //   : typeof many.join.from === 'function' ? many.join.from( this.entity ) : many.join.from;
+    const fromField = typeof many.join.from === 'string' ? this.entity[ many.join.from ]
+      : typeof many.join.from === 'function' ? many.join.from( this.entity ) : many.join.from;
     const whereCondition = typeof many.join.where === 'function' ? 
-      many.join.where( toEntity ) : many.join.where;
+      many.join.where( toEntity, this.externals ) : many.join.where;
     
     let pageSize = this.hints?.pageSize || 200;
 
     const relatedQuery = toEntity.select()
       .where( toField.in( uniqueValues ) )
+      .where( whereCondition )
       .pageSize(pageSize)
       .orderBy( { columnName: toField.name, order: 'asc' } );
 
