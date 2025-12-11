@@ -46,4 +46,27 @@ describe('Many-to-Many Relationship Tests', () => {
         expect( users[0].projects instanceof Array ).to.be.true;
         expect( users[0].projects.length ).to.be.greaterThan( 0 );
     });
+
+    it.only( 'Fetch User with details of Projects', async () => {
+        
+        const userQuery = User.select()
+            .withRelated( User.projects )
+            .withRelated( ProjectUser.Project );
+        expect( userQuery instanceof Object ).to.be.true;
+
+
+        const users = await userQuery.exec();
+
+        expect( users.length ).to.eql( 3 );
+        const userNames = users.map( u => u.name ).sort();
+        expect( userNames ).to.eql( [ 'Aaron Arancioni', 'Bill Bianchi', 'Chen Ciani' ] );
+
+        expect( users[0].projects instanceof Array ).to.be.true;
+        expect( users[0].projects.length ).to.be.greaterThan( 0 );
+
+        expect( users[0].projects[0] instanceof Object ).to.be.true;
+        expect( users[0].projects[0].Project instanceof Object ).to.be.true;
+        expect( users[0].projects[0].Project.name ).to.be.a( 'string' );
+
+    });
 });

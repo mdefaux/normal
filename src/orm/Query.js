@@ -307,6 +307,30 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     if ( !fieldWrapper ) {
       return this;
     }
+
+    // if parameter is an array, recursively call withRelated for each element
+    if ( Array.isArray( fieldWrapper ) ) {
+      fieldWrapper.forEach( fw => ( this.withRelated( fw ) ) );
+      return this;
+    }
+
+    // checks if field table belongs to an entity 
+    // already present in manyRelateds
+    if (this.manyRelateds && 
+      Object.values(this.manyRelateds).find( 
+        mr => mr.toEntityName === fieldWrapper.sourceEntity.metaData.name )
+    ) {
+      const manyRelated = Object.values(this.manyRelateds).find( 
+        mr => mr.toEntityName === fieldWrapper.sourceEntity.metaData.name );
+      // adds the related info to manyRelated
+      manyRelated.relateds = [...manyRelated.relateds || [], fieldWrapper ];
+      return this;
+    }
+    // cheecks if field belongs to model
+    if ( !this.model.fields[ fieldWrapper.field.name ] ) {
+      throw new Error( `Field '${fieldWrapper.field.name}' does not belong to entity '${this.model.name}'.` );
+    }
+
     const field = fieldWrapper.field;
     this.manyRelateds = {
       ...this.manyRelateds || {},
@@ -709,7 +733,8 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     
     let pageSize = this.hints?.pageSize || 200;
 
-    const relatedQuery = toEntity.select()
+    const relatedQuery = toEntity.select('*')
+      .select(many.relateds || [])
       .where( toField.in( uniqueValues ) )
       .where( whereCondition )
       .pageSize(pageSize)
