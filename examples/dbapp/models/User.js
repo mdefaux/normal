@@ -22,6 +22,22 @@ var User = store.entity('User', (model) => {
     model.string('name');          // name of user
     model.string( 'email' );
     model.string( 'telephone' );
+    
+    model.many( 'projects', {
+        modelClass: "ProjectUser",
+        join: {
+            from: 'id',
+            to: 'User',
+            // where:  ( Site ) => (Site.address.notNull())
+        },
+        // def: ( Site ) => ({
+        //     join: {
+        //         from: Customer.id,
+        //         to: Site.Customer,
+        //         condition: Site.address.notNull()
+        //     },
+        // })
+    });
 });
 
 module.exports = User;

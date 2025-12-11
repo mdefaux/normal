@@ -9,5 +9,6 @@ module.exports = {
     User: User,
     Project: Project,
     DevicePrice: DevicePrice,
-    Site: Site
+    Site: Site,
+    ProjectUser: require( './ProjectUser' ),
 }

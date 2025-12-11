@@ -721,7 +721,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       r[ many.field.name ] = [];
 
       while( relatedIndex < relatedData.length &&
-        relatedData[ relatedIndex ][ toField.name ].id === r[ many.join.from ] ) 
+        relatedData[ relatedIndex ][ toField.name ][ many.join.from ] === r[ many.join.from ] ) 
       {
         r[ many.field.name ].push( relatedData[ relatedIndex ] );
         relatedIndex++;
