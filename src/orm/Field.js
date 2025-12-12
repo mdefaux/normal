@@ -456,7 +456,7 @@ class ObjectLink extends Relation {
                 throw new Error( `Value '${value}' is not a valid id for field '${this.name}'.`)
             }
             // assert( parseInt( value ) !== 'NaN');
-            return parseInt( value );
+            return{ [idField]:parseInt( value )};
         }
     }
 
