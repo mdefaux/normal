@@ -43,7 +43,7 @@ class FieldQueryItem {
     
 
     processValue(obj) {
-        return obj[this.name];
+        return obj[this.name] || (this.field?.toModel?.idField  ? obj[this.field?.toModel?.idField] : undefined );
     }
 
     in(arrayOrFunction) {
