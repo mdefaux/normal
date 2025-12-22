@@ -30,13 +30,6 @@ var User = store.entity('User', (model) => {
             to: 'User',
             // where:  ( Site ) => (Site.address.notNull())
         },
-        // def: ( Site ) => ({
-        //     join: {
-        //         from: Customer.id,
-        //         to: Site.Customer,
-        //         condition: Site.address.notNull()
-        //     },
-        // })
     });
 });
 
