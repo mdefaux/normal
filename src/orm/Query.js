@@ -669,6 +669,10 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
         if ( this.hints?.cache?.[ join.condition.field.name ]?.[ value ] ) {
           return uniques;
         } 
+        if( value === undefined) {
+          return uniques;
+        }
+        
         return [ ...uniques, value ];
       }, []);
 
