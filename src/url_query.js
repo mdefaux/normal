@@ -171,6 +171,68 @@ const URLquery = {
      
     },
 
+    parseRelated( req, responseModel, relation ) {
+
+       // let groupBySelect = [];
+        
+
+        let select = Object.entries( req ).reduce( (relatedColumns, [reqField, reqValue]) => {
+           // let newColumnSelected;
+           /*  if ( reqField.startsWith( "xcount" ) ) {
+                newColumnSelected = new FieldAggregationCount();
+            }
+            else */ if ( reqField.startsWith( "xrel" ) ) {
+                return [...relatedColumns, responseModel[reqValue] ];
+            }
+/*             else if (reqField.startsWith( "xgb" ) ) {
+                groupBySelect.push(reqValue);
+                return selectedColumns;
+            } */
+            else {
+                return relatedColumns;
+            }
+
+         // return [...relatedColumns, newColumnSelected ];
+
+        }, [] );
+
+       // if(groupBySelect.length > 0) return groupBySelect;
+        return select;
+    },
+
+     parseParams( req, responseModel, relation ) {
+
+       // let groupBySelect = [];
+        
+
+        let params = Object.entries( req ).reduce( (paramColumns, [reqField, reqValue]) => {
+           // let newColumnSelected;
+           /*  if ( reqField.startsWith( "xcount" ) ) {
+                newColumnSelected = new FieldAggregationCount();
+            }
+            else */ if ( reqField.startsWith( "xparams" ) ) {
+                // get a substring after xparams
+                let paramName = reqField.substring(7);
+
+                return {...paramColumns, [paramName]: reqValue};
+                // [...paramColumns, responseModel[reqValue] ];
+            }
+/*             else if (reqField.startsWith( "xgb" ) ) {
+                groupBySelect.push(reqValue);
+                return selectedColumns;
+            } */
+            else {
+                return paramColumns;
+            }
+
+         // return [...relatedColumns, newColumnSelected ];
+
+        }, {} );
+
+       // if(groupBySelect.length > 0) return groupBySelect;
+        return params;
+    },
+
     parse( req, responseModel, relation ) {
 
         let params = req; // .params;
@@ -180,6 +242,8 @@ const URLquery = {
         let groupedFields = this.parseGroup(params, responseModel, relation);
         let sortingFields = this.parseSort(params, responseModel, relation);
         let sumFields = this.parseSum( params, responseModel, relation);
+        let withRelateds = this.parseRelated(params, responseModel, relation);
+        let parameters = this.parseParams(params, responseModel, relation);
 
         if ( sortingFields?.[0]?.columnName 
             && responseModel.metaData.model.fields[ sortingFields[0].columnName ].type === 'ObjectLink' ) 
@@ -189,7 +253,7 @@ const URLquery = {
 
         if(sumFields.length > 0 ) selectedFields = [...selectedFields, ...sumFields]
 
-        return {filters, selectedFields, groupedFields, sortingFields, sumFields};
+        return {filters, selectedFields, groupedFields, sortingFields, sumFields, withRelateds, parameters};
     }
 };
 

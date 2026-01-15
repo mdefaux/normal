@@ -341,6 +341,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
           from: field.join?.from || 'id',
           to: field.join?.to || field.name + '_id',
           table: field.join?.table || field.toEntityName,
+          where: field.join?.where || null
         }
         // leftAlias: leftTableAlias, // && '_jt_PARTNUMBER_Partnumber'
         // idFieldKey: leftTableAlias ? `${leftTableAlias}.${field.sqlSource}` : field.sqlSource,
