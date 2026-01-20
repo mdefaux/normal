@@ -90,6 +90,15 @@ class FieldDef {
         this.targetField.calc = expression;
         return this;
     }
+
+    onReadValue(callback) {
+        this.targetField.onReadValue = callback;
+        return this;
+    }
+    onWriteValue(callback) {
+        this.targetField.onWriteValue = callback;
+        return this;
+    }
 }
 
 class ModelDef {
@@ -165,10 +174,6 @@ class ModelDef {
         this.model.labelField = fieldName;
 
         // return new FieldDef( this.model.fields[ fieldName ] );
-    }
-
-    calc(expression) {
-        this.calc = expression;
     }
 
     string( fieldName )
@@ -336,6 +341,14 @@ class ModelDef {
     select( createSelectCallback ) {
         this.entity.metaData.createSelectCallback = createSelectCallback;
     }
+
+    /**Defines a callback to be executed after select operations
+     * 
+     * @param {callback} afterSelectCallback 
+     */
+    // afterSelect( afterSelectCallback ) {
+    //     this.entity.metaData.afterSelectCallback = afterSelectCallback;
+    // }
 
     paged( isPaged = true ) {
         this.entity.metaData.model.paged = isPaged;

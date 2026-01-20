@@ -47,7 +47,7 @@ describe('Many-to-Many Relationship Tests', () => {
         expect( users[0].projects.length ).to.be.greaterThan( 0 );
     });
 
-    it.only( 'Fetch User with details of Projects', async () => {
+    it( 'Fetch User with details of Projects', async () => {
         
         const userQuery = User.select()
             .withRelated( User.projects )

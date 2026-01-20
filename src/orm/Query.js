@@ -526,7 +526,30 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
 
     await this.processJoin( resultSet );
 
+    // for each record, applies post processing if any
+    for (let record of resultSet) {
+      await this.postProcessRecord(record);
+    }
+
+    // if( typeof this.entity.metaData.afterSelectCallback === 'function' ) {
+
+      
+    //     this.entity.metaData.afterSelectCallback( resultSet, this.externals || {} );
+    // }
+
     return resultSet;
+  }
+
+  async postProcessRecord( record ) {
+
+    // for each column, looks for those which have 'onReadValue' callback
+    for( let col of this.columns || [] ) {
+
+      if( col instanceof Field && typeof col.onReadValue === 'function' ) {
+        record[ col.name ] = await col.onReadValue( record, this.externals || {} );
+      }
+    }
+
   }
 
   async exec(){
@@ -734,7 +757,7 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
     const fromField = typeof many.join.from === 'string' ? this.entity[ many.join.from ]
       : typeof many.join.from === 'function' ? many.join.from( this.entity ) : many.join.from;
     const whereCondition = typeof many.join.where === 'function' ? 
-      many.join.where( toEntity, this.externals ) : many.join.where;
+      many.join.where( toEntity, this.externals || {} ) : many.join.where;
     
     let pageSize = this.hints?.pageSize || 200;
 
