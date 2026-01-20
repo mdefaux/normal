@@ -211,6 +211,10 @@ class EntityBE {
      * @returns 
      */
     async update( id, record, params /*, returning */ ) {
+        if( id === undefined ) {
+            // returns an update statement
+            return this.host.createUpdate( this );
+        }
       //  let idFilter = record[ this.model.idField ];
         let idFilter = id;
         // creates the update statement
@@ -230,6 +234,10 @@ class EntityBE {
         }
 
         return response;
+    }
+
+    _update() {
+        return this.host.createUpdate( this );
     }
 
     /**Updates a record

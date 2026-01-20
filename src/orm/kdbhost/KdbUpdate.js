@@ -31,6 +31,11 @@ class KdbUpdate extends UpdateStatement {
             rowId = this.recordId;
         }
 
+        // if processedRecord has no value, nothing to update
+        if ( Object.keys( this.processedRecord || {} ).length === 0 ) {
+            return rowId;
+        }
+
         let query = this.knex(this.entity.model.dbTableName)
             .where(rowId)
             .update(this.processedRecord /* , returning */)
@@ -53,11 +58,11 @@ class KdbUpdate extends UpdateStatement {
         return this;
     }
 
-    debug() {
-        this.qb.debug();
+    // debug() {
+    //     this.qb.debug();
 
-        return this;
-    }
+    //     return this;
+    // }
 }
 
 exports.KdbUpdate = KdbUpdate;

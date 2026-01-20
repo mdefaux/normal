@@ -85,6 +85,14 @@ class Statement {
         let r = [];
 
         for (let [key, value] of Object.entries(record)) {
+
+            // if field has onWriteValue callback, calls it to get the value to use for writing
+            let field = this.entity.model.fields[ key ];
+            if( field instanceof Object && typeof field.onWriteValue === 'function' ) {
+                value = await field.onWriteValue( value, record, this.externals || {} );
+                continue;
+            }
+
             if(typeof value === 'function') {
                 value = await value(cache, this);
             }
