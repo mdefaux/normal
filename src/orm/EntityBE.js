@@ -65,16 +65,15 @@ class EntityBE {
     createQuery( externalParameters ) {
         // TODO: host should create/factory for query 
         // TODO: use storage query if entity is marked 'local storage'
-        if ( this.storage ) {
-            return this.storage.createQuery( this );
+        let query = this.storage ? this.storage.createQuery( this ) 
+            : this.host.createQuery( this );
+
+        if ( typeof this.metaData.createSelectCallback === 'function' ) {
+            query =  this.metaData.createSelectCallback( 
+                query, externalParameters );
         }
 
-        if ( this.metaData.createSelectCallback ) {
-            return this.metaData.createSelectCallback( 
-                this.host.createQuery( this ), externalParameters );
-        }
-
-        return this.host.createQuery( this );
+        return query;
     }
 
     createRelationQuery( relatedEntityName ) {
