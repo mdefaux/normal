@@ -52,15 +52,18 @@ class EntityBE {
         // return new Query(this, this.model, this.factory);
     }
 
-    saveAll( arrayOfRecords ) {
-        if( Array.isArray(arrayOfRecords) )
-        {
-            throw new Error( `Object '${arrayOfRecords}' is not array.` );
-        }
-        return Promise.all( 
-            arrayOfRecords.map( (r) => ( this.save(r) ) ) 
-        );
-    }
+    /**deprecated?
+     * 
+     */
+    // _saveAll( arrayOfRecords ) {
+    //     if( Array.isArray(arrayOfRecords) )
+    //     {
+    //         throw new Error( `Object '${arrayOfRecords}' is not array.` );
+    //     }
+    //     return Promise.all( 
+    //         arrayOfRecords.map( (r) => ( this.save(r) ) ) 
+    //     );
+    // }
 
     createQuery( externalParameters ) {
         // TODO: host should create/factory for query 
@@ -129,21 +132,7 @@ class EntityBE {
         
         newRelation.init?.( parameters );
         return newRelation;
-
-        if ( !relationQuery ) {
-            throw new Error( `Relation '${this.metaData.name}' - '${relatedEntityName}' has no selection query.`)
-        }
-
-        return relationQuery;
     }
-
-    // fetch() {
-    //     return this.createQuery().fetch();
-    // }
-
-    // fetchWithRelated() {
-    //     return this.createQuery().fetchWithRelated();
-    // }
 
     select(field) {
         return this.createQuery()/*.fetch()*/.select(field);
