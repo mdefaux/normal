@@ -187,6 +187,7 @@ class EntityBE {
 
         // creates the insert statement
         let insert = this.host.createInsert(this);
+        insert.externalParameters( params || {} );
         let newId = await insert.value(record).exec(); // executes the insert
         // console.log( `newId= '${newId}'.`);
         // after getting the new id, queries the new record
@@ -219,6 +220,7 @@ class EntityBE {
         let idFilter = id;
         // creates the update statement
         let update = this.host.createUpdate( this );
+        update.externalParameters( params || {} );
         let updateRecord = await update.value(id, record ).exec(/* returning */); // executes the update
 
         // for now, get the updated record data with a select.
