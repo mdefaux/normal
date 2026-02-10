@@ -769,20 +769,27 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       .orderBy( { columnName: toField.name, order: 'asc' } );
 
     let relatedData = await relatedQuery.exec();
-    let relatedIndex = 0;
+   // let relatedIndex = 0;
     for( let r of data ) {
-      r[ many.field.name ] = [];
+     // r[ many.field.name ] = [];
 
-      while( relatedIndex < relatedData.length &&
+     // while( relatedIndex < relatedData.length &&
       //  relatedData[ relatedIndex ][ toField.name ][ many.join.from ] === r[ many.join.from ] 
        // relatedData[ relatedIndex ][ toField.name ][ many.join.from ] === r[ many.join.from ] 
         //fromField?.field?.equalValues( relatedData[ relatedIndex ][ toField.name ] , toField?.field?.parseValue(r[ many.join.from ]))
-       toField?.field?.equalValues(toField?.field?.parseValue(relatedData[ relatedIndex ][ toField.name ]),  fromField?.field?.parseValue(r[ many.join.from ]))
-      ) 
-      {
-        r[ many.field.name ].push( relatedData[ relatedIndex ] );
-        relatedIndex++;
-      }
+  //     toField?.field?.equalValues(toField?.field?.parseValue(relatedData[ relatedIndex ][ toField.name ]),  fromField?.field?.parseValue(r[ many.join.from ]))
+  //    ) 
+     
+      // search in relatedData all matching records. 
+      // Using equalValues and parseValue functions since they are usually objecctLinks
+      let found = relatedData.filter(e=> 
+         toField?.field?.equalValues(toField?.field?.parseValue(e[ toField.name ]),  fromField?.field?.parseValue(r[ many.join.from ]))
+      );
+
+      //  r[ many.field.name ].push( relatedData[ relatedIndex ] );
+        r[ many.field.name ] = found?.length > 0 ? found : [] ;
+      //  relatedIndex++;
+      
 
     }
   }
