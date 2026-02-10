@@ -85,7 +85,20 @@ class FieldQueryItem {
         return new FieldConditionDef("<", this, objectOrFunction);
     }
 
+    /**
+     * @deprecated use lessThanOrEqual instead
+     * @param {*} objectOrFunction 
+     * @returns 
+     */
     lessOrEqualThan(objectOrFunction) {
+        return new FieldConditionDef("<=", this, objectOrFunction);
+    }
+
+    /**Builds a condition with LESS THAN OR EQUAL operator
+     * @param {*} objectOrFunction 
+     * @returns 
+     */
+    lessThanOrEqual(objectOrFunction) {
         return new FieldConditionDef("<=", this, objectOrFunction);
     }
 
@@ -93,7 +106,20 @@ class FieldQueryItem {
         return new FieldConditionDef(">", this, objectOrFunction);
     }
 
+    /**
+     * @deprecated use greaterThanOrEqual instead
+     * @param {*} objectOrFunction 
+     * @returns 
+     */
     greaterOrEqualThan(objectOrFunction) {
+        return new FieldConditionDef(">=", this, objectOrFunction);
+    }
+    
+    /**Builds a condition with GREATER THAN OR EQUAL operator
+     * @param {*} objectOrFunction 
+     * @returns 
+     */
+    greaterThanOrEqual(objectOrFunction) {
         return new FieldConditionDef(">=", this, objectOrFunction);
     }
 
