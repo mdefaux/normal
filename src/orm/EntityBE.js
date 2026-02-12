@@ -584,11 +584,11 @@ class EntityBE {
                     console.log('*******array destination DUMP*************');
                     console.log(arrayB);
                 } else {
-                    console.log('*******array source DUMP*************'); 
+                    // console.log('*******array source DUMP*************'); 
                     // prints the subset of arrayA range [indexA-2, indexA+2]
-                    console.log(arrayA.slice(ia-2, ia+2));
-                    console.log('*******array destination DUMP*************');
-                    console.log(arrayB.slice(ib-2, ib+2));
+                    // console.log(arrayA.slice(ia-2, ia+2));
+                    // console.log('*******array destination DUMP*************');
+                    // console.log(arrayB.slice(ib-2, ib+2));
                 }
 
                 // empties the arrays to avoid problems with the next iteration
