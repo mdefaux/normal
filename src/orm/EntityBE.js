@@ -454,10 +454,10 @@ class EntityBE {
                 
                 // 
                 let sourceRecord = arrayA[ia];
-                if(parameters.columnMap && arrayaend != 1) {
+                if(parameters.columnMap && sourceRecord /* arrayaend != 1 */) {
                     sourceRecord = parameters.columnMap(arrayA[ia]);
                 }
-                if(parameters.parseValue && arrayaend != 1) {
+                if(parameters.parseValue && sourceRecord /* arrayaend != 1 */) {
                     let keys = Object.keys(sourceRecord);
                     keys.forEach(key => {
                         sourceRecord[key] = parameters.parseValue(sourceRecord[key]);
