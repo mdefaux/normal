@@ -555,9 +555,9 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
   async exec(){
     const resultSet = RecordsArray.fromPlainArray(await super.exec());
 
-    await this.applyPostProcessing(resultSet);
+    const processedResultSet = await this.applyPostProcessing(resultSet);
 
-    return resultSet;
+    return processedResultSet;
   }
 
   async execute() {
