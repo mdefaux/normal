@@ -551,6 +551,17 @@ class RelatedObjects extends Relation {
         this.field = sourceName;
         return this;
     }
+
+    serialize() {
+
+        return {
+            name: this.name,
+            type:  'Many',
+            mandatory: this.mandatory,
+            toEntityName: this.toEntityName,
+            join: this.join,
+        }
+    }
 }
 
 /**TODO:
