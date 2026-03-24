@@ -752,10 +752,20 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
 
     const uniqueValues = data.getUniqueFieldValues( many.join.from );
     const toEntity = this.factory[ many.toEntityName ];
+    if ( !toEntity ) {
+      throw new Error( `Unknown entity '${many.toEntityName}' in many join definition for field '${many.field.name}' of entity '${this.model.name}'. Check your entity definition.` );
+    }
     const toField = typeof many.join.to === 'string' ? toEntity[ many.join.to ] 
       : typeof many.join.to === 'function' ? many.join.to( toEntity ) : many.join.to;
+    if ( !toField ) {
+      throw new Error( `Unknown field '${many.join.to}' of entity '${many.toEntityName}' in many join definition for field '${many.field.name}' of entity '${this.model.name}'. Check your entity definition.` );
+    }
+
     const fromField = typeof many.join.from === 'string' ? this.entity[ many.join.from ]
       : typeof many.join.from === 'function' ? many.join.from( this.entity ) : many.join.from;
+    if ( !fromField ) {
+      throw new Error( `Unknown field '${many.join.from}' of entity '${this.model.name}' in many join definition for field '${many.field.name}' of entity '${this.model.name}'. Check your entity definition.` );
+    }
     const whereCondition = typeof many.join.where === 'function' ? 
       many.join.where( toEntity, this.externals || {} ) : many.join.where;
     
@@ -784,7 +794,8 @@ chainSelectedColum( columnSeq, entity, leftTableAlias ) {
       // Using equalValues and parseValue functions since they are usually objecctLinks
       let found = relatedData.filter(e=> 
          toField?.field?.equalValues(toField?.field?.parseValue(e[ toField.name ]),  fromField?.field?.parseValue(r[ many.join.from ]))
-      );
+      )
+      //.sort( (a, b) => (a[ toField.name ] > b[ toField.name ] ? 1 : -1) );
 
       //  r[ many.field.name ].push( relatedData[ relatedIndex ] );
         r[ many.field.name ] = found?.length > 0 ? found : [] ;
