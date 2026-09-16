@@ -389,6 +389,66 @@ class ModelDef {
         }
         this.entity.metaData.canChange = callback;
     }
+
+    beforeInsert( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `beforeInsert parameter should be a function.` );
+        }
+        this.entity.metaData.beforeInsert = callback;
+    }
+
+    beforeUpdate( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `beforeUpdate parameter should be a function.` );
+        }
+        this.entity.metaData.beforeUpdate = callback;
+    }
+
+    beforeDelete( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `beforeDelete parameter should be a function.` );
+        }
+        this.entity.metaData.beforeDelete = callback;
+    }
+
+    /**Sets the base row level security callback
+     * @param {function} callback - The callback function to determine row level security.
+     */
+    rowLevelSecurity( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `rowLevelSecurity parameter should be a function.` );
+        }
+        this.entity.metaData.rowLevelSecurity = callback;
+    }
+
+    selectRowLevelSecurity( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `selectRowLevelSecurity parameter should be a function.` );
+        }
+        this.entity.metaData.selectRowLevelSecurity = callback;
+    }
+
+    insertRowLevelSecurity( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `insertRowLevelSecurity parameter should be a function.` );
+        }
+        this.entity.metaData.insertRowLevelSecurity = callback;
+    }
+
+    updateRowLevelSecurity( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `updateRowLevelSecurity parameter should be a function.` );
+        }
+        this.entity.metaData.updateRowLevelSecurity = callback;
+    }
+
+    deleteRowLevelSecurity( callback ) {
+        if ( typeof callback !== 'function' ) {
+            throw new Error( `deleteRowLevelSecurity parameter should be a function.` );
+        }
+        this.entity.metaData.deleteRowLevelSecurity = callback;
+    }
+
 }
 
 class EntityProxy extends EntityBE
