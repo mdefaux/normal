@@ -64,9 +64,7 @@ class EntityBE {
 
     createQuery( externalParameters ) {
         // TODO: host should create/factory for query 
-        // TODO: use storage query if entity is marked 'local storage'
-        let query = this.storage ? this.storage.createQuery( this ) 
-            : this.host.createQuery( this );
+        let query = this.host.createQuery( this );
 
         if ( typeof this.metaData.createSelectCallback === 'function' ) {
             query =  this.metaData.createSelectCallback( 

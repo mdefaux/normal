@@ -283,6 +283,7 @@ class ModelDef {
 
     storageData( storage ) {
         this.entity.storage = storage;
+        this.host(storage);
     }
 
     action( actionName, callback ) {

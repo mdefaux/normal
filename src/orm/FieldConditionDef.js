@@ -213,6 +213,34 @@ class FieldConditionDef {
         return this.value;
     }
 
+    match(record) {
+        const fieldName = this.field.sourceField || this.field.name;
+        const recordValue = record[fieldName];
+
+        switch (this.type) {
+            case '=':
+                return recordValue === this.value;
+            case '<>':
+                return recordValue !== this.value;
+            case 'in':
+                return this.value.includes(recordValue);
+            case 'not in':
+                return !this.value.includes(recordValue);
+            case '<':
+                return recordValue < this.value;
+            case '<=':
+                return recordValue <= this.value;
+            case '>':
+                return recordValue > this.value;
+            case '>=':
+                return recordValue >= this.value;
+            case 'like':
+                return String(recordValue).includes(this.value);
+            default:
+                return false;
+        }
+    }
+
     toQuery(query) {
         return `${this.tableAlias}.${this.field.sqlSource} in `;
     }
