@@ -16,6 +16,7 @@ class ComparisonResult {
     }
 }
 const defaultPageSize=500;
+const defaultNotInSourceLimit=200; // Infinity ?
 const CompareHelper = {
 
     /**
@@ -213,7 +214,10 @@ const CompareHelper = {
         result.notInSource = notInSource;
 
         // performs a specific action for records not presentin source
-        if ( actions?.handleNotInSource ) {
+        if ( actions?.handleNotInSource 
+            && Object.keys(result.notInSource).length > 0 
+            && Object.keys(result.notInSource).length < ( parameters?.notInSourceLimit || defaultNotInSourceLimit )
+        ) {
             result = await actions?.handleNotInSource( destEntity, result, parameters );
         }
 
